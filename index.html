@@ -376,13 +376,13 @@
               <label class="text-xs font-semibold text-stone-500 uppercase tracking-wider block">1. Core Theme</label>
               <select id="brief-theme"
                 class="w-full p-3 border border-stone-200 rounded-xl bg-stone-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm text-indigo-950">
-                <option value="Contemporary Ethnic Wear with asymmetric cuts">Contemporary Ethnic Wear (SUTI Style)
+                <option value="contemporary">Contemporary Ethnic Wear (SUTI Style)
                 </option>
-                <option value="Circular Sustainable Organic construction">Sustainable & Circular (The Archive Style)
+                <option value="circular">Sustainable & Circular (The Archive Style)
                 </option>
-                <option value="Indo-Western Fusion with bold traditional prints">Indo-Western Fusion (Utsa/Vark Style)
+                <option value="fusion">Indo-Western Fusion (Utsa/Vark Style)
                 </option>
-                <option value="Graphic Minimalist Loungewear with custom vector designs">Graphic Minimalist Loungewear
+                <option value="graphic">Graphic Minimalist Loungewear
                   (SmallOutside Style)</option>
               </select>
             </div>
@@ -415,9 +415,22 @@
               </div>
             </div>
 
+            <!-- Surface Pattern Selector -->
+            <div class="space-y-2">
+              <label class="text-xs font-semibold text-stone-500 uppercase tracking-wider block">3. Surface Pattern</label>
+              <select id="brief-pattern"
+                class="w-full p-3 border border-stone-200 rounded-xl bg-stone-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm text-indigo-950">
+                <option value="signature">Theme Signature</option>
+                <option value="ajrakh">Geometric Ajrakh</option>
+                <option value="buta">Floral Buta</option>
+                <option value="stripes">Hand-Block Stripes</option>
+                <option value="vector">Abstract Vector</option>
+              </select>
+            </div>
+
             <!-- Target Demographic -->
             <div class="space-y-2">
-              <label class="text-xs font-semibold text-stone-500 uppercase tracking-wider block">3. Retail
+              <label class="text-xs font-semibold text-stone-500 uppercase tracking-wider block">4. Retail
                 Demographic</label>
               <select id="brief-demographic"
                 class="w-full p-3 border border-stone-200 rounded-xl bg-stone-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm text-indigo-950">
@@ -857,6 +870,33 @@
 
     function getPortfolioAnswer(question) {
       const query = question.toLowerCase();
+      if (query.includes('dumpling')) {
+        return 'Cream cheese dumpling hahahah...';
+      }
+      if (query.includes('collaborat') || query.includes('cross function') || query.includes('cross-function') || query.includes('teamwork')) {
+        return 'Yes. Cross-functional collaboration is central to Girisha\'s work. She connects design direction with merchandising, buyers, marketing, sampling teams, pattern makers, and production units so that a creative idea remains commercially relevant and technically achievable. At Wings Lifestyle and SUTI, that coordination helped her manage external accounts, product ranges, sample-room priorities, and retail deadlines.';
+      }
+      if (query.includes('leadership') || query.includes('lead a team') || query.includes('management style')) {
+        return 'Girisha leads from concept through execution: she sets the visual direction, translates it into clear technical requirements, reviews fits and samples, and keeps teams aligned around quality and delivery. Her style combines creative ownership with practical follow-through rather than treating design and production as separate stages.';
+      }
+      if (query.includes('sustainab') || query.includes('circular') || query.includes('environment')) {
+        return 'Girisha has hands-on circular-design experience from The Archive at Manchester Metropolitan University, where she developed technical product specifications and worked with donated textiles. Her Carbon Literacy training supports practical decisions around material use, longevity, lower-waste pattern planning, and repeat wear.';
+      }
+      if (query.includes('merchandis') || query.includes('range plan') || query.includes('assortment')) {
+        return 'Girisha combines design with merchandise planning. She uses trend and consumer insights to shape assortment architecture, balances statement pieces with commercial volume drivers, and follows the range through sampling and retail execution. That ability to connect aesthetics with the product mix contributed to SUTI\'s reported 20% sales growth.';
+      }
+      if (query.includes('production') || query.includes('factory') || query.includes('tech pack') || query.includes('technical')) {
+        return 'Her technical experience covers tech packs, fit evaluation, pattern corrections, sampling, factory coordination, and lead-time management. She has worked directly with sample rooms and production teams, so her concepts are developed with construction, repeatability, cost, and delivery in mind.';
+      }
+      if (query.includes('graphic') || query.includes('brand') || query.includes('branding')) {
+        return 'Alongside fashion design, Girisha brings graphic and brand-design experience across identity assets, character artwork, print development, and exhibition materials. That dual perspective helps her build collections with a coherent visual language across product, packaging, presentation, and campaign touchpoints.';
+      }
+      if (query.includes('education') || query.includes('university') || query.includes('manchester') || query.includes('uk')) {
+        return 'Girisha\'s UK experience at Manchester Metropolitan University included fashion and resource technology work for The Archive, with an emphasis on circular design, technical specifications, branding, exhibitions, textile donations, and advanced machinery. It strengthened both her research-led process and her ability to work in multidisciplinary environments.';
+      }
+      if (query.includes('hire') || query.includes('strength') || query.includes('good fit') || query.includes('value')) {
+        return 'Girisha\'s strongest value is the combination of creative direction, commercial range thinking, and production fluency. She can define a relevant design story, turn it into a balanced assortment, communicate it technically, and guide teams toward a retail-ready result.';
+      }
       if (query.includes('20%') || query.includes('sales') || query.includes('suti')) {
         return 'At SUTI, Girisha combined range planning, consumer trend analysis, and a contemporary update to traditional ethnic wear. That commercially focused approach contributed to 20% sales growth while strengthening the brand\'s premium positioning.';
       }
@@ -877,7 +917,7 @@
     function selectColor(colorName, element) {
       selectedColorChoice = colorName;
       document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.classList.remove('border-indigo-600', 'font-semibold');
+        btn.classList.remove('border-indigo-600', 'border-amber-500', 'font-semibold');
         btn.classList.add('border-transparent');
       });
       element.classList.remove('border-transparent');
@@ -886,6 +926,7 @@
 
     async function generateCollectionBrief() {
       const theme = document.getElementById('brief-theme').value;
+      const pattern = document.getElementById('brief-pattern').value;
       const demographic = document.getElementById('brief-demographic').value;
       const palette = selectedColorChoice;
 
@@ -906,8 +947,8 @@
       loadingDetails.innerText = "Building a commercial range plan and visual direction...";
 
       window.setTimeout(() => {
-        const brief = buildCollectionBrief(theme, demographic, palette);
-        document.getElementById('generative-image-display').src = buildConceptImage(palette);
+        const brief = buildCollectionBrief(theme, demographic, palette, pattern);
+        document.getElementById('generative-image-display').src = buildConceptImage(theme, palette, pattern);
         const parsedContent = parseMarkdownToHTML(brief);
         document.getElementById('generative-brief-display').innerHTML = parsedContent;
         loader.classList.add('hidden');
@@ -915,31 +956,75 @@
       }, 350);
     }
 
-    function buildCollectionBrief(theme, demographic, palette) {
+    const collectionThemes = {
+      contemporary: {
+        name: 'New Heritage',
+        label: 'contemporary ethnic wear with asymmetric cuts',
+        signaturePattern: 'ajrakh',
+        innovation: ['Asymmetric kurta hems with clean side-panel movement', 'Modern band collars and controlled heritage-print placement', 'Modular trousers and light layers built from repeatable fit blocks'],
+        assortment: ['Asymmetric kurta sets: 40%', 'Contemporary co-ords: 25%', 'Layering jackets: 20%', 'Elevated separates: 15%'],
+        fabrics: 'Cotton-silk, breathable cotton-linen, and low-impact printed panels',
+        position: 'Premium contemporary ethnic wear with strong occasion-to-work versatility'
+      },
+      circular: {
+        name: 'Second Life',
+        label: 'circular, sustainable modular design',
+        signaturePattern: 'stripes',
+        innovation: ['Reversible wrap silhouettes with adjustable fastening', 'Visible panel joins that turn offcuts into a design feature', 'Replaceable trims and mono-material construction for easier recovery'],
+        assortment: ['Reversible wrap dresses: 30%', 'Modular overshirts: 25%', 'Zero-waste separates: 25%', 'Remnant accessories: 20%'],
+        fabrics: 'Deadstock cotton, recycled blends, natural dyes, and reusable corozo fastenings',
+        position: 'A traceable slow-fashion capsule built around longevity, repair, and repeat styling'
+      },
+      fusion: {
+        name: 'City Raga',
+        label: 'Indo-Western fusion with bold traditional print',
+        signaturePattern: 'buta',
+        innovation: ['Cropped structured tops paired with fluid wide-leg trousers', 'Long open shrugs that frame concentrated traditional motifs', 'Convertible drapes that shift from daytime separates to occasion looks'],
+        assortment: ['Fusion trouser sets: 35%', 'Printed dresses: 25%', 'Long shrugs: 20%', 'Statement tops: 20%'],
+        fabrics: 'Viscose twill, chanderi layers, soft satin, and engineered motif placement',
+        position: 'Expressive department-store fashion balancing cultural detail with urban styling'
+      },
+      graphic: {
+        name: 'Off Grid',
+        label: 'graphic minimalist loungewear with custom vector artwork',
+        signaturePattern: 'vector',
+        innovation: ['Oversized drop-shoulder tops with precise graphic placement', 'Tapered utility joggers with modular pockets and contrast binding', 'Gender-inclusive proportions supported by a compact shared block system'],
+        assortment: ['Graphic oversized tops: 35%', 'Utility joggers: 30%', 'Relaxed co-ords: 20%', 'Lightweight overshirts: 15%'],
+        fabrics: 'Compact cotton jersey, loopback fleece, recycled nylon, and water-based print',
+        position: 'Accessible creative street-lounge product designed for versatile Gen-Z wardrobes'
+      }
+    };
+
+    const patternNames = {
+      ajrakh: 'geometric Ajrakh',
+      buta: 'floral buta',
+      stripes: 'hand-block stripes',
+      vector: 'abstract vector'
+    };
+
+    function buildCollectionBrief(theme, demographic, palette, requestedPattern) {
+      const direction = collectionThemes[theme] || collectionThemes.contemporary;
+      const pattern = requestedPattern === 'signature' ? direction.signaturePattern : requestedPattern;
       return `### Collection Name & Concept
-**The Modern Archive** pairs ${theme.toLowerCase()} with a ${palette.toLowerCase()} color direction for ${demographic.toLowerCase()}. The range balances visual impact with repeatable commercial silhouettes.
+**${direction.name}** explores ${direction.label} for ${demographic.toLowerCase()}. A ${palette.toLowerCase()} palette and ${patternNames[pattern]} surface story give the range a distinct, recognizable identity.
 
 ### Design & Styling Innovation
-- Use asymmetric hems, modular layers, and clean contemporary necklines.
-- Apply heritage-inspired surface details as controlled accents rather than all-over decoration.
-- Keep fit blocks consistent so styles can move efficiently from sampling to production.
+${direction.innovation.map(item => `- ${item}`).join('\n')}
+- Use ${patternNames[pattern]} artwork at intentional focal areas so the print supports the silhouette.
 
 ### Assortment Range Plan
-- Statement kurta and trouser sets: 40%
-- Versatile fusion dresses: 25%
-- Coordinated separates: 20%
-- Lightweight layering pieces: 15%
+${direction.assortment.map(item => `- ${item}`).join('\n')}
 
 ### Fabric & Sustainability Specifications
-- Prioritize cotton-linen blends, low-impact dyes, and reusable trims.
-- Reduce cutting waste through shared pattern blocks and considered marker planning.
-- Design separates for repeat wear and cross-season styling.
+- ${direction.fabrics}.
+- Engineer the ${patternNames[pattern]} repeat to reduce print waste and awkward motif cutting.
+- Share blocks and components across the range to improve sampling and production efficiency.
 
 ### Retail Viability
-Position the collection as accessible premium design with clear good-better-best price tiers. Lead the visual merchandising with two statement looks, then support them with versatile commercial separates.`;
+${direction.position}. Use one hero patterned look in the window story, then echo the same motif across lower-risk separates and accessories.`;
     }
 
-    function buildConceptImage(palette) {
+    function buildConceptImage(theme, palette, requestedPattern) {
       const palettes = {
         'Warm Amber': ['#f59e0b', '#fef3c7', '#1e1b4b'],
         'Indigo Dust': ['#4338ca', '#e0e7ff', '#f59e0b'],
@@ -947,7 +1032,21 @@ Position the collection as accessible premium design with clear good-better-best
         'Sage Green': ['#4d7c6f', '#e7efe9', '#243c35']
       };
       const colors = palettes[palette] || palettes['Warm Amber'];
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600"><defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="${colors[1]}"/><stop offset="1" stop-color="#fafaf9"/></linearGradient><pattern id="p" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M0 14h28M14 0v28" stroke="${colors[2]}" stroke-opacity=".14" stroke-width="2"/></pattern></defs><rect width="600" height="600" fill="url(#bg)"/><circle cx="300" cy="120" r="42" fill="#d6a47c"/><path d="M230 170Q300 145 370 170L410 500Q300 545 190 500Z" fill="${colors[0]}"/><path d="M230 175L150 350L205 375L270 235M370 175L450 350L395 375L330 235" fill="${colors[0]}" stroke="${colors[2]}" stroke-width="8"/><path d="M238 173Q300 225 362 173L340 285H260Z" fill="${colors[1]}"/><path d="M215 325H385L405 500Q300 535 195 500Z" fill="url(#p)"/><path d="M300 285V510" stroke="${colors[2]}" stroke-opacity=".45" stroke-width="5"/><text x="300" y="570" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" letter-spacing="4" fill="${colors[2]}">${escapeHtml(palette.toUpperCase())}</text></svg>`;
+      const direction = collectionThemes[theme] || collectionThemes.contemporary;
+      const pattern = requestedPattern === 'signature' ? direction.signaturePattern : requestedPattern;
+      const patterns = {
+        ajrakh: `<pattern id="surface" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="${colors[0]}"/><path d="M24 3L45 24 24 45 3 24Z" fill="none" stroke="${colors[1]}" stroke-width="5"/><circle cx="24" cy="24" r="7" fill="${colors[2]}"/><path d="M0 0L12 12M48 0L36 12M0 48L12 36M48 48L36 36" stroke="${colors[2]}" stroke-width="3"/></pattern>`,
+        buta: `<pattern id="surface" width="58" height="72" patternUnits="userSpaceOnUse"><rect width="58" height="72" fill="${colors[0]}"/><path d="M29 58C8 43 16 18 35 10C47 31 43 49 29 58Z" fill="${colors[1]}" stroke="${colors[2]}" stroke-width="3"/><path d="M29 57C29 39 32 27 38 17M29 39L20 29M31 34L42 27" fill="none" stroke="${colors[2]}" stroke-width="2"/></pattern>`,
+        stripes: `<pattern id="surface" width="42" height="42" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)"><rect width="42" height="42" fill="${colors[1]}"/><rect width="13" height="42" fill="${colors[0]}"/><rect x="17" width="5" height="42" fill="${colors[2]}"/><path d="M29 0v42" stroke="${colors[0]}" stroke-width="7" stroke-dasharray="5 4"/></pattern>`,
+        vector: `<pattern id="surface" width="72" height="72" patternUnits="userSpaceOnUse"><rect width="72" height="72" fill="${colors[0]}"/><circle cx="14" cy="16" r="11" fill="${colors[1]}"/><path d="M34 8h30L49 34Z" fill="${colors[2]}"/><path d="M8 54C22 37 38 72 62 47" fill="none" stroke="${colors[1]}" stroke-width="8"/></pattern>`
+      };
+      const silhouettes = {
+        contemporary: `<circle cx="300" cy="112" r="38" fill="#d6a47c"/><path d="M228 164Q300 140 372 164L392 430 332 468 204 446 226 290 158 364 120 330 218 172Z" fill="url(#surface)" stroke="${colors[2]}" stroke-width="7"/><path d="M238 160Q300 218 362 160L344 270H256Z" fill="${colors[1]}" stroke="${colors[2]}" stroke-width="5"/><path d="M248 446L238 530H294L302 455M332 457L318 530H374L370 437" fill="${colors[2]}"/><path d="M214 337L386 303" stroke="${colors[1]}" stroke-width="9"/>`,
+        circular: `<circle cx="300" cy="108" r="38" fill="#d6a47c"/><path d="M220 165Q300 138 380 165L426 485Q300 535 174 485Z" fill="url(#surface)" stroke="${colors[2]}" stroke-width="7"/><path d="M220 167L142 348 192 375 265 228M380 167L458 348 408 375 335 228" fill="${colors[1]}" stroke="${colors[2]}" stroke-width="7"/><path d="M225 166L363 318 235 486" fill="none" stroke="${colors[1]}" stroke-width="16"/><path d="M376 166L252 305 390 472" fill="none" stroke="${colors[2]}" stroke-width="5"/><circle cx="365" cy="318" r="12" fill="${colors[0]}" stroke="${colors[2]}" stroke-width="4"/>`,
+        fusion: `<circle cx="300" cy="102" r="36" fill="#d6a47c"/><path d="M232 152Q300 130 368 152L380 270H220Z" fill="url(#surface)" stroke="${colors[2]}" stroke-width="7"/><path d="M232 154L148 360 198 384 255 218M368 154L452 360 402 384 345 218" fill="none" stroke="${colors[0]}" stroke-width="34"/><path d="M238 278L205 520H290L300 310 310 520H395L362 278Z" fill="${colors[1]}" stroke="${colors[2]}" stroke-width="7"/><path d="M220 150L185 490M380 150L415 490" stroke="${colors[0]}" stroke-width="22"/><path d="M220 150L185 490M380 150L415 490" stroke="url(#surface)" stroke-width="13"/>`,
+        graphic: `<circle cx="300" cy="98" r="36" fill="#d6a47c"/><path d="M206 148Q300 125 394 148L448 305 392 326 370 245 358 360H242L230 245 208 326 152 305Z" fill="url(#surface)" stroke="${colors[2]}" stroke-width="7"/><path d="M246 368L224 522H286L300 398 314 522H376L354 368Z" fill="${colors[2]}"/><path d="M245 410H285M315 410H355" stroke="${colors[0]}" stroke-width="8"/><rect x="265" y="188" width="70" height="70" rx="12" fill="${colors[1]}"/><circle cx="300" cy="223" r="21" fill="${colors[0]}"/><path d="M263 360H337" stroke="${colors[0]}" stroke-width="9"/>`
+      };
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600"><defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="${colors[1]}"/><stop offset="1" stop-color="#fafaf9"/></linearGradient>${patterns[pattern] || patterns.ajrakh}</defs><rect width="600" height="600" fill="url(#bg)"/><circle cx="300" cy="300" r="235" fill="#fff" fill-opacity=".34" stroke="${colors[2]}" stroke-opacity=".12" stroke-width="2"/>${silhouettes[theme] || silhouettes.contemporary}<text x="300" y="566" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="3" fill="${colors[2]}">${escapeHtml(direction.name.toUpperCase())} / ${escapeHtml(patternNames[pattern].toUpperCase())}</text></svg>`;
       return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
     }
 
