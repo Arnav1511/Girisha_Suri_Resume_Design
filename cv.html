@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Girisha Suri's portfolio: fashion and graphic design leadership, merchandising, sustainable design, and AI-assisted collection planning.">
+  <meta name="theme-color" content="#1e1b4b">
+  <title>Girisha Suri | Interactive Portfolio & AI Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Importing FontAwesome for polished visual icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #fcfaf8;
+      /* Stone-50 variant */
+      color: #1e1b4b;
+      /* Indigo-900 */
+    }
+
+    .heading-serif {
+      font-family: 'Playfair Display', serif;
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      height: 300px;
+      max-height: 400px;
+    }
+
+    @media (min-width: 768px) {
+      .chart-container {
+        height: 350px;
+      }
+    }
+
+    .nav-link {
+      transition: all 0.3s ease;
+      border-bottom: 2px solid transparent;
+    }
+
+    .nav-link.active {
+      border-bottom: 2px solid #f59e0b;
+      /* Amber-500 */
+      color: #f59e0b;
+    }
+
+    .experience-card {
+      transition: transform 0.2s ease;
+    }
+
+    .experience-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .skill-tag {
+      background-color: #e2e8f0;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      margin: 2px;
+      display: inline-block;
+    }
+
+    /* Custom scrollbar for Chat and AI Outputs */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+
+<body class="antialiased">
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-stone-200">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="heading-serif text-xl font-bold tracking-tight">GIRISHA SURI</div>
+      <div class="hidden md:flex space-x-6 text-sm font-medium">
+        <button onclick="showSection('impact')" class="nav-link active" id="btn-impact">Impact</button>
+        <button onclick="showSection('experience')" class="nav-link" id="btn-experience">Experience</button>
+        <button onclick="showSection('skills')" class="nav-link" id="btn-skills">Expertise</button>
+        <button onclick="showSection('ai-studio')" class="nav-link text-indigo-600 font-semibold" id="btn-ai-studio">
+          <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI Studio
+        </button>
+        <button onclick="showSection('contact')" class="nav-link" id="btn-contact">Contact</button>
+      </div>
+      <!-- Mobile Menu Toggle Button -->
+      <div class="md:hidden flex items-center">
+        <button onclick="toggleMobileMenu()" class="text-stone-700 hover:text-amber-500 focus:outline-none">
+          <i class="fa-solid fa-bars text-xl" id="menu-icon"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-stone-200 px-4 py-4 space-y-3 shadow-md">
+      <button onclick="showSection('impact'); toggleMobileMenu();"
+        class="block w-full text-left font-medium text-stone-700 hover:text-amber-500 py-1">Impact</button>
+      <button onclick="showSection('experience'); toggleMobileMenu();"
+        class="block w-full text-left font-medium text-stone-700 hover:text-amber-500 py-1">Experience</button>
+      <button onclick="showSection('skills'); toggleMobileMenu();"
+        class="block w-full text-left font-medium text-stone-700 hover:text-amber-500 py-1">Expertise</button>
+      <button onclick="showSection('ai-studio'); toggleMobileMenu();"
+        class="block w-full text-left font-semibold text-indigo-600 hover:text-indigo-800 py-1">
+        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI Studio
+      </button>
+      <button onclick="showSection('contact'); toggleMobileMenu();"
+        class="block w-full text-left font-medium text-stone-700 hover:text-amber-500 py-1">Contact</button>
+    </div>
+  </nav>
+
+  <main class="pt-24 pb-12 px-4 max-w-6xl mx-auto">
+
+    <!-- Section 1: Impact Dashboard -->
+    <section id="sec-impact" class="space-y-12">
+      <div class="max-w-3xl">
+        <h1 class="heading-serif text-4xl md:text-6xl mb-6 leading-tight">Fashion & Graphic Design Leader.</h1>
+        <p class="text-lg text-stone-600 leading-relaxed">
+          I bridge the gap between creative vision and commercial reality. Currently leading design at
+          <strong>SUTI</strong> and <strong>Wings Lifestyle</strong>, I specialize in injecting contemporary aesthetics
+          into traditional wear while scaling high-volume manufacturing pipelines for national retailers.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-4">
+          <button onclick="showSection('ai-studio')"
+            class="px-5 py-3 bg-indigo-900 text-white rounded-xl shadow-md hover:bg-indigo-950 transition-colors flex items-center space-x-2">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Explore AI Creative Studio</span>
+          </button>
+          <button onclick="showSection('experience')"
+            class="px-5 py-3 bg-amber-500 text-indigo-950 font-semibold rounded-xl shadow-md hover:bg-amber-600 transition-colors">
+            View Interactive Resume
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white p-8 rounded-2xl shadow-sm border border-stone-100">
+        <div>
+          <h2 class="text-2xl font-bold mb-4 text-indigo-950">Commercial Performance</h2>
+          <p class="text-sm text-stone-500 mb-6">Visualizing the 20% sales growth achieved at SUTI through strategic
+            range planning and contemporary market positioning.</p>
+          <div class="chart-container">
+            <canvas id="growthChart"></canvas>
+          </div>
+        </div>
+        <div class="flex flex-col justify-center space-y-6">
+          <div class="p-6 bg-stone-50 rounded-xl border-l-4 border-amber-500">
+            <div class="text-3xl font-bold text-amber-600">20%</div>
+            <div class="text-sm uppercase tracking-wider font-semibold text-indigo-950">Sales Growth (SUTI)</div>
+            <p class="text-xs text-stone-500 mt-2">Optimized range planning, consumer trend analytics, and modern ethnic
+              collection launches to capture "new-age" demographics.</p>
+          </div>
+          <div class="p-6 bg-stone-50 rounded-xl border-l-4 border-indigo-600">
+            <div class="text-xl font-bold text-indigo-950">Key Account Acquisitions</div>
+            <div class="flex flex-wrap mt-2 gap-2">
+              <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">UTSA
+                (Westside)</span>
+              <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">VARK
+                (Westside)</span>
+              <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">Shoppers Stop</span>
+            </div>
+            <p class="text-xs text-stone-500 mt-2">Spearheaded the integration of premium retail sub-brands into the
+              Wings Lifestyle manufacturing pipelines and managed key external accounts.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Experience Explorer -->
+    <section id="sec-experience" class="hidden space-y-8">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <h2 class="heading-serif text-4xl mb-4">Professional Journey</h2>
+        <p class="text-stone-600">An interactive look at my career progression across the UK and India, focusing on
+          design leadership and technical innovation.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Timeline Sidebar -->
+        <div class="lg:col-span-1 space-y-4" id="experience-list">
+          <!-- JS will populate this -->
+        </div>
+        <!-- Detail View -->
+        <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-sm border border-stone-100 min-h-[400px]"
+          id="experience-detail">
+          <div class="flex items-center justify-center h-full text-stone-400">
+            Select a role to view details and key achievements.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Expertise & Toolkit -->
+    <section id="sec-skills" class="hidden space-y-12">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div>
+          <h2 class="heading-serif text-4xl mb-6">Creative Toolkit</h2>
+          <p class="text-stone-600 mb-8">My expertise spans the entire product lifecycle—from conceptual draping to
+            high-fidelity 3D modeling and digital brand identity.</p>
+
+          <div class="space-y-6">
+            <div>
+              <h3 class="font-bold text-sm uppercase tracking-widest text-amber-600 mb-3">Design Software</h3>
+              <div class="flex flex-wrap gap-2" id="software-skills">
+                <!-- JS Populated -->
+              </div>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm uppercase tracking-widest text-indigo-600 mb-3">Fashion Competencies</h3>
+              <div class="flex flex-wrap gap-2" id="fashion-skills">
+                <!-- JS Populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-stone-100">
+          <h3 class="text-center font-semibold mb-4">Competency Distribution</h3>
+          <div class="chart-container">
+            <canvas id="skillsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certifications -->
+      <div
+        class="bg-indigo-900 text-white p-8 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-8">
+        <div>
+          <h3 class="text-2xl font-bold mb-2">Adobe Certified Professional</h3>
+          <p class="text-indigo-200">Official industry standard certifications in Photoshop, Illustrator, and Visual
+            Design.</p>
+        </div>
+        <div class="flex gap-4">
+          <div class="text-center px-4 py-2 bg-white/10 rounded-lg backdrop-blur">
+            <div class="text-xs uppercase text-indigo-300">Sustainability</div>
+            <div class="font-bold">Carbon Literacy</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: AI Creative Studio (GEMINI-POWERED) -->
+    <section id="sec-ai-studio" class="hidden space-y-10">
+      <div class="max-w-3xl mx-auto text-center space-y-4">
+        <span
+          class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-widest">
+          <i class="fa-solid fa-sparkles mr-1"></i> Interactive Gemini AI Playground
+        </span>
+        <h2 class="heading-serif text-4xl md:text-5xl">AI Creative Co-Pilot</h2>
+        <p class="text-stone-600 max-w-2xl mx-auto">
+          Interact directly with an intelligent digital representation of Girisha, or collaborate with her AI-guided
+          range planner to brainstorm tailored collections with custom generative visuals.
+        </p>
+      </div>
+
+      <!-- AI Studio Sub-Navigation Tab Headers -->
+      <div class="flex justify-center border-b border-stone-200 max-w-xl mx-auto">
+        <button onclick="switchStudioTab('chat')" id="tab-chat"
+          class="w-1/2 py-3 text-center border-b-2 border-indigo-600 font-semibold text-indigo-900 focus:outline-none transition-all">
+          <i class="fa-solid fa-comments mr-2"></i>Ask Girisha's Agent
+        </button>
+        <button onclick="switchStudioTab('co-pilot')" id="tab-co-pilot"
+          class="w-1/2 py-3 text-center border-b-2 border-transparent font-medium text-stone-500 hover:text-indigo-600 focus:outline-none transition-all">
+          <i class="fa-solid fa-compass-drafting mr-2"></i>AI Collection Planner
+        </button>
+      </div>
+
+      <!-- TAB 1: Chatbot Agent -->
+      <div id="studio-chat-container" class="space-y-6 max-w-4xl mx-auto">
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden grid grid-cols-1 md:grid-cols-3">
+
+          <!-- Chat Sidebar Info & Prompts -->
+          <div class="p-6 bg-stone-50 border-r border-stone-100 flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-lg text-indigo-950 mb-2">Portfolio Agent</h3>
+              <p class="text-xs text-stone-500 leading-relaxed mb-6">
+                Powered by Gemini, this agent acts as my digital representative. Ask about my achievements,
+                technical skills, or design leadership.
+              </p>
+
+              <span class="text-xs font-semibold uppercase tracking-wider text-stone-400 block mb-3">Suggested
+                Topics</span>
+              <div class="space-y-2">
+                <button onclick="sendSuggestedQuestion('Tell me about SUTI and the 20% sales growth.')"
+                  class="w-full text-left p-2 bg-white hover:bg-amber-50 hover:border-amber-400 border border-stone-200 text-xs rounded-lg transition-all text-indigo-950">
+                  <i class="fa-solid fa-chart-line mr-1 text-amber-500"></i> How did you drive 20% sales growth?
+                </button>
+                <button
+                  onclick="sendSuggestedQuestion('What was your role in bringing Utsa and Vark to Wings Lifestyle?')"
+                  class="w-full text-left p-2 bg-white hover:bg-amber-50 hover:border-amber-400 border border-stone-200 text-xs rounded-lg transition-all text-indigo-950">
+                  <i class="fa-solid fa-tags mr-1 text-indigo-500"></i> Acquired Westside Brands?
+                </button>
+                <button onclick="sendSuggestedQuestion('Tell me about your experience in Clo3D and design software.')"
+                  class="w-full text-left p-2 bg-white hover:bg-amber-50 hover:border-amber-400 border border-stone-200 text-xs rounded-lg transition-all text-indigo-950">
+                  <i class="fa-solid fa-laptop-code mr-1 text-indigo-500"></i> What software do you excel at?
+                </button>
+                <button onclick="sendSuggestedQuestion('How did you help Suti enter Shoppers Stop?')"
+                  class="w-full text-left p-2 bg-white hover:bg-amber-50 hover:border-amber-400 border border-stone-200 text-xs rounded-lg transition-all text-indigo-950">
+                  <i class="fa-solid fa-store mr-1 text-amber-500"></i> Shoppers Stop retail expansion?
+                </button>
+              </div>
+            </div>
+            <div class="pt-6 border-t border-stone-200 mt-6 md:mt-0">
+              <span class="text-xs text-stone-400 block"><i
+                  class="fa-solid fa-circle-nodes text-green-500 mr-1 animate-pulse"></i> Gemini Live Agent
+                Online</span>
+            </div>
+          </div>
+
+          <!-- Chat Interface -->
+          <div class="col-span-2 flex flex-col h-[480px]">
+            <!-- Messages Area -->
+            <div id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-4 custom-scrollbar bg-stone-50/30">
+              <!-- Welcome Message -->
+              <div class="flex items-start space-x-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-indigo-900 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                  GS</div>
+                <div
+                  class="bg-white border border-stone-200 rounded-2xl rounded-tl-none p-4 max-w-[85%] text-sm text-stone-800 shadow-sm leading-relaxed">
+                  Hello there! I am Girisha's AI representative. You can ask me any question regarding her design
+                  methodologies, technical expertise in fashion technology, or the commercial results she delivered for
+                  major brands like SUTI and Wings Lifestyle. How can I assist you today?
+                </div>
+              </div>
+            </div>
+
+            <!-- Chat Input Block -->
+            <div class="p-4 bg-white border-t border-stone-200">
+              <form id="chat-form" onsubmit="handleChatSubmit(event)" class="flex items-center space-x-2">
+                <input type="text" id="chat-input" placeholder="Ask anything about Girisha's journey..."
+                  class="flex-1 px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:outline-none text-sm"
+                  autocomplete="off">
+                <button type="submit" id="chat-send-btn"
+                  class="p-3 bg-indigo-900 hover:bg-indigo-950 text-white rounded-xl shadow transition-colors flex items-center justify-center">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </form>
+              <div id="chat-error-log" class="text-xs text-red-500 mt-1 hidden"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: AI Collection Planner -->
+      <div id="studio-copilot-container" class="hidden space-y-8 max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          <!-- Configuration Inputs panel -->
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 space-y-6">
+            <h3 class="font-bold text-lg text-indigo-950 mb-2 border-b border-stone-100 pb-3">
+              <i class="fa-solid fa-sliders text-amber-500 mr-2"></i>Brief Builder
+            </h3>
+
+            <!-- Theme selector -->
+            <div class="space-y-2">
+              <label class="text-xs font-semibold text-stone-500 uppercase tracking-wider block">1. Core Theme</label>
+              <select id="brief-theme"
+                class="w-full p-3 border border-stone-200 rounded-xl bg-stone-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm text-indigo-950">
+                <option value="Contemporary Ethnic Wear with asymmetric cuts">Contemporary Ethnic Wear (SUTI Style)
+                </option>
+                <option value="Circular Sustainable Organic construction">Sustainable & Circular (The Archive Style)
+                </option>
+                <option value="Indo-Western Fusion with bold traditional prints">Indo-Western Fusion (Utsa/Vark Style)
+                </option>
+                <option value="Graphic Minimalist Loungewear with custom vector designs">Graphic Minimalist Loungewear
+                  (SmallOutside Style)</option>
+              </select>
+            </div>
+
+            <!-- Accent Color Palette Selector -->
+            <div class="space-y-2">
+              <label class="text-xs font-semibold text-stone-500 uppercase tracking-wider block">2. Primary Accent
+                Color</label>
+              <div class="grid grid-cols-4 gap-2">
+                <button onclick="selectColor('Warm Amber', this)"
+                  class="color-btn border-2 border-amber-500 rounded-xl p-2 text-center bg-stone-50 transition-all text-xs font-semibold">
+                  <span class="inline-block w-4 h-4 bg-amber-500 rounded-full mr-1 align-middle"></span>
+                  Amber
+                </button>
+                <button onclick="selectColor('Indigo Dust', this)"
+                  class="color-btn border-2 border-transparent rounded-xl p-2 text-center bg-stone-50 transition-all text-xs">
+                  <span class="inline-block w-4 h-4 bg-indigo-900 rounded-full mr-1 align-middle"></span>
+                  Indigo
+                </button>
+                <button onclick="selectColor('Earthy Terracotta', this)"
+                  class="color-btn border-2 border-transparent rounded-xl p-2 text-center bg-stone-50 transition-all text-xs">
+                  <span class="inline-block w-4 h-4 bg-red-700 rounded-full mr-1 align-middle"></span>
+                  Earth
+                </button>
+                <button onclick="selectColor('Sage Green', this)"
+                  class="color-btn border-2 border-transparent rounded-xl p-2 text-center bg-stone-50 transition-all text-xs">
+                  <span class="inline-block w-4 h-4 bg-emerald-600 rounded-full mr-1 align-middle"></span>
+                  Sage
+                </button>
+              </div>
+            </div>
+
+            <!-- Target Demographic -->
+            <div class="space-y-2">
+              <label class="text-xs font-semibold text-stone-500 uppercase tracking-wider block">3. Retail
+                Demographic</label>
+              <select id="brief-demographic"
+                class="w-full p-3 border border-stone-200 rounded-xl bg-stone-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm text-indigo-950">
+                <option value="Gen-Z Modern Indian buyers seeking versatility">Gen-Z Modern Indian (Versatile)</option>
+                <option value="Premium Retailers - MBO customers like Shoppers Stop">Premium Department (Shoppers Stop /
+                  MBO)</option>
+                <option value="Conscious consumers seeking circular life products">Eco-Conscious / Slow Fashion</option>
+              </select>
+            </div>
+
+            <!-- Action Generator Button -->
+            <button onclick="generateCollectionBrief()" id="btn-generate-collection"
+              class="w-full py-4 bg-indigo-900 hover:bg-indigo-950 text-white rounded-xl shadow-md transition-all font-semibold flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>Generate Creative Brief</span>
+            </button>
+          </div>
+
+          <!-- Output display area -->
+          <div
+            class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden flex flex-col min-h-[500px]">
+
+            <!-- Progress / Logs display during generation -->
+            <div id="copilot-loading"
+              class="hidden flex-1 flex-col items-center justify-center p-8 text-center bg-stone-50/50">
+              <div class="relative w-16 h-16 mb-4">
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-200 animate-pulse"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-t-indigo-900 animate-spin"></div>
+              </div>
+              <span class="text-xs font-semibold text-indigo-900 uppercase tracking-wider mb-2"
+                id="copilot-loading-stage">Initializing Co-Pilot...</span>
+              <p class="text-xs text-stone-400 max-w-sm" id="copilot-loading-details">Contacting Gemini and Imagen
+                services to structure your request.</p>
+            </div>
+
+            <!-- Initial placeholder state -->
+            <div id="copilot-placeholder"
+              class="flex-1 flex flex-col items-center justify-center p-8 text-center text-stone-400">
+              <div
+                class="w-20 h-20 rounded-full bg-stone-100 flex items-center justify-center text-stone-300 text-3xl mb-4">
+                <i class="fa-solid fa-palette"></i>
+              </div>
+              <h4 class="font-bold text-lg text-indigo-950 mb-1">Your Creative Board is Empty</h4>
+              <p class="text-sm max-w-md mx-auto">Select a core theme, accent color, and target demographics in the
+                Brief Builder. The AI will generate a complete commercial Range Plan and render a visual signature
+                sketch simultaneously!</p>
+            </div>
+
+            <!-- Display of Results -->
+            <div id="copilot-results" class="hidden flex-1 grid grid-cols-1 md:grid-cols-2">
+
+              <!-- Generative Image Showcase -->
+              <div class="p-6 bg-stone-50 flex flex-col justify-between border-r border-stone-100">
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-amber-600 uppercase tracking-widest"><i
+                        class="fa-regular fa-image mr-1"></i> AI Concept Render</span>
+                    <span class="text-[10px] bg-stone-200 text-stone-600 px-2 py-0.5 rounded-full font-medium">1024x1024
+                      PNG</span>
+                  </div>
+                  <div
+                    class="w-full aspect-square rounded-xl overflow-hidden bg-stone-200 shadow-sm relative border border-stone-300">
+                    <img id="generative-image-display" src="" alt="Generative Fashion Sketch"
+                      class="w-full h-full object-cover">
+                  </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-stone-200">
+                  <h5 class="text-xs font-bold text-indigo-950 uppercase mb-1">Creative Visual Seed</h5>
+                  <p class="text-[11px] text-stone-500 leading-relaxed">Generated with Gemini based on customized
+                    theme constraints, styling logic, and modern ethnic wear parameters.</p>
+                </div>
+              </div>
+
+              <!-- Generative Text Brief Showcase -->
+              <div class="p-6 flex flex-col justify-between max-h-[600px] overflow-y-auto custom-scrollbar">
+                <div class="space-y-4">
+                  <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest"><i
+                      class="fa-solid fa-list-check mr-1"></i> Gemini Commercial Plan</span>
+                  <div id="generative-brief-display"
+                    class="prose prose-sm text-stone-800 space-y-4 text-xs leading-relaxed">
+                    <!-- Generative Content goes here -->
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Error display box -->
+            <div id="copilot-error" class="hidden p-6 bg-red-50 text-red-800 text-center space-y-4">
+              <i class="fa-solid fa-triangle-exclamation text-3xl text-red-600"></i>
+              <h4 class="font-bold">Generation Failed</h4>
+              <p class="text-sm" id="copilot-error-msg">An error occurred during communication. Check your parameters or
+                network connection.</p>
+              <button onclick="resetCopilotUI()"
+                class="px-4 py-2 bg-red-100 text-red-800 rounded-lg text-xs font-bold hover:bg-red-200">Try
+                Again</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Contact -->
+    <section id="sec-contact" class="hidden text-center space-y-12 py-12">
+      <div class="max-w-2xl mx-auto">
+        <h2 class="heading-serif text-5xl mb-6">Let's Connect</h2>
+        <p class="text-xl text-stone-600 mb-12">Currently based in India, working globally. I'm always open to
+          discussing design leadership, brand strategy, or creative collaborations.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left max-w-lg mx-auto">
+          <a href="mailto:Girishasuril8@gmail.com"
+            class="p-6 bg-white border border-stone-200 rounded-xl hover:border-amber-500 transition-colors group">
+            <div class="text-xs text-stone-400 mb-1">Email</div>
+            <div class="font-semibold group-hover:text-amber-600">Girishasuril8@gmail.com</div>
+          </a>
+          <a href="https://linkedin.com/in/girisha-s-b30b76134" target="_blank" rel="noopener noreferrer"
+            class="p-6 bg-white border border-stone-200 rounded-xl hover:border-indigo-500 transition-colors group">
+            <div class="text-xs text-stone-400 mb-1">LinkedIn</div>
+            <div class="font-semibold group-hover:text-indigo-600">girisha-s-b30b76134</div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="mt-12 border-t border-stone-200 py-8 text-center text-xs text-stone-400">
+    &copy; 2026 Girisha Suri. Built as an interactive career dashboard & generative design studio.
+  </footer>
+
+  <script>
+    // Core Career Data
+    const experiences = [
+      {
+        id: 'suti',
+        title: 'Head of Design & Merchandise',
+        company: 'SUTI (Ethnic Wear)',
+        period: 'Present',
+        summary: 'Leading the creative evolution of a traditional ethnic brand into a premium market competitor.',
+        achievements: [
+          'Engineered 20% sales growth through optimized product assortment and trend analysis.',
+          'Spearheaded the brand launch into Shoppers Stop (MBO), securing a premium market position.',
+          'Injecting a contemporary "new-age" twist into traditional collections to capture modern consumers.',
+          'Directing the complete production lifecycle from sampling to final retail execution.'
+        ]
+      },
+      {
+        id: 'wings',
+        title: 'Head of Design',
+        company: 'Wings Lifestyle',
+        period: 'Present',
+        summary: 'Managing high-profile accounts for one of India\'s major manufacturing hubs.',
+        achievements: [
+          'Onboarded Westside sub-brands (Utsa and Vark) as key manufacturing clients.',
+          'Leading end-to-end design development and high-volume sampling pipelines.',
+          'Directing production and sample room teams to ensure strict lead-time adherence.',
+          'Ensuring high-quality execution for various external buying houses.'
+        ]
+      },
+      {
+        id: 'resourzburg',
+        title: 'Senior Fashion Designer',
+        company: '224dot - Resourzburg',
+        period: '2024',
+        summary: 'Managed a multidisciplinary team to deliver end-to-end collections.',
+        achievements: [
+          'Led the entire collection process from conceptualization to tech pack development.',
+          'Conducted routine factory visits for fit evaluations and pattern corrections.',
+          'Collaborated with marketing teams to align product aesthetics with global trends.'
+        ]
+      },
+      {
+        id: 'mmu',
+        title: 'Fashion & Resource Tech',
+        company: 'Manchester Metropolitan University',
+        period: '2023 - 2024',
+        summary: 'Technical research and branding within a prestigious UK academic environment.',
+        achievements: [
+          'Developed technical product specifications for "The Archive" focusing on circular design.',
+          'Designed branding materials and garments for high-profile university exhibitions.',
+          'Managed textile donations from premium suppliers and advised on advanced machinery.'
+        ]
+      }
+    ];
+
+    const software = ['Photoshop', 'Illustrator', 'InDesign', 'After Effects', 'Gerber', 'Clo3D', 'Figma', 'Microsoft 365'];
+    const skills = ['Range Planning', 'Print Development', 'Draping & Drafting', 'Tech Packs', 'Trend Analysis', 'Brand Merchandising', 'Sustainable Construction'];
+
+    // Selected State for brief color
+    let selectedColorChoice = 'Warm Amber';
+
+    function showSection(sectionId) {
+      const sections = ['impact', 'experience', 'skills', 'ai-studio', 'contact'];
+      sections.forEach(s => {
+        const element = document.getElementById(`sec-${s}`);
+        const btn = document.getElementById(`btn-${s}`);
+        if (element) element.classList.add('hidden');
+        if (btn) btn.classList.remove('active');
+      });
+
+      const currentElement = document.getElementById(`sec-${sectionId}`);
+      const currentBtn = document.getElementById(`btn-${sectionId}`);
+      if (currentElement) currentElement.classList.remove('hidden');
+      if (currentBtn) currentBtn.classList.add('active');
+    }
+
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      const icon = document.getElementById('menu-icon');
+      if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        icon.className = "fa-solid fa-xmark text-xl";
+      } else {
+        menu.classList.add('hidden');
+        icon.className = "fa-solid fa-bars text-xl";
+      }
+    }
+
+    // Initialize Charts
+    let chartsInitialized = false;
+    function initCharts() {
+      if (chartsInitialized) return;
+      chartsInitialized = true;
+
+      // Growth Chart
+      const ctxGrowth = document.getElementById('growthChart').getContext('2d');
+      new Chart(ctxGrowth, {
+        type: 'bar',
+        data: {
+          labels: ['Before Strategy', 'After Strategy (SUTI)'],
+          datasets: [{
+            label: 'Sales Index (%)',
+            data: [100, 120],
+            backgroundColor: ['#e7e5e4', '#f59e0b'],
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 140,
+              ticks: { callback: value => value + '%' }
+            }
+          }
+        }
+      });
+
+      // Skills Chart
+      const ctxSkills = document.getElementById('skillsChart').getContext('2d');
+      new Chart(ctxSkills, {
+        type: 'polarArea',
+        data: {
+          labels: ['Fashion Design', 'Graphic Design', 'Merchandising', 'Production', 'Tech Packs'],
+          datasets: [{
+            data: [95, 90, 85, 80, 95],
+            backgroundColor: [
+              'rgba(30, 27, 75, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(79, 70, 229, 0.7)',
+              'rgba(120, 113, 108, 0.7)',
+              'rgba(55, 65, 81, 0.7)'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+
+    // Experience UI Generation
+    function renderExperience() {
+      const listContainer = document.getElementById('experience-list');
+      if (!listContainer) return;
+      listContainer.innerHTML = '';
+      experiences.forEach((exp, index) => {
+        const btn = document.createElement('button');
+        btn.className = `experience-card w-full text-left p-4 rounded-xl border border-stone-200 bg-white hover:border-amber-500 transition-all ${index === 0 ? 'border-amber-500 ring-1 ring-amber-500' : ''}`;
+        btn.onclick = () => selectExperience(exp.id, btn);
+        btn.innerHTML = `
+                    <div class="text-xs font-bold text-amber-600 uppercase tracking-tighter">${exp.period}</div>
+                    <div class="font-bold">${exp.company}</div>
+                    <div class="text-sm text-stone-500">${exp.title}</div>
+                `;
+        listContainer.appendChild(btn);
+      });
+      // Select first by default
+      if (experiences.length > 0) {
+        selectExperience(experiences[0].id, listContainer.firstChild);
+      }
+    }
+
+    function selectExperience(id, element) {
+      document.querySelectorAll('.experience-card').forEach(card => {
+        card.classList.remove('border-amber-500', 'ring-1', 'ring-amber-500');
+      });
+      if (element) {
+        element.classList.add('border-amber-500', 'ring-1', 'ring-amber-500');
+      }
+
+      const exp = experiences.find(e => e.id === id);
+      const detailContainer = document.getElementById('experience-detail');
+      if (!exp || !detailContainer) return;
+
+      detailContainer.innerHTML = `
+                <h3 class="heading-serif text-3xl mb-1">${exp.title}</h3>
+                <div class="text-lg text-amber-600 font-semibold mb-4">${exp.company}</div>
+                <p class="text-stone-600 mb-6 pb-6 border-b border-stone-100">${exp.summary}</p>
+                <h4 class="text-xs uppercase tracking-widest font-bold mb-4 text-stone-400">Key Achievements</h4>
+                <ul class="space-y-3">
+                    ${exp.achievements.map(a => `
+                        <li class="flex items-start">
+                            <span class="text-amber-500 mr-2">◆</span>
+                            <span class="text-sm text-stone-700">${a}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+    }
+
+    function renderSkills() {
+      const softCont = document.getElementById('software-skills');
+      const fishCont = document.getElementById('fashion-skills');
+      if (softCont && fishCont) {
+        softCont.innerHTML = '';
+        fishCont.innerHTML = '';
+        software.forEach(s => {
+          softCont.insertAdjacentHTML('beforeend', `<span class="skill-tag">${escapeHtml(s)}</span>`);
+        });
+        skills.forEach(s => {
+          fishCont.insertAdjacentHTML('beforeend', `<span class="skill-tag">${escapeHtml(s)}</span>`);
+        });
+      }
+    }
+
+    // --- GEMINI PORTFOLIO CHATBOT INTEGRATION ---
+
+    // Configures tabs inside the AI Studio
+    function switchStudioTab(tab) {
+      const tabChat = document.getElementById('tab-chat');
+      const tabCoPilot = document.getElementById('tab-co-pilot');
+      const chatContainer = document.getElementById('studio-chat-container');
+      const copilotContainer = document.getElementById('studio-copilot-container');
+
+      if (tab === 'chat') {
+        tabChat.className = "w-1/2 py-3 text-center border-b-2 border-indigo-600 font-semibold text-indigo-900 focus:outline-none transition-all";
+        tabCoPilot.className = "w-1/2 py-3 text-center border-b-2 border-transparent font-medium text-stone-500 hover:text-indigo-600 focus:outline-none transition-all";
+        chatContainer.classList.remove('hidden');
+        copilotContainer.classList.add('hidden');
+      } else {
+        tabCoPilot.className = "w-1/2 py-3 text-center border-b-2 border-indigo-600 font-semibold text-indigo-900 focus:outline-none transition-all";
+        tabChat.className = "w-1/2 py-3 text-center border-b-2 border-transparent font-medium text-stone-500 hover:text-indigo-600 focus:outline-none transition-all";
+        copilotContainer.classList.remove('hidden');
+        chatContainer.classList.add('hidden');
+      }
+    }
+
+    async function handleChatSubmit(event) {
+      event.preventDefault();
+      const inputField = document.getElementById('chat-input');
+      const question = inputField.value.trim();
+      if (!question) return;
+
+      // Render User Message
+      appendChatMessage("User", question);
+      inputField.value = '';
+
+      // Disable button/input during call
+      setChatState(true);
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'AI request failed.');
+        const textOutput = result.text;
+
+        if (textOutput) {
+          appendChatMessage("Girisha AI", textOutput);
+        } else {
+          throw new Error("No response returned from the model.");
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('chat-error-log').innerText = err.message;
+        document.getElementById('chat-error-log').classList.remove('hidden');
+        setTimeout(() => { document.getElementById('chat-error-log').classList.add('hidden'); }, 4000);
+        appendChatMessage("System Warning", "The connection to the AI studio is momentarily congested. Please wait a second and retry!");
+      } finally {
+        setChatState(false);
+      }
+    }
+
+    function setChatState(isLoading) {
+      const sendBtn = document.getElementById('chat-send-btn');
+      const inputField = document.getElementById('chat-input');
+      if (isLoading) {
+        sendBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>';
+        sendBtn.disabled = true;
+        inputField.disabled = true;
+      } else {
+        sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+        sendBtn.disabled = false;
+        inputField.disabled = false;
+        inputField.focus();
+      }
+    }
+
+    function appendChatMessage(sender, text) {
+      const chatMessages = document.getElementById('chat-messages');
+      if (!chatMessages) return;
+
+      const isUser = sender === "User";
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `flex items-start space-x-3 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`;
+
+      const avatarBg = isUser ? 'bg-amber-500 text-indigo-950' : 'bg-indigo-900 text-white';
+      const messageBg = isUser ? 'bg-amber-50 border border-amber-200' : 'bg-white border border-stone-200';
+      const initial = isUser ? 'U' : 'GS';
+
+      messageDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-xs font-bold shadow-sm">${initial}</div>
+                <div class="${messageBg} rounded-2xl ${isUser ? 'rounded-tr-none' : 'rounded-tl-none'} p-4 max-w-[85%] text-sm text-stone-800 shadow-sm leading-relaxed">
+                    <span class="block text-[10px] uppercase font-bold text-stone-400 mb-1">${escapeHtml(sender)}</span>
+                    <p class="whitespace-pre-line">${escapeHtml(text)}</p>
+                </div>
+            `;
+
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function sendSuggestedQuestion(questionText) {
+      document.getElementById('chat-input').value = questionText;
+      document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+    }
+
+    // --- GEMINI CO-PILOT COLLECTION GENERATOR INTEGRATION ---
+
+    function selectColor(colorName, element) {
+      selectedColorChoice = colorName;
+      document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-600', 'font-semibold');
+        btn.classList.add('border-transparent');
+      });
+      element.classList.remove('border-transparent');
+      element.classList.add('border-amber-500', 'font-semibold');
+    }
+
+    async function generateCollectionBrief() {
+      const theme = document.getElementById('brief-theme').value;
+      const demographic = document.getElementById('brief-demographic').value;
+      const palette = selectedColorChoice;
+
+      const placeholder = document.getElementById('copilot-placeholder');
+      const loader = document.getElementById('copilot-loading');
+      const results = document.getElementById('copilot-results');
+      const errorDiv = document.getElementById('copilot-error');
+
+      placeholder.classList.add('hidden');
+      results.classList.add('hidden');
+      errorDiv.classList.add('hidden');
+      loader.classList.remove('hidden');
+
+      const loadingStage = document.getElementById('copilot-loading-stage');
+      const loadingDetails = document.getElementById('copilot-loading-details');
+
+      try {
+        loadingStage.innerText = "Analyzing Design Brief...";
+        loadingDetails.innerText = "Generating a commercially optimized range plan and visual concept...";
+        const response = await fetch('/api/collection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ theme, demographic, palette })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Collection generation failed.');
+        if (result.image) document.getElementById('generative-image-display').src = result.image;
+        const parsedContent = parseMarkdownToHTML(result.text || 'No brief was returned.');
+        document.getElementById('generative-brief-display').innerHTML = parsedContent;
+
+        loader.classList.add('hidden');
+        results.classList.remove('hidden');
+
+      } catch (err) {
+        console.error(err);
+        loader.classList.add('hidden');
+        errorDiv.classList.remove('hidden');
+        document.getElementById('copilot-error-msg').innerText = err.message;
+      }
+    }
+
+    function resetCopilotUI() {
+      document.getElementById('copilot-error').classList.add('hidden');
+      document.getElementById('copilot-placeholder').classList.remove('hidden');
+    }
+
+    // Quick simple parser to format Gemini's markdown response cleanly in the custom HTML design
+    function parseMarkdownToHTML(md) {
+      let html = escapeHtml(md);
+      // Headers
+      html = html.replace(/\#\#\#\s*(.*)/g, '<h4 class="text-sm font-bold text-indigo-950 uppercase mt-4 mb-2">$1</h4>');
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-indigo-900">$1</strong>');
+      // Bullet points
+      html = html.replace(/^\s*[-*]\s+(.*)/gm, '<li class="ml-4 list-disc text-stone-700 py-0.5">$1</li>');
+      // Paragraph formatting
+      html = html.split('\n\n').map(p => {
+        if (p.trim().startsWith('<h4') || p.trim().startsWith('<li')) return p;
+        return `<p class="mb-3 text-stone-600 leading-relaxed">${p}</p>`;
+      }).join('');
+      return html;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    // Initialize Application
+    window.onload = () => {
+      initCharts();
+      renderExperience();
+      renderSkills();
+    };
+  </script>
+</body>
+
+</html>
