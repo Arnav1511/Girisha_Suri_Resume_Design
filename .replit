@@ -1,9 +1,3 @@
-run = "npm start"
-
-[[ports]]
-localPort = 3000
-externalPort = 80
-
 [deployment]
-run = ["sh", "-c", "npm start"]
-deploymentTarget = "cloudrun"
+deploymentTarget = "static"
+publicDir = "."
