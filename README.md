@@ -93,8 +93,10 @@ what happens to the hero image:
      `.env` (local) or Render's Environment Variables (deployed).
   3. For Render, also make the real hero image available during the build.
      Preferred: keep a private GitHub repo with
-     `protected-images/<projectId>/hero-real.<ext>` and set a read-only
-     `PROTECTED_ASSETS_TOKEN` in Render. `PROTECTED_ASSETS_REPO` defaults to
+     `<projectId>/hero-real.<ext>` (for example,
+     `overrun-bomber/hero-real.jpg`) and set a read-only
+     `PROTECTED_ASSETS_TOKEN` in Render. `protected-images/<projectId>/...`
+     also works. `PROTECTED_ASSETS_REPO` defaults to
      `Arnav1511/girisha-protected-assets`; override it if your asset repo uses
      a different `owner/repo`.
   4. Run `npm run protected-assets` (or just `npm run dev` / `npm run build`,
@@ -168,8 +170,8 @@ SAS URLs** (or any private bucket) is documented in
   fresh clone/Render build has no source image to hash-copy on its own.
   `prepare-protected-assets.mjs` first tries a private GitHub asset repo when
   `PROTECTED_ASSETS_TOKEN` is set. Put the file at
-  `protected-images/<projectId>/hero-real.<ext>` in that private repo and set
-  `PROTECTED_ASSETS_REPO` only if it is not
+  `<projectId>/hero-real.<ext>` in that private repo, for example
+  `overrun-bomber/hero-real.jpg`, and set `PROTECTED_ASSETS_REPO` only if it is not
   `Arnav1511/girisha-protected-assets`.
 
   Render [Secret Files](https://render.com/docs/configure-environment-variables#secret-files)

@@ -100,7 +100,7 @@ function candidateRepoPaths(projectId) {
   const configuredPrefix = process.env.PROTECTED_ASSETS_PATH_PREFIX;
   const prefixes = configuredPrefix
     ? [configuredPrefix]
-    : ["protected-images", "private/protected-images", ""];
+    : ["", "protected-images", "private/protected-images"];
 
   return prefixes.flatMap((prefix) => {
     const cleanPrefix = prefix.trim().replace(/^\/+|\/+$/g, "");
@@ -113,7 +113,10 @@ function candidateRepoPaths(projectId) {
 
 async function fetchGitHubHeroSource(projectId) {
   const token = process.env.PROTECTED_ASSETS_TOKEN;
-  if (!token) return null;
+  if (!token) {
+    console.warn("[protected-assets] PROTECTED_ASSETS_TOKEN is not set, so the private GitHub asset repo cannot be checked.");
+    return null;
+  }
 
   const repo = process.env.PROTECTED_ASSETS_REPO ?? DEFAULT_PROTECTED_ASSETS_REPO;
   const ref = process.env.PROTECTED_ASSETS_REF;
