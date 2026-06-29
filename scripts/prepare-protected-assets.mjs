@@ -23,17 +23,22 @@ const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const PRIVATE_ROOT = path.join(ROOT, "private", "protected-images");
 const PUBLIC_ROOT = path.join(ROOT, "public", "images", "protected");
 // private/ is gitignored — a public-repo deploy (e.g. Render) never has it.
-// Render Secret Files land at /etc/secrets/<filename>, so a real protected
-// photo can reach the build that way instead. Two supported forms, since
-// it's unclear up front which one Render's dashboard will actually accept
-// for a given file size:
-//  - "<projectId>-hero-real.<ext>" uploaded as the file itself (binary,
-//    via Render's upload/drag-and-drop) — read directly.
-//  - "<projectId>-hero-real.<ext>.b64" pasted as text into the Contents box
-//    (Render's Secret File editor is a plain-text field, so a raw binary
-//    image can't always be pasted directly — base64 dodges that, at the
-//    cost of being ~33% bigger) — decoded back to real bytes before use.
+// Simplest fix: a normal environment variable, exactly like UNLOCK_PASSWORDS
+// already is. Compress the real photo down to a sane web size first (a
+// resized, ~80-quality JPEG is usually well under 200KB -> ~250KB of base64
+// text, comfortably variable-sized, not "paste a multi-MB file into a box"
+// sized) and set it as HERO_B64_<PROJECT_ID> (dashes -> underscores,
+// uppercased), e.g. HERO_B64_OVERRUN_BOMBER for "overrun-bomber". Picked up
+// automatically at build time, no dashboard file upload involved.
+//
+// Render Secret Files (/etc/secrets/<filename>) are kept as a fallback for
+// anyone who prefers that route, same two forms as before: a raw uploaded
+// file, or a "<projectId>-hero-real.<ext>.b64" text payload.
 const SECRETS_ROOT = "/etc/secrets";
+
+function envVarNameForProject(projectId) {
+  return `HERO_B64_${projectId.toUpperCase().replace(/[^A-Z0-9]+/g, "_")}`;
+}
 
 function loadDotEnvFallback() {
   const envPath = path.join(ROOT, ".env");
@@ -67,8 +72,8 @@ function deriveSuffix(password, projectId) {
   return createHash("sha256").update(`${password}:${projectId}`).digest("hex").slice(0, 16);
 }
 
-// Returns the real image bytes for a project, regardless of which of the
-// two sources it came from, so the caller never has to care.
+// Returns the real image bytes for a project, regardless of which source it
+// came from, so the caller never has to care.
 function resolveHeroSource(projectId) {
   const sourceDir = path.join(PRIVATE_ROOT, projectId);
   if (existsSync(sourceDir)) {
@@ -76,6 +81,11 @@ function resolveHeroSource(projectId) {
     if (heroFile) {
       return { ext: path.extname(heroFile), buffer: readFileSync(path.join(sourceDir, heroFile)) };
     }
+  }
+
+  const envValue = process.env[envVarNameForProject(projectId)];
+  if (envValue) {
+    return { ext: ".jpg", buffer: Buffer.from(envValue.trim(), "base64") };
   }
 
   if (existsSync(SECRETS_ROOT)) {
@@ -103,7 +113,7 @@ for (const [projectId, password] of Object.entries(passwordMap)) {
   const source = resolveHeroSource(projectId);
   if (!source) {
     console.warn(
-      `[protected-assets] No hero-real.* file found for "${projectId}" in ${PRIVATE_ROOT} or as a Render Secret File named "${projectId}-hero-real.<ext>.b64"`,
+      `[protected-assets] No hero image found for "${projectId}" — checked ${PRIVATE_ROOT}, the ${envVarNameForProject(projectId)} env var, and Render Secret Files in ${SECRETS_ROOT}.`,
     );
     continue;
   }
