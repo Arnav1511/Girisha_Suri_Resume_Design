@@ -15,7 +15,7 @@
  * .env file (simple KEY=VALUE parsing, no dependency) for `npm run dev`.
  */
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, copyFileSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -24,8 +24,12 @@ const PRIVATE_ROOT = path.join(ROOT, "private", "protected-images");
 const PUBLIC_ROOT = path.join(ROOT, "public", "images", "protected");
 // private/ is gitignored — a public-repo deploy (e.g. Render) never has it.
 // Render Secret Files land at /etc/secrets/<filename>, so a real protected
-// photo can reach the build that way instead: add a Secret File there named
-// "<projectId>-hero-real.<ext>" (e.g. "overrun-bomber-hero-real.jpg").
+// photo can reach the build that way instead — but Render's Secret File
+// editor is a plain-text box, so a raw binary image can't be pasted into it
+// directly. Base64-encode the photo into text first (pure ASCII, safe to
+// paste anywhere) and name the secret file "<projectId>-hero-real.<ext>.b64"
+// (e.g. "overrun-bomber-hero-real.jpg.b64"); this script decodes it back to
+// real image bytes before copying it into the public build.
 const SECRETS_ROOT = "/etc/secrets";
 
 function loadDotEnvFallback() {
@@ -60,16 +64,26 @@ function deriveSuffix(password, projectId) {
   return createHash("sha256").update(`${password}:${projectId}`).digest("hex").slice(0, 16);
 }
 
-function findHeroRealFile(projectId) {
+// Returns the real image bytes for a project, regardless of which of the
+// two sources it came from, so the caller never has to care.
+function resolveHeroSource(projectId) {
   const sourceDir = path.join(PRIVATE_ROOT, projectId);
   if (existsSync(sourceDir)) {
     const heroFile = readdirSync(sourceDir).find((name) => name.startsWith("hero-real"));
-    if (heroFile) return path.join(sourceDir, heroFile);
+    if (heroFile) {
+      return { ext: path.extname(heroFile), buffer: readFileSync(path.join(sourceDir, heroFile)) };
+    }
   }
 
   if (existsSync(SECRETS_ROOT)) {
-    const secretFile = readdirSync(SECRETS_ROOT).find((name) => name.startsWith(`${projectId}-hero-real`));
-    if (secretFile) return path.join(SECRETS_ROOT, secretFile);
+    const secretFile = readdirSync(SECRETS_ROOT).find(
+      (name) => name.startsWith(`${projectId}-hero-real`) && name.endsWith(".b64"),
+    );
+    if (secretFile) {
+      const ext = path.extname(secretFile.slice(0, -".b64".length));
+      const base64 = readFileSync(path.join(SECRETS_ROOT, secretFile), "utf8").trim();
+      return { ext, buffer: Buffer.from(base64, "base64") };
+    }
   }
 
   return null;
@@ -78,19 +92,18 @@ function findHeroRealFile(projectId) {
 const passwordMap = loadPasswordMap();
 
 for (const [projectId, password] of Object.entries(passwordMap)) {
-  const heroPath = findHeroRealFile(projectId);
-  if (!heroPath) {
+  const source = resolveHeroSource(projectId);
+  if (!source) {
     console.warn(
-      `[protected-assets] No hero-real.* file found for "${projectId}" in ${PRIVATE_ROOT} or as a Render Secret File named "${projectId}-hero-real.<ext>"`,
+      `[protected-assets] No hero-real.* file found for "${projectId}" in ${PRIVATE_ROOT} or as a Render Secret File named "${projectId}-hero-real.<ext>.b64"`,
     );
     continue;
   }
 
-  const ext = path.extname(heroPath);
   const suffix = deriveSuffix(password, projectId);
   const destDir = path.join(PUBLIC_ROOT, projectId);
   mkdirSync(destDir, { recursive: true });
-  const destPath = path.join(destDir, `hero-${suffix}${ext}`);
-  copyFileSync(heroPath, destPath);
-  console.log(`[protected-assets] ${projectId} -> images/protected/${projectId}/hero-${suffix}${ext}`);
+  const destPath = path.join(destDir, `hero-${suffix}${source.ext}`);
+  writeFileSync(destPath, source.buffer);
+  console.log(`[protected-assets] ${projectId} -> images/protected/${projectId}/hero-${suffix}${source.ext}`);
 }

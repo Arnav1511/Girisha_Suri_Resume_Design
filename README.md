@@ -160,12 +160,23 @@ SAS URLs** (or any private bucket) is documented in
   on purpose, so a fresh clone/Render build has no source image to hash-copy
   on its own. `prepare-protected-assets.mjs` now also checks Render
   [Secret Files](https://render.com/docs/configure-environment-variables#secret-files)
-  (Environment tab → Secret Files → Add file) as a fallback source — add one
-  named `<projectId>-hero-real.<ext>` (e.g. `overrun-bomber-hero-real.jpg`)
-  with the real photo as its content; Render mounts it at
-  `/etc/secrets/<filename>` during the build, which the script picks up the
-  same way it picks up `private/protected-images/<projectId>/hero-real.<ext>`
-  locally. Check Render's current size limit for Secret Files before
-  uploading a large photo — for anything bigger, fall back to a build step
-  that fetches it from a private bucket using a token stored as a Render env
-  var instead.
+  (Environment tab → Secret Files → Add file) as a fallback source. Render's
+  Secret File editor is a plain-text box, so a raw binary photo can't be
+  pasted in directly — base64-encode it into text first:
+
+  ```powershell
+  [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\path\to\real-photo.jpg")) |
+    Set-Content -Path "$env:USERPROFILE\Desktop\overrun-bomber-hero-real.jpg.b64" -NoNewline -Encoding ascii
+  ```
+
+  Open that `.b64` file, select all, copy, and paste it as the **Contents**
+  of a Secret File named `<projectId>-hero-real.<ext>.b64` (e.g.
+  `overrun-bomber-hero-real.jpg.b64` — keep the real extension before
+  `.b64`). Render mounts it at `/etc/secrets/<filename>` during the build;
+  the script decodes it back to real image bytes before copying it into the
+  public build, the same way it reads
+  `private/protected-images/<projectId>/hero-real.<ext>` locally. Check
+  Render's current size limit for Secret Files before uploading a large
+  photo (base64 inflates size by about a third) — for anything too big, fall
+  back to a build step that fetches it from a private bucket using a token
+  stored as a Render env var instead.
