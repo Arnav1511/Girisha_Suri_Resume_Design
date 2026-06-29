@@ -91,11 +91,17 @@ what happens to the hero image:
      never committed, this repo is public).
   2. Add `"<projectId>": "<password>"` to the `UNLOCK_PASSWORDS` JSON in your
      `.env` (local) or Render's Environment Variables (deployed).
-  3. Run `npm run protected-assets` (or just `npm run dev` / `npm run build`,
+  3. For Render, also make the real hero image available during the build.
+     Preferred: keep a private GitHub repo with
+     `protected-images/<projectId>/hero-real.<ext>` and set a read-only
+     `PROTECTED_ASSETS_TOKEN` in Render. `PROTECTED_ASSETS_REPO` defaults to
+     `Arnav1511/girisha-protected-assets`; override it if your asset repo uses
+     a different `owner/repo`.
+  4. Run `npm run protected-assets` (or just `npm run dev` / `npm run build`,
      which do it automatically) — this copies the real image into
      `public/images/protected/<projectId>/hero-<hash>.<ext>`, where `<hash>`
      is derived from the password, and is how the gate finds it.
-  4. Export a genuinely low-res, blurred version as the public `heroImage` —
+  5. Export a genuinely low-res, blurred version as the public `heroImage` —
      never a CSS blur over the real file. See
      `public/images/streetwear/overrun-bomber/hero-blurred.jpg` for the
      pattern: resize the real photo down to a few dozen pixels wide, blur it,
@@ -158,13 +164,18 @@ SAS URLs** (or any private bucket) is documented in
   animated against one ScrollTrigger progress value) — it isn't built yet.
 - The Azure Blob/SAS wiring documented above is written but not exercised
   against a real Azure subscription.
-- **Getting the real protected image onto Render.** `private/` is gitignored
-  on purpose, so a fresh clone/Render build has no source image to hash-copy
-  on its own. `prepare-protected-assets.mjs` now also checks Render
-  [Secret Files](https://render.com/docs/configure-environment-variables#secret-files)
-  (Environment tab → Secret Files → Add file) as a fallback source. Render's
-  Secret File editor is a plain-text box, so a raw binary photo can't be
-  pasted in directly — base64-encode it into text first:
+- **Render protected-image source.** `private/` is gitignored on purpose, so a
+  fresh clone/Render build has no source image to hash-copy on its own.
+  `prepare-protected-assets.mjs` first tries a private GitHub asset repo when
+  `PROTECTED_ASSETS_TOKEN` is set. Put the file at
+  `protected-images/<projectId>/hero-real.<ext>` in that private repo and set
+  `PROTECTED_ASSETS_REPO` only if it is not
+  `Arnav1511/girisha-protected-assets`.
+
+  Render [Secret Files](https://render.com/docs/configure-environment-variables#secret-files)
+  still work as a fallback source. Render's Secret File editor is a plain-text
+  box, so a raw binary photo can't be pasted in directly — base64-encode it
+  into text first:
 
   ```powershell
   [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\path\to\real-photo.jpg")) |
@@ -179,6 +190,5 @@ SAS URLs** (or any private bucket) is documented in
   public build, the same way it reads
   `private/protected-images/<projectId>/hero-real.<ext>` locally. Check
   Render's current size limit for Secret Files before uploading a large
-  photo (base64 inflates size by about a third) — for anything too big, fall
-  back to a build step that fetches it from a private bucket using a token
-  stored as a Render env var instead.
+  photo (base64 inflates size by about a third). For large files, use the
+  private GitHub token flow instead of pasting the image into Render config.
