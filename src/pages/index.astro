@@ -1,10 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ParticleAssemblyHero from "../components/thread/ParticleAssemblyHero.astro";
-import SegmentCard from "../components/cards/SegmentCard.astro";
-import { getOrderedSegments } from "../data/segments";
-
-const segments = getOrderedSegments();
 ---
 
 <BaseLayout title="Girisha Suri — Fashion Design Portfolio">
@@ -25,14 +21,6 @@ const segments = getOrderedSegments();
     <ParticleAssemblyHero />
 
     <div class="outro-fade" data-outro-fade></div>
-
-    <section class="segments" aria-label="Work by segment">
-      <ul>
-        {segments.map((segment, index) => (
-          <SegmentCard segment={segment} index={index} />
-        ))}
-      </ul>
-    </section>
   </main>
 </BaseLayout>
 
@@ -143,17 +131,7 @@ const segments = getOrderedSegments();
   }
 
   .outro-fade {
-    height: 30vh;
+    height: 18vh;
     background: var(--color-ink);
-  }
-
-  .segments {
-    max-width: var(--max-width-content);
-    margin: 0 auto;
-    padding: var(--space-2xl) var(--page-gutter) var(--space-3xl);
-  }
-
-  .segments ul {
-    border-bottom: 1px solid var(--color-border);
   }
 </style>

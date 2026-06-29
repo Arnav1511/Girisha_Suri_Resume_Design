@@ -1,7 +1,7 @@
 # Girisha Suri — fashion design portfolio
 
-Astro + TypeScript portfolio site. Phase 1 vertical slice: landing page with the
-signature thread-stitch scroll moment, segment selection, one fully built
+Astro + TypeScript portfolio site. Phase 1 vertical slice: landing page with a
+long denim-scroll portfolio selection moment, one fully built
 segment (Streetwear) with an open and a password-protected project, a complete
 case-study page with a bespoke thread-into-embroidery scroll interaction, the
 password gate, a recruiter filter, and an About page.
@@ -48,7 +48,10 @@ deploys.
   — an illustrated denim selvage fabric scroll unfurls on scroll. Thread
   rolls, a needle, embroidery frame, tablet sketch, colour palette, ruler,
   inch tape, pencil, and beads spill out in a rough watercolor style; the
-  beads fall toward the next section as the scroll exits. Respects
+  portfolio segments then appear as tactile textile-study cards embedded in
+  the cloth, so Streetwear, Indo-Western, Evening Wear, Contemporary, and
+  Vendor/Client work are selected inside the scroll rather than from a
+  separate block grid. Respects
   `prefers-reduced-motion` by showing the opened layout directly.
 - **Password-gate logic (active, static-hosting path)** —
   [src/lib/clientGate.ts](src/lib/clientGate.ts) and
@@ -62,8 +65,9 @@ deploys.
 ## Add a segment
 
 Edit [src/data/segments.ts](src/data/segments.ts) — add an entry with a new
-`id`/`slug`/`name`/`order`/`blurb`. It immediately appears on the landing page
-and gets a route at `/work/<slug>` (empty-state grid until you add projects).
+`id`/`slug`/`name`/`order`/`blurb`. It immediately appears inside the landing
+page scroll and gets a route at `/work/<slug>` (empty-state grid until you add
+projects).
 
 ## Add a project
 
