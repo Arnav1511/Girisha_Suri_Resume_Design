@@ -29,8 +29,11 @@ const segmentWorlds = getOrderedSegments().map((segment) => {
   </svg>
 
   <div class="grain" aria-hidden="true"></div>
+  <div class="grain grain-soft" aria-hidden="true"></div>
+  <div class="light-sweep" data-light-sweep aria-hidden="true"></div>
 
   <nav class="story-rail" aria-hidden="true">
+    <span class="rail-progress" data-rail-progress></span>
     <span data-rail-dot></span>
     <span data-rail-dot></span>
     <span data-rail-dot></span>
@@ -219,6 +222,25 @@ const segmentWorlds = getOrderedSegments().map((segment) => {
       linear-gradient(105deg, transparent 0 47%, rgba(185, 147, 90, 0.08) 48% 49%, transparent 50%);
     background-size: 17px 19px, 23px 29px, auto;
     transform: rotate(-1.5deg);
+    will-change: transform;
+  }
+
+  .grain-soft {
+    opacity: 0.1;
+    background-size: 26px 31px, 35px 27px, auto;
+    transform: rotate(2.2deg) scale(1.12);
+    mix-blend-mode: soft-light;
+  }
+
+  .light-sweep {
+    position: absolute;
+    inset: -25%;
+    z-index: 11;
+    background: radial-gradient(ellipse 36% 28% at 28% 32%, rgba(247, 245, 240, 0.17), transparent 62%);
+    mix-blend-mode: screen;
+    opacity: 0.5;
+    pointer-events: none;
+    will-change: transform;
   }
 
   .story-rail {
@@ -239,10 +261,22 @@ const segmentWorlds = getOrderedSegments().map((segment) => {
     bottom: 0.35rem;
     left: 0.35rem;
     width: 1px;
-    background: rgba(247, 245, 240, 0.24);
+    background: repeating-linear-gradient(to bottom, rgba(247, 245, 240, 0.3) 0 3px, transparent 3px 7px);
   }
 
-  .story-rail span {
+  .rail-progress {
+    position: absolute;
+    top: 0.35rem;
+    bottom: 0.35rem;
+    left: 0.35rem;
+    width: 1px;
+    background: var(--color-thread);
+    transform-origin: top;
+    transform: scaleY(0);
+    will-change: transform;
+  }
+
+  .story-rail span:not(.rail-progress) {
     position: relative;
     width: 0.7rem;
     height: 0.7rem;
@@ -270,13 +304,19 @@ const segmentWorlds = getOrderedSegments().map((segment) => {
     position: absolute;
     inset: 0 auto auto 0;
     opacity: 0;
-    transform: translateY(1.2rem);
+    transform: translateY(1.6rem);
+    filter: blur(5px);
     color: var(--color-chalk);
+    transition:
+      opacity 0.7s var(--ease-thread),
+      transform 0.7s var(--ease-thread),
+      filter 0.7s var(--ease-thread);
   }
 
   .chapter.is-active {
     opacity: 1;
     transform: translateY(0);
+    filter: blur(0);
   }
 
   .chapter p {
@@ -1228,6 +1268,8 @@ const segmentWorlds = getOrderedSegments().map((segment) => {
     const chapters = Array.from(document.querySelectorAll<HTMLElement>("[data-chapter]"));
     const dots = Array.from(document.querySelectorAll<HTMLElement>("[data-rail-dot]"));
     const menu = document.querySelector<HTMLElement>("[data-goto-menu]");
+    const railProgress = document.querySelector<HTMLElement>("[data-rail-progress]");
+    const lightSweep = document.querySelector<HTMLElement>("[data-light-sweep]");
 
     if (!root || !panel || !roll) return;
 
@@ -1246,7 +1288,21 @@ const segmentWorlds = getOrderedSegments().map((segment) => {
         menu.style.transform = "translateY(0)";
         menu.classList.add("is-live");
       }
+      if (railProgress) railProgress.style.transform = "scaleY(1)";
       return;
+    }
+
+    // Slow, continuous drift independent of scroll position — the backdrop
+    // should already feel alive before the visitor moves the wheel.
+    if (lightSweep) {
+      gsap.to(lightSweep, {
+        xPercent: 16,
+        yPercent: -10,
+        duration: 17,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+      });
     }
 
     gsap.set(panel, { "--open": 0.025, "--cloth-y": "0vh", "--cloth-tilt": "0deg" });
@@ -1266,6 +1322,7 @@ const segmentWorlds = getOrderedSegments().map((segment) => {
         const chapterIndex = p < 0.16 ? 0 : p < 0.38 ? 1 : p < 0.6 ? 2 : 3;
         setChapter(chapterIndex, chapters, dots);
         menu?.classList.toggle("is-live", p > 0.66);
+        if (railProgress) railProgress.style.transform = `scaleY(${p})`;
       },
     });
 
@@ -1277,6 +1334,10 @@ const segmentWorlds = getOrderedSegments().map((segment) => {
         scrub: true,
       },
     });
+
+    if (lightSweep) {
+      timeline.to(lightSweep, { x: "8vw", y: "-5vh", ease: "none", duration: 1 }, 0);
+    }
 
     timeline
       .to(panel, { "--open": 1, ease: "power2.out", duration: 0.075 }, 0)
@@ -1299,22 +1360,22 @@ const segmentWorlds = getOrderedSegments().map((segment) => {
         "--fall-y": (_index: number, element: Element) => `${num(element as HTMLElement, "--land-y")}vh`,
         "--fall-r": (_index: number, element: Element) => `${num(element as HTMLElement, "--land-r")}deg`,
         "--fall-s": 1,
-        ease: "bounce.out",
+        ease: "power3.out",
         stagger: 0.014,
-        duration: 0.12,
+        duration: 0.13,
       }, 0.145)
       .to(objects, {
-        "--fall-y": (_index: number, element: Element) => `${num(element as HTMLElement, "--land-y") - 1.4}vh`,
+        "--fall-y": (_index: number, element: Element) => `${num(element as HTMLElement, "--land-y") - 0.6}vh`,
         ease: "power1.out",
         stagger: 0.007,
-        duration: 0.034,
-      }, 0.28)
+        duration: 0.04,
+      }, 0.3)
       .to(objects, {
         "--fall-y": (_index: number, element: Element) => `${num(element as HTMLElement, "--land-y")}vh`,
         ease: "power1.in",
         stagger: 0.007,
-        duration: 0.034,
-      }, 0.315)
+        duration: 0.045,
+      }, 0.34)
       .to(beads, { autoAlpha: 1, ease: "none", stagger: { amount: 0.07, from: "random" }, duration: 0.02 }, 0.08)
       .to(beads, {
         "--fall-x": (_index: number, element: Element) => `${num(element as HTMLElement, "--land-x") * 0.22}vw`,
@@ -1328,7 +1389,7 @@ const segmentWorlds = getOrderedSegments().map((segment) => {
         "--fall-x": (_index: number, element: Element) => `${num(element as HTMLElement, "--land-x")}vw`,
         "--fall-y": (_index: number, element: Element) => `${num(element as HTMLElement, "--land-y")}vh`,
         "--fall-r": (_index: number, element: Element) => `${num(element as HTMLElement, "--land-r")}deg`,
-        ease: "bounce.out",
+        ease: "power3.out",
         stagger: { amount: 0.08, from: "random" },
         duration: 0.1,
       }, 0.18)

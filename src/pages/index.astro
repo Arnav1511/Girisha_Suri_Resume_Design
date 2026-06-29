@@ -6,15 +6,35 @@ import ParticleAssemblyHero from "../components/thread/ParticleAssemblyHero.astr
 <BaseLayout title="Girisha Suri — Fashion Design Portfolio">
   <main>
     <section class="hero" data-hero>
+      <div class="hero-backdrop" aria-hidden="true">
+        <span class="hero-grain" data-hero-grain></span>
+        <span class="hero-glow" data-hero-glow></span>
+        <span class="hero-vignette"></span>
+      </div>
+
       <div class="hero-veil" data-hero-veil></div>
+
       <div class="hero-content">
-        <p class="kicker">Fashion design portfolio</p>
-        <h1>Girisha Suri</h1>
-        <p class="tagline">
+        <p class="kicker" data-hero-kicker>Fashion design portfolio</p>
+
+        <h1 data-hero-title>
+          <span class="line-mask"><span class="line-inner" data-hero-word>Girisha</span></span>
+          <span class="line-mask"><span class="line-inner" data-hero-word>Suri</span></span>
+        </h1>
+
+        <svg class="hero-stitch" data-hero-stitch viewBox="0 0 320 22" aria-hidden="true" focusable="false">
+          <path d="M4 13 C 48 3, 88 21, 138 11 S 228 1, 316 12" />
+        </svg>
+
+        <p class="tagline" data-hero-tagline>
           Commercial discipline, couture finishing — built across streetwear, evening wear,
           and the spaces between.
         </p>
-        <p class="scroll-cue">Scroll to explore</p>
+
+        <p class="scroll-cue" data-hero-cue>
+          <span class="cue-thread" aria-hidden="true"></span>
+          Scroll to explore
+        </p>
       </div>
     </section>
 
@@ -30,32 +50,105 @@ import ParticleAssemblyHero from "../components/thread/ParticleAssemblyHero.astr
 
   gsap.registerPlugin(ScrollTrigger);
 
+  function drawStitch(svg: SVGSVGElement | null) {
+    const path = svg?.querySelector<SVGPathElement>("path");
+    if (!path) return null;
+    const length = path.getTotalLength();
+    path.style.strokeDasharray = `${length}`;
+    path.style.strokeDashoffset = `${length}`;
+    return path;
+  }
+
   function setUp() {
     const hero = document.querySelector<HTMLElement>("[data-hero]");
     const veil = document.querySelector<HTMLElement>("[data-hero-veil]");
     const outro = document.querySelector<HTMLElement>("[data-outro-fade]");
+    const grain = document.querySelector<HTMLElement>("[data-hero-grain]");
+    const glow = document.querySelector<HTMLElement>("[data-hero-glow]");
+    const kicker = document.querySelector<HTMLElement>("[data-hero-kicker]");
+    const words = Array.from(document.querySelectorAll<HTMLElement>("[data-hero-word]"));
+    const stitch = document.querySelector<SVGSVGElement>("[data-hero-stitch]");
+    const tagline = document.querySelector<HTMLElement>("[data-hero-tagline]");
+    const cue = document.querySelector<HTMLElement>("[data-hero-cue]");
+    const cueThread = cue?.querySelector<HTMLElement>(".cue-thread") ?? null;
+
     if (!hero || !veil || !outro) return;
 
-    if (window.__prefersReducedMotion) return;
+    const stitchPath = drawStitch(stitch);
 
-    const kicker = hero.querySelector(".kicker");
-    const h1 = hero.querySelector("h1");
-    const tagline = hero.querySelector(".tagline");
-    const cue = hero.querySelector(".scroll-cue");
+    if (window.__prefersReducedMotion) {
+      if (stitchPath) stitchPath.style.strokeDashoffset = "0";
+      return;
+    }
 
-    // A dark veil rises from the bottom of the hero as you scroll — not a
-    // flat color swap on the whole section, an actual tide moving through
-    // it — so it always matches the (already-dark) assembly section right
-    // beneath it, with no hard seam at any scroll position. The text
-    // recedes (shrinks + lifts) rather than growing, and .hero clips
-    // anything that travels past its own edges so nothing ever
-    // double-exposes against the fixed header.
+    // Entrance: a single deliberate reveal on load, not tied to scroll — the
+    // page's first impression should already feel alive before anyone
+    // touches the wheel. Words rise out of a masked strip and settle into
+    // focus (blur -> crisp) rather than just fading, which reads as a
+    // camera finding focus instead of a flat opacity tween.
+    gsap.set(words, { yPercent: 115, filter: "blur(14px)" });
+    gsap.set([kicker, tagline], { opacity: 0, y: 14 });
+    gsap.set(cue, { opacity: 0 });
+
+    const entrance = gsap.timeline({ delay: 0.15 });
+    entrance
+      .to(kicker, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" })
+      .to(
+        words,
+        { yPercent: 0, filter: "blur(0px)", duration: 1.1, stagger: 0.12, ease: "power3.out" },
+        0.1,
+      )
+      .add(() => {
+        if (stitchPath) gsap.to(stitchPath, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" });
+      }, 0.65)
+      .to(tagline, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 0.85)
+      .to(cue, { opacity: 0.7, duration: 0.6, ease: "power2.out" }, 1.05);
+
+    // Idle life: slow, near-imperceptible drift on the grain and glow so the
+    // backdrop never sits perfectly still, plus a thread that visibly drops
+    // and fades on a loop as the scroll affordance.
+    if (grain) {
+      gsap.to(grain, {
+        x: "1.5%",
+        y: "-1%",
+        rotate: "-0.4deg",
+        duration: 16,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+      });
+    }
+    if (glow) {
+      gsap.to(glow, {
+        xPercent: 14,
+        yPercent: 10,
+        duration: 19,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+      });
+    }
+    if (cueThread) {
+      gsap.fromTo(
+        cueThread,
+        { scaleY: 0, opacity: 0.9, transformOrigin: "top" },
+        { scaleY: 1, opacity: 0, duration: 1.6, ease: "power1.in", repeat: -1, repeatDelay: 0.3 },
+      );
+    }
+
+    // Scroll exit: a dark tide rises from the bottom of the hero (matching
+    // the already-dark assembly section beneath, so there's never a hard
+    // seam) while the type pulls back like a camera losing focus on it —
+    // scale down, lift, and soften — rather than a flat fade. The two words
+    // recede at slightly different rates for a touch of parallax depth.
     gsap.timeline({
       scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true },
     })
       .fromTo(veil, { scaleY: 0 }, { scaleY: 1, ease: "none", duration: 1 }, 0)
-      .to([kicker, tagline, cue], { opacity: 0, y: -30, ease: "none", duration: 0.5 }, 0)
-      .to(h1, { opacity: 0, scale: 0.82, y: -36, ease: "none", duration: 0.5 }, 0);
+      .to([kicker, tagline, cue, stitch], { opacity: 0, y: -28, ease: "none", duration: 0.5 }, 0)
+      .to(words[0] ?? [], { yPercent: -14, scale: 0.85, filter: "blur(3px)", opacity: 0, ease: "none", duration: 0.5 }, 0)
+      .to(words[1] ?? [], { yPercent: -10, scale: 0.88, filter: "blur(3px)", opacity: 0, ease: "none", duration: 0.5 }, 0.03)
+      .to([grain, glow], { yPercent: -18, opacity: 0, ease: "none", duration: 0.6 }, 0);
 
     // Mirror fade back to canvas in a dedicated buffer band, so the textile
     // reveal never has to deal with a transitioning background.
@@ -90,18 +183,59 @@ import ParticleAssemblyHero from "../components/thread/ParticleAssemblyHero.astr
     pointer-events: none;
   }
 
+  .hero-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .hero-grain {
+    position: absolute;
+    inset: -15%;
+    opacity: 0.2;
+    background:
+      radial-gradient(circle at 18% 26%, rgba(247, 245, 240, 0.06) 0 1px, transparent 1.6px),
+      radial-gradient(circle at 74% 62%, rgba(185, 147, 90, 0.05) 0 1px, transparent 1.8px),
+      radial-gradient(circle at 42% 86%, rgba(140, 42, 53, 0.05) 0 1px, transparent 1.6px);
+    background-size: 19px 23px, 27px 31px, 33px 29px;
+    transform: rotate(-1.5deg);
+    will-change: transform;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 62vw;
+    height: 62vw;
+    left: -8vw;
+    top: -14vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-thread) 32%, transparent), transparent 68%);
+    filter: blur(60px);
+    mix-blend-mode: screen;
+    opacity: 0.45;
+    will-change: transform;
+  }
+
+  .hero-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 62% 56% at 50% 46%, transparent 52%, rgba(18, 16, 14, 0.5) 100%);
+  }
+
   .hero-veil {
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom, rgba(33, 31, 28, 0), #211f1c 55%);
     transform: scaleY(0);
     transform-origin: bottom center;
-    z-index: 0;
+    z-index: 1;
   }
 
   .hero-content {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -127,7 +261,32 @@ import ParticleAssemblyHero from "../components/thread/ParticleAssemblyHero.astr
     letter-spacing: var(--tracking-display);
     margin: 0;
     color: var(--color-chalk);
-    transform-origin: center center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .line-mask {
+    display: block;
+    overflow: hidden;
+  }
+
+  .line-inner {
+    display: block;
+    transform-origin: bottom center;
+  }
+
+  .hero-stitch {
+    width: clamp(7rem, 14vw, 11rem);
+    height: 1.35rem;
+    overflow: visible;
+  }
+
+  .hero-stitch path {
+    fill: none;
+    stroke: var(--color-thread);
+    stroke-width: 1.6;
+    stroke-linecap: round;
   }
 
   .tagline {
@@ -138,11 +297,21 @@ import ParticleAssemblyHero from "../components/thread/ParticleAssemblyHero.astr
 
   .scroll-cue {
     margin-top: var(--space-2xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2xs);
     font-size: var(--fs-label);
     text-transform: uppercase;
     letter-spacing: var(--tracking-label);
     color: rgba(247, 245, 240, 0.62);
-    opacity: 0.7;
+  }
+
+  .cue-thread {
+    width: 1px;
+    height: 1.5rem;
+    background: linear-gradient(to bottom, transparent, var(--color-thread) 55%, transparent);
+    transform: scaleY(0);
   }
 
   .outro-fade {

@@ -1,16 +1,36 @@
 /**
  * Static hosting has no server session, so "stay unlocked" lives in the
  * browser. Once a visitor enters the right password, we remember the resolved
- * image URL (not the password) in localStorage, scoped to this browser.
+ * image URL (not the password) in sessionStorage, scoped to this browser tab.
+ *
+ * sessionStorage (not localStorage) is deliberate: it carries the unlock
+ * across page navigations within one visit (so the case-study page doesn't
+ * re-prompt right after the gate modal), but it's gone the moment the tab/
+ * browser closes. Protected work must default back to locked every time the
+ * site is freshly opened — it must never stay publicly unlocked indefinitely
+ * just because someone proved access once, days or months ago.
  */
 
 const STORAGE_PREFIX = "girisha-gate:";
+const LEGACY_LOCALSTORAGE_PREFIX = "girisha-gate:";
 const UNLOCKED_LABEL = "Unlocked - full preview";
 const DEFAULT_LOCKED_LABEL = "Viewable on request";
 
+// One-time cleanup: earlier builds stored unlocks in localStorage, which
+// never expired. Wipe any leftover entries so a browser that was unlocked
+// long ago doesn't keep showing protected work as public.
+try {
+  for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+    const key = localStorage.key(i);
+    if (key?.startsWith(LEGACY_LOCALSTORAGE_PREFIX)) localStorage.removeItem(key);
+  }
+} catch {
+  // Storage unavailable — nothing to clean up.
+}
+
 export function getStoredUnlock(projectId: string): string | null {
   try {
-    return localStorage.getItem(STORAGE_PREFIX + projectId);
+    return sessionStorage.getItem(STORAGE_PREFIX + projectId);
   } catch {
     return null;
   }
@@ -18,7 +38,7 @@ export function getStoredUnlock(projectId: string): string | null {
 
 export function setStoredUnlock(projectId: string, imageUrl: string): void {
   try {
-    localStorage.setItem(STORAGE_PREFIX + projectId, imageUrl);
+    sessionStorage.setItem(STORAGE_PREFIX + projectId, imageUrl);
   } catch {
     // Storage unavailable; unlock still works for this page view.
   }
@@ -26,7 +46,7 @@ export function setStoredUnlock(projectId: string, imageUrl: string): void {
 
 export function clearStoredUnlock(projectId: string): void {
   try {
-    localStorage.removeItem(STORAGE_PREFIX + projectId);
+    sessionStorage.removeItem(STORAGE_PREFIX + projectId);
   } catch {
     // Storage unavailable; the visual lock state can still be restored.
   }
