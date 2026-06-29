@@ -156,12 +156,16 @@ SAS URLs** (or any private bucket) is documented in
   animated against one ScrollTrigger progress value) — it isn't built yet.
 - The Azure Blob/SAS wiring documented above is written but not exercised
   against a real Azure subscription.
-- **Getting the real protected image onto Render at all.** `private/` is
-  gitignored on purpose, so a fresh clone/Render build has no source image to
-  hash-copy — `prepare-protected-assets.mjs` just warns and skips. Render has
-  no built-in private file storage for a Static Site. Once real unreleased
-  photography needs to go behind the gate, you'll need to get it into the
-  build some other way that isn't committing it to this public repo — Render
-  Secret Files (check their size limit) for something small, or a build step
+- **Getting the real protected image onto Render.** `private/` is gitignored
+  on purpose, so a fresh clone/Render build has no source image to hash-copy
+  on its own. `prepare-protected-assets.mjs` now also checks Render
+  [Secret Files](https://render.com/docs/configure-environment-variables#secret-files)
+  (Environment tab → Secret Files → Add file) as a fallback source — add one
+  named `<projectId>-hero-real.<ext>` (e.g. `overrun-bomber-hero-real.jpg`)
+  with the real photo as its content; Render mounts it at
+  `/etc/secrets/<filename>` during the build, which the script picks up the
+  same way it picks up `private/protected-images/<projectId>/hero-real.<ext>`
+  locally. Check Render's current size limit for Secret Files before
+  uploading a large photo — for anything bigger, fall back to a build step
   that fetches it from a private bucket using a token stored as a Render env
-  var, for anything larger.
+  var instead.
