@@ -97,8 +97,10 @@ what happens to the hero image:
      is derived from the password, and is how the gate finds it.
   4. Export a genuinely low-res, blurred version as the public `heroImage` —
      never a CSS blur over the real file. See
-     `public/images/streetwear/overrun-bomber/hero-blurred.svg` for the
-     pattern (an SVG with `feGaussianBlur` baked into the asset itself).
+     `public/images/streetwear/overrun-bomber/hero-blurred.jpg` for the
+     pattern: resize the real photo down to a few dozen pixels wide, blur it,
+     re-export as a small JPEG (e.g. via `sharp`) — the result is too
+     low-resolution to recover any real detail no matter how it's displayed.
 
 A project's `tags` array drives the recruiter filter automatically — no
 separate wiring needed.

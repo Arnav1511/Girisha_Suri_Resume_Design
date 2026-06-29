@@ -7,7 +7,9 @@
  * only the hero image is gated (see [project].astro and ProjectCard.astro).
  * Their `heroImage` MUST point at a genuinely low-res, blurred,
  * separately-exported file (see public/images/streetwear/overrun-bomber/
- * hero-blurred.svg) — never the real asset with a CSS blur on top. The
+ * hero-blurred.jpg — generated from the real photo via sharp: resize to a
+ * few dozen px, blur, re-export — never the real asset with a CSS blur on
+ * top). The
  * real source file lives outside public/ entirely (/private/protected-images,
  * gitignored) and only reaches the public build as a hashed filename — see
  * scripts/prepare-protected-assets.mjs and src/lib/clientGate.ts. Process
@@ -114,7 +116,7 @@ export const projects: Project[] = [
     segmentId: "streetwear",
     title: "Overrun Bomber",
     year: 2025,
-    heroImage: "/images/streetwear/overrun-bomber/hero-blurred.svg",
+    heroImage: "/images/streetwear/overrun-bomber/hero-blurred.jpg",
     heroAlt: "Low-resolution preview of an unreleased bomber jacket, blurred pending client release.",
     protected: true,
     description:
