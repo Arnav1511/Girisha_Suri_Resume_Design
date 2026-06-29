@@ -45,14 +45,13 @@ deploys.
   (`thread/`, `cards/`, `gate/`, `filter/`, `scroll/`, `process/`, `layout/`).
   The landing page's signature moment is
   [thread/ParticleAssemblyHero.astro](src/components/thread/ParticleAssemblyHero.astro)
-  — the photo is sliced into a grid of rigid rectangular tiles (SVG
-  `clipPath` windows onto the real full-resolution image, not sampled
-  colour swatches), which scatter and tumble in from random positions and
-  lock edge-to-edge into the finished photo as you scroll (pinned,
-  scrubbed). Takes the image via props (`image`, `imageAlt`, `imageWidth`,
-  `imageHeight` — the last two must be the file's real pixel dimensions, used
-  as the SVG viewBox). Respects `prefers-reduced-motion` (shows the finished
-  photo directly, no animation) and uses a smaller grid on small viewports.
+  — the karigar photo is revealed through drawn SVG thread paths that act as
+  a stitched mask over the real image. Pattern paper, swatches, tape, a spool,
+  and a thread card animate into the surrounding field so the section feels
+  like an atelier table instead of empty negative space. Takes the image via
+  props (`image`, `imageAlt`, `imageWidth`, `imageHeight` — the last two must
+  be the file's real pixel dimensions, used as the SVG viewBox). Respects
+  `prefers-reduced-motion` by showing the finished photo directly.
 - **Password-gate logic (active, static-hosting path)** —
   [src/lib/clientGate.ts](src/lib/clientGate.ts) and
   [scripts/prepare-protected-assets.mjs](scripts/prepare-protected-assets.mjs).

@@ -1,30 +1,12 @@
 ---
 /**
- * The landing-page signature moment: the karigar's photo is sliced into a
- * grid of rigid rectangular plates, each carrying its own exact slice of
- * the real photo. They start scattered and tumbling off-frame and fly
- * together — translating and rotating as solid pieces, dbrand-plate style
- * — locking edge-to-edge into the finished photo with zero gaps, because
- * the grid is an exact partition of the image (no overlap margin, no
- * sampling). Pinned and scrubbed to scroll, then settling before scroll
- * continues normally into the segment list below.
+ * Landing-page textile reveal.
  *
- * Each tile is a <clipPath> window onto the same full-resolution <image>,
- * not a sampled colour swatch — so the pixels inside every tile are the
- * real photo. That is the deliberate difference from an earlier version
- * that sampled the photo into a Three.js particle field: at any particle
- * count that performs well, that approach has visible gaps/pixelation,
- * because each particle approximates a region's colour rather than
- * showing it. A grid of exact tiles can never show a gap at rest, by
- * construction — every tile's home rectangle is a precise, non-overlapping
- * partition of the full image.
- *
- * The backdrop is the same photo, heavily blurred and darkened, filling
- * the section behind the frame — so the surrounding space reads as an
- * extension of the image's own colour rather than empty negative space.
- *
- * Respects prefers-reduced-motion: every tile is shown at its home
- * position immediately (the photo reads as complete with no animation).
+ * The karigar photo begins as stitched paths: many drawn thread lines act as
+ * an SVG mask over the real image, then the full photograph settles in as the
+ * scroll completes. Surrounding atelier objects (pattern paper, swatches,
+ * tape, spool, thread card) keep the page from feeling empty while reinforcing
+ * the fashion-design world.
  */
 interface Props {
   image: string;
@@ -34,27 +16,86 @@ interface Props {
 }
 
 const { image, imageAlt, imageWidth, imageHeight } = Astro.props;
+const maskId = `thread-photo-mask-${Math.random().toString(36).slice(2, 9)}`;
 ---
 
-<section class="assembly" data-assembly-root>
+<section class="assembly" data-thread-assembly>
   <div class="assembly-backdrop" aria-hidden="true">
     <img src={image} alt="" />
   </div>
-  <div class="assembly-frame">
-    <img class="assembly-sizer" src={image} alt={imageAlt} loading="eager" />
-    <svg
-      class="assembly-reveal"
-      data-assembly-reveal
-      data-image-href={image}
-      viewBox={`0 0 ${imageWidth} ${imageHeight}`}
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <defs data-assembly-defs></defs>
-      <g data-assembly-tiles></g>
-    </svg>
+
+  <svg class="ambient-threads" viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden="true">
+    <path data-ambient-thread d="M -80 190 C 230 80, 380 290, 650 160 S 1020 40, 1280 210" />
+    <path data-ambient-thread d="M -120 610 C 190 470, 350 690, 610 560 S 960 430, 1280 575" />
+    <path data-ambient-thread d="M 80 860 C 240 560, 490 650, 720 430 S 1020 290, 1240 80" />
+  </svg>
+
+  <div class="atelier-object sketchbook" data-atelier-object aria-hidden="true">
+    <span class="paper page-back"></span>
+    <span class="paper page-front">
+      <svg viewBox="0 0 220 280" preserveAspectRatio="none">
+        <path d="M54 54 C86 36, 132 36, 166 55" />
+        <path d="M78 76 C70 122, 70 176, 86 230" />
+        <path d="M144 76 C156 124, 154 178, 136 230" />
+        <path d="M80 118 C112 128, 140 128, 154 116" />
+        <path d="M62 246 C102 232, 142 233, 178 249" />
+      </svg>
+    </span>
   </div>
-  <p class="assembly-caption">Made by hand. Stitched into every piece.</p>
+
+  <div class="atelier-object swatches" data-atelier-object aria-hidden="true">
+    <span class="swatch swatch-denim"></span>
+    <span class="swatch swatch-canvas"></span>
+    <span class="swatch swatch-thread"></span>
+  </div>
+
+  <div class="atelier-object spool" data-atelier-object aria-hidden="true">
+    <span class="spool-cap top"></span>
+    <span class="spool-thread"></span>
+    <span class="spool-cap bottom"></span>
+    <span class="spool-tail"></span>
+  </div>
+
+  <div class="atelier-object tape" data-atelier-object aria-hidden="true">
+    {Array.from({ length: 17 }).map((_, index) => <span style={`--tick:${index}`}></span>)}
+  </div>
+
+  <div class="atelier-object thread-card" data-atelier-object aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <div class="assembly-stage">
+    <div class="photo-wrap" data-photo-wrap>
+      <img class="photo-complete" data-final-photo src={image} alt={imageAlt} loading="eager" />
+      <svg
+        class="thread-reveal"
+        data-thread-reveal
+        data-image-href={image}
+        viewBox={`0 0 ${imageWidth} ${imageHeight}`}
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <defs>
+          <mask id={maskId} maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" x="0" y="0" width={imageWidth} height={imageHeight}>
+            <rect width={imageWidth} height={imageHeight} fill="black" />
+            <g data-mask-threads></g>
+            <rect data-mask-full width={imageWidth} height={imageHeight} fill="white" opacity="0" />
+          </mask>
+        </defs>
+        <image href={image} x="0" y="0" width={imageWidth} height={imageHeight} mask={`url(#${maskId})`} />
+        <g data-visible-threads></g>
+        <g class="needle" data-needle>
+          <path d="M0 -15 L4 15 L0 23 L-4 15 Z" />
+          <circle cx="0" cy="-7" r="2.4" />
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <p class="assembly-caption" data-assembly-caption>Threads become the mark. The mark becomes the garment.</p>
 </section>
 
 <style>
@@ -62,15 +103,43 @@ const { image, imageAlt, imageWidth, imageHeight } = Astro.props;
     position: relative;
     height: 100vh;
     overflow: hidden;
-    background: var(--color-ink);
     display: flex;
     align-items: center;
     justify-content: center;
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--color-ink) 88%, #253242) 0 1px, transparent 1px 100%),
+      linear-gradient(0deg, color-mix(in srgb, var(--color-ink) 90%, #b9935a) 0 1px, transparent 1px 100%),
+      color-mix(in srgb, var(--color-ink) 92%, #253242);
+    background-size: 78px 78px, 78px 78px, auto;
+    isolation: isolate;
+  }
+
+  .assembly::before,
+  .assembly::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .assembly::before {
+    background:
+      linear-gradient(115deg, rgba(247, 245, 240, 0.12), transparent 28%),
+      linear-gradient(245deg, rgba(140, 42, 53, 0.18), transparent 32%),
+      linear-gradient(to bottom, rgba(30, 27, 23, 0.16), rgba(30, 27, 23, 0.42));
+    mix-blend-mode: screen;
+    opacity: 0.75;
+  }
+
+  .assembly::after {
+    background: linear-gradient(to bottom, transparent 70%, rgba(30, 27, 23, 0.64));
+    z-index: 4;
   }
 
   .assembly-backdrop {
     position: absolute;
-    inset: 0;
+    inset: -8vh -6vw;
+    opacity: 0.28;
     overflow: hidden;
   }
 
@@ -78,65 +147,374 @@ const { image, imageAlt, imageWidth, imageHeight } = Astro.props;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transform: scale(1.2);
-    filter: blur(60px) brightness(0.38) saturate(1.15);
+    transform: scale(1.16);
+    filter: blur(48px) brightness(0.5) saturate(1.1);
   }
 
-  .assembly-backdrop::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 72% 68% at 50% 50%, transparent 0%, var(--color-ink) 88%);
-  }
-
-  .assembly-frame {
-    position: relative;
-    display: inline-block;
-    z-index: 1;
-  }
-
-  .assembly-sizer {
-    display: block;
-    width: auto;
-    height: auto;
-    max-width: min(80vw, 64rem);
-    max-height: 84vh;
-    opacity: 0;
-  }
-
-  .assembly-reveal {
+  .ambient-threads {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+    z-index: 1;
     overflow: visible;
-    filter: drop-shadow(0 3rem 7rem rgba(0, 0, 0, 0.55));
+    opacity: 0.9;
+  }
+
+  .ambient-threads path {
+    fill: none;
+    stroke: color-mix(in srgb, var(--color-thread) 72%, var(--color-chalk));
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 12 16;
+  }
+
+  .assembly-stage {
+    position: relative;
+    z-index: 2;
+    width: min(48vw, 38rem);
+    max-width: calc(100vw - 2 * var(--page-gutter));
+  }
+
+  .photo-wrap {
+    position: relative;
+    aspect-ratio: 620 / 795;
+    filter: drop-shadow(0 3rem 7rem rgba(0, 0, 0, 0.58));
+    transform-origin: center center;
+  }
+
+  .photo-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -1.1rem;
+    border: 1px solid rgba(247, 245, 240, 0.28);
+    transform: rotate(-1.8deg);
+  }
+
+  .photo-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(247, 245, 240, 0.09) 0 1px, transparent 1px 100%),
+      linear-gradient(0deg, rgba(247, 245, 240, 0.07) 0 1px, transparent 1px 100%);
+    background-size: 32px 32px;
+    mix-blend-mode: screen;
+    opacity: 0.28;
+    pointer-events: none;
+  }
+
+  .photo-complete,
+  .thread-reveal {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .photo-complete {
+    object-fit: cover;
+    opacity: 0;
+  }
+
+  .thread-reveal {
+    overflow: visible;
+  }
+
+  .needle {
+    opacity: 0;
+    color: var(--color-chalk);
+    filter: drop-shadow(0 0.5rem 0.8rem rgba(0, 0, 0, 0.35));
+  }
+
+  .needle path {
+    fill: currentColor;
+  }
+
+  .needle circle {
+    fill: color-mix(in srgb, var(--color-ink) 72%, transparent);
+  }
+
+  .atelier-object {
+    position: absolute;
+    z-index: 2;
+    opacity: 0;
+    transform-origin: center center;
+    pointer-events: none;
+  }
+
+  .sketchbook {
+    left: clamp(1.25rem, 8vw, 8rem);
+    top: 18vh;
+    width: min(24vw, 17rem);
+    aspect-ratio: 0.78;
+  }
+
+  .paper {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(30, 27, 23, 0.28);
+    background: #efe7d4;
+    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.24);
+  }
+
+  .page-back {
+    transform: rotate(-8deg) translate(-8%, 4%);
+    background:
+      linear-gradient(90deg, rgba(30, 27, 23, 0.08) 0 1px, transparent 1px 100%),
+      #d8ceb6;
+    background-size: 22px 100%;
+  }
+
+  .page-front {
+    transform: rotate(4deg);
+  }
+
+  .page-front svg {
+    position: absolute;
+    inset: 10%;
+    width: 80%;
+    height: 80%;
+  }
+
+  .page-front path {
+    fill: none;
+    stroke: rgba(30, 27, 23, 0.62);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+
+  .swatches {
+    left: clamp(1rem, 11vw, 10rem);
+    bottom: 12vh;
+    width: min(24vw, 18rem);
+    height: 10rem;
+  }
+
+  .swatch {
+    position: absolute;
+    width: 68%;
+    height: 58%;
+    border: 1px solid rgba(247, 245, 240, 0.18);
+    box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.3);
+  }
+
+  .swatch-denim {
+    left: 4%;
+    top: 8%;
+    transform: rotate(-10deg);
+    background:
+      repeating-linear-gradient(90deg, rgba(247, 245, 240, 0.08) 0 1px, transparent 1px 7px),
+      #263242;
+  }
+
+  .swatch-canvas {
+    left: 24%;
+    top: 24%;
+    transform: rotate(5deg);
+    background:
+      repeating-linear-gradient(0deg, rgba(30, 27, 23, 0.08) 0 1px, transparent 1px 8px),
+      #d6ccb8;
+  }
+
+  .swatch-thread {
+    left: 44%;
+    top: 3%;
+    transform: rotate(14deg);
+    background:
+      linear-gradient(90deg, rgba(247, 245, 240, 0.12), transparent),
+      var(--color-thread);
+  }
+
+  .spool {
+    right: clamp(1.5rem, 9vw, 8rem);
+    top: 17vh;
+    width: min(16vw, 9rem);
+    height: min(24vw, 13rem);
+  }
+
+  .spool-cap,
+  .spool-thread {
+    position: absolute;
+    left: 16%;
+    width: 68%;
+    border-radius: 50%;
+  }
+
+  .spool-cap {
+    height: 22%;
+    background: #d0c2aa;
+    border: 1px solid rgba(30, 27, 23, 0.28);
+  }
+
+  .spool-cap.top {
+    top: 0;
+  }
+
+  .spool-cap.bottom {
+    bottom: 0;
+  }
+
+  .spool-thread {
+    top: 10%;
+    height: 80%;
+    border-radius: 42% / 12%;
+    background:
+      repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.18) 0 2px, transparent 2px 7px),
+      var(--color-thread);
+    box-shadow: inset 0 0 1.4rem rgba(30, 27, 23, 0.38), 0 1.5rem 4rem rgba(0, 0, 0, 0.3);
+  }
+
+  .spool-tail {
+    position: absolute;
+    right: 54%;
+    top: 48%;
+    width: 14rem;
+    height: 9rem;
+    border: 2px solid var(--color-thread-dim);
+    border-color: var(--color-thread-dim) transparent transparent transparent;
+    border-radius: 50%;
+    transform: rotate(20deg);
+  }
+
+  .tape {
+    right: clamp(1rem, 8vw, 7rem);
+    bottom: 12vh;
+    width: min(32vw, 24rem);
+    height: 2.7rem;
+    border: 1px solid rgba(30, 27, 23, 0.34);
+    background: #d9bf73;
+    box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.28);
+    transform: rotate(-13deg);
+  }
+
+  .tape span {
+    position: absolute;
+    left: calc(var(--tick) * 6%);
+    top: 0;
+    width: 1px;
+    height: 58%;
+    background: rgba(30, 27, 23, 0.54);
+  }
+
+  .tape span:nth-child(4n) {
+    height: 100%;
+  }
+
+  .thread-card {
+    right: clamp(1rem, 17vw, 16rem);
+    bottom: 25vh;
+    width: min(16vw, 10rem);
+    aspect-ratio: 0.75;
+    background: #efe7d4;
+    border: 1px solid rgba(30, 27, 23, 0.26);
+    transform: rotate(7deg);
+    box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.24);
+  }
+
+  .thread-card span {
+    position: absolute;
+    left: 16%;
+    right: 16%;
+    height: 9%;
+    border-radius: 999px;
+    background: var(--thread-color, var(--color-thread));
+    box-shadow: 0 0.15rem 0.2rem rgba(30, 27, 23, 0.22);
+  }
+
+  .thread-card span:nth-child(1) {
+    top: 22%;
+    --thread-color: #8c2a35;
+  }
+
+  .thread-card span:nth-child(2) {
+    top: 38%;
+    --thread-color: #253242;
+  }
+
+  .thread-card span:nth-child(3) {
+    top: 54%;
+    --thread-color: #c8b26a;
+  }
+
+  .thread-card span:nth-child(4) {
+    top: 70%;
+    --thread-color: #f7f5f0;
   }
 
   .assembly-caption {
     position: absolute;
+    left: var(--page-gutter);
+    right: var(--page-gutter);
     bottom: var(--space-xl);
-    left: 0;
-    right: 0;
+    z-index: 5;
     text-align: center;
     color: var(--color-chalk);
     font-size: var(--fs-label);
     text-transform: uppercase;
     letter-spacing: var(--tracking-label);
     opacity: 0;
-    z-index: 1;
-    transition: opacity var(--duration-slow) var(--ease-thread);
   }
 
-  .assembly.is-settled .assembly-caption {
-    opacity: 0.85;
-  }
-
-  @media (max-width: 720px) {
-    .assembly-sizer {
-      max-width: 88vw;
-      max-height: 70vh;
+  @media (max-width: 900px) {
+    .assembly-stage {
+      width: min(72vw, 34rem);
     }
+
+    .sketchbook,
+    .thread-card {
+      display: none;
+    }
+
+    .swatches {
+      left: -5vw;
+      bottom: 10vh;
+      width: 34vw;
+    }
+
+    .spool {
+      right: -1rem;
+      top: 16vh;
+      width: 7rem;
+      height: 10rem;
+    }
+
+    .tape {
+      right: -9vw;
+      bottom: 16vh;
+      width: 48vw;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .assembly-stage {
+      width: min(84vw, 28rem);
+    }
+
+    .swatches,
+    .spool {
+      opacity: 0.5;
+    }
+
+    .tape {
+      bottom: 8vh;
+    }
+  }
+</style>
+
+<style is:global>
+  .thread-mask-path {
+    fill: none;
+    stroke: #fff;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .thread-visible-path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0.45rem 0.5rem rgba(0, 0, 0, 0.28));
   }
 </style>
 
@@ -148,152 +526,209 @@ const { image, imageAlt, imageWidth, imageHeight } = Astro.props;
 
   const SVG_NS = "http://www.w3.org/2000/svg";
 
-  interface Tile {
-    g: SVGGElement;
-    seed: number;
-    cx: number;
-    cy: number;
-    fromX: number;
-    fromY: number;
-    fromR: number;
-    fromS: number;
+  interface ThreadLine {
+    maskPath: SVGPathElement;
+    visiblePath: SVGPathElement;
+    length: number;
+    delay: number;
   }
 
-  // An exact grid partition of the photo — every tile's clip rectangle is
-  // a precise, non-overlapping slice (no rounding, no overlap margin), so
-  // once every tile reaches its home transform (identity), the tiles abut
-  // exactly and there is no possible gap. Each tile carries its own slice
-  // of the real <image> with it as it flies in, like a rigid plate.
-  function buildTileGrid(
-    defs: SVGDefsElement,
-    container: SVGGElement,
-    rows: number,
-    cols: number,
-    vbW: number,
-    vbH: number,
-    href: string,
-    instanceId: string,
-  ): Tile[] {
-    const tileW = vbW / cols;
-    const tileH = vbH / rows;
-    const tiles: Tile[] = [];
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const x = c * tileW;
-        const y = r * tileH;
-        const cx = x + tileW / 2;
-        const cy = y + tileH / 2;
-
-        // Clip rects overlap their neighbours by a hair (clamped to the
-        // image bounds) so adjacent tiles' anti-aliased edges double up
-        // instead of leaving a 1px seam once they're sitting flush.
-        const eps = Math.min(tileW, tileH) * 0.04;
-        const clipX = Math.max(0, x - eps);
-        const clipY = Math.max(0, y - eps);
-        const clipW = Math.min(vbW, x + tileW + eps) - clipX;
-        const clipH = Math.min(vbH, y + tileH + eps) - clipY;
-
-        const clipId = `assembly-clip-${instanceId}-${r}-${c}`;
-        const clipPath = document.createElementNS(SVG_NS, "clipPath");
-        clipPath.setAttribute("id", clipId);
-        const clipRect = document.createElementNS(SVG_NS, "rect");
-        clipRect.setAttribute("x", String(clipX));
-        clipRect.setAttribute("y", String(clipY));
-        clipRect.setAttribute("width", String(clipW));
-        clipRect.setAttribute("height", String(clipH));
-        clipPath.appendChild(clipRect);
-        defs.appendChild(clipPath);
-
-        const g = document.createElementNS(SVG_NS, "g");
-        g.setAttribute("clip-path", `url(#${clipId})`);
-        const img = document.createElementNS(SVG_NS, "image");
-        img.setAttribute("href", href);
-        img.setAttribute("x", "0");
-        img.setAttribute("y", "0");
-        img.setAttribute("width", String(vbW));
-        img.setAttribute("height", String(vbH));
-        g.appendChild(img);
-        container.appendChild(g);
-
-        const angle = Math.random() * Math.PI * 2;
-        const dist = vbW * (0.12 + Math.random() * 0.32);
-
-        tiles.push({
-          g,
-          seed: Math.random(),
-          cx,
-          cy,
-          fromX: Math.cos(angle) * dist,
-          fromY: Math.sin(angle) * dist,
-          fromR: (Math.random() - 0.5) * 150,
-          fromS: 0.55 + Math.random() * 0.25,
-        });
-      }
-    }
-    return tiles;
+  function clamp(value: number, min = 0, max = 1): number {
+    return Math.min(max, Math.max(min, value));
   }
 
-  // Rotate/scale a tile around its own home centre, then offset by the
-  // remaining flight distance — composing to an exact identity transform
-  // (and therefore its precise grid slot) once the tile has fully arrived.
-  function applyTile(t: Tile, factor: number) {
-    const dx = t.fromX * (1 - factor);
-    const dy = t.fromY * (1 - factor);
-    const angle = t.fromR * (1 - factor);
-    const scale = t.fromS + (1 - t.fromS) * factor;
-    t.g.setAttribute(
-      "transform",
-      `translate(${dx} ${dy}) translate(${t.cx} ${t.cy}) rotate(${angle}) scale(${scale}) translate(${-t.cx} ${-t.cy})`,
-    );
+  function smoothstep(value: number): number {
+    const t = clamp(value);
+    return t * t * (3 - 2 * t);
+  }
+
+  function seeded(seed: number): number {
+    const x = Math.sin(seed * 9301 + 49297) * 233280;
+    return x - Math.floor(x);
+  }
+
+  function createThreadPath(index: number, count: number, width: number, height: number): string {
+    const yBase = ((index + 0.45) / count) * height;
+    const y = yBase + (seeded(index + 2) - 0.5) * (height / count) * 0.8;
+    const amp = height * (0.014 + seeded(index + 7) * 0.028);
+    const bend = seeded(index + 11) > 0.5 ? 1 : -1;
+
+    return [
+      `M ${-width * 0.08} ${y}`,
+      `C ${width * 0.18} ${y - amp * bend}, ${width * 0.3} ${y + amp * 1.1 * bend}, ${width * 0.48} ${y}`,
+      `S ${width * 0.75} ${y - amp * 1.2 * bend}, ${width * 1.08} ${y + amp * 0.45 * bend}`,
+    ].join(" ");
+  }
+
+  function buildThreads(
+    maskGroup: SVGGElement,
+    visibleGroup: SVGGElement,
+    width: number,
+    height: number,
+    isMobile: boolean,
+  ): ThreadLine[] {
+    const count = isMobile ? 34 : 52;
+    const palette = ["#f7f5f0", "#8c2a35", "#c8b26a", "#b97e84", "#253242"];
+
+    return Array.from({ length: count }, (_, index) => {
+      const d = createThreadPath(index, count, width, height);
+      const maskPath = document.createElementNS(SVG_NS, "path");
+      maskPath.setAttribute("class", "thread-mask-path");
+      maskPath.setAttribute("d", d);
+      maskPath.setAttribute("stroke-width", String(isMobile ? 24 : 21));
+
+      const visiblePath = document.createElementNS(SVG_NS, "path");
+      visiblePath.setAttribute("class", "thread-visible-path");
+      visiblePath.setAttribute("d", d);
+      visiblePath.setAttribute("stroke", palette[index % palette.length]);
+      visiblePath.setAttribute("stroke-width", String(1.4 + seeded(index + 21) * 2.4));
+      visiblePath.setAttribute("opacity", "0");
+
+      maskGroup.appendChild(maskPath);
+      visibleGroup.appendChild(visiblePath);
+
+      const length = visiblePath.getTotalLength();
+      [maskPath, visiblePath].forEach((path) => {
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+      });
+
+      return {
+        maskPath,
+        visiblePath,
+        length,
+        delay: seeded(index + 31) * 0.28,
+      };
+    });
   }
 
   function setUp() {
-    const root = document.querySelector<HTMLElement>("[data-assembly-root]");
-    const reveal = document.querySelector<SVGSVGElement>("[data-assembly-reveal]");
-    const defs = document.querySelector<SVGDefsElement>("[data-assembly-defs]");
-    const container = document.querySelector<SVGGElement>("[data-assembly-tiles]");
-    if (!root || !reveal || !defs || !container) return;
+    const root = document.querySelector<HTMLElement>("[data-thread-assembly]");
+    const reveal = document.querySelector<SVGSVGElement>("[data-thread-reveal]");
+    const maskGroup = document.querySelector<SVGGElement>("[data-mask-threads]");
+    const visibleGroup = document.querySelector<SVGGElement>("[data-visible-threads]");
+    const maskFull = document.querySelector<SVGRectElement>("[data-mask-full]");
+    const finalPhoto = document.querySelector<HTMLImageElement>("[data-final-photo]");
+    const photoWrap = document.querySelector<HTMLElement>("[data-photo-wrap]");
+    const needle = document.querySelector<SVGGElement>("[data-needle]");
+    const caption = document.querySelector<HTMLElement>("[data-assembly-caption]");
+    const objects = Array.from(document.querySelectorAll<HTMLElement>("[data-atelier-object]"));
+    const ambientThreads = Array.from(document.querySelectorAll<SVGPathElement>("[data-ambient-thread]"));
 
-    const href = reveal.dataset.imageHref ?? "";
-    const vbWidth = reveal.viewBox.baseVal.width || 1;
-    const vbHeight = reveal.viewBox.baseVal.height || 1;
-    const isMobile = window.matchMedia("(max-width: 720px)").matches;
-    const rows = isMobile ? 6 : 9;
-    const cols = isMobile ? 8 : 16;
-    const instanceId = Math.random().toString(36).slice(2, 8);
-
-    const tiles = buildTileGrid(defs, container, rows, cols, vbWidth, vbHeight, href, instanceId);
-
-    if (window.__prefersReducedMotion) {
-      tiles.forEach((t) => applyTile(t, 1));
-      root.classList.add("is-settled");
+    if (!root || !reveal || !maskGroup || !visibleGroup || !maskFull || !finalPhoto || !photoWrap || !needle) {
       return;
     }
 
-    tiles.forEach((t) => applyTile(t, 0));
+    const rootEl = root;
+    const revealEl = reveal;
+    const maskFullEl = maskFull;
+    const finalPhotoEl = finalPhoto;
+    const photoWrapEl = photoWrap;
+    const needleEl = needle;
+    const width = reveal.viewBox.baseVal.width || 1;
+    const height = reveal.viewBox.baseVal.height || 1;
+    const isMobile = window.matchMedia("(max-width: 720px)").matches;
+    const lines = buildThreads(maskGroup, visibleGroup, width, height, isMobile);
 
-    ScrollTrigger.create({
-      trigger: root,
-      start: "top top",
-      end: "+=150%",
-      pin: true,
-      scrub: true,
-      onUpdate: (self) => {
-        const progress = self.progress;
-        const spread = 0.6;
-
-        tiles.forEach((t) => {
-          const localStart = t.seed * (1 - spread);
-          const local = Math.min(1, Math.max(0, (progress - localStart) / spread));
-          const eased = local * local * (3 - 2 * local);
-          applyTile(t, eased);
-        });
-
-        if (progress > 0.97) root.classList.add("is-settled");
-        else root.classList.remove("is-settled");
-      },
+    ambientThreads.forEach((path) => {
+      const length = path.getTotalLength();
+      path.style.strokeDasharray = String(length);
+      path.style.strokeDashoffset = String(length);
     });
+
+    function updateThreads(progress: number) {
+      const drawWindow = 0.7;
+      const lineForNeedle = lines[Math.min(lines.length - 1, Math.floor(progress * lines.length))];
+
+      lines.forEach((line) => {
+        const local = smoothstep((progress - line.delay) / drawWindow);
+        const offset = line.length * (1 - local);
+        line.maskPath.style.strokeDashoffset = String(offset);
+        line.visiblePath.style.strokeDashoffset = String(offset);
+        line.visiblePath.style.opacity = String(clamp(local * 1.2, 0, 0.92) * (1 - clamp((progress - 0.78) / 0.2, 0, 0.8)));
+      });
+
+      ambientThreads.forEach((path, index) => {
+        const length = path.getTotalLength();
+        const local = smoothstep((progress - index * 0.08) / 0.58);
+        path.style.strokeDashoffset = String(length * (1 - local));
+      });
+
+      const fullReveal = smoothstep((progress - 0.62) / 0.28);
+      maskFullEl.setAttribute("opacity", String(fullReveal));
+      finalPhotoEl.style.opacity = String(smoothstep((progress - 0.7) / 0.22));
+      revealEl.style.opacity = String(1 - clamp((progress - 0.84) / 0.16, 0, 0.7));
+      if (caption) caption.style.opacity = String(smoothstep((progress - 0.82) / 0.16) * 0.86);
+
+      if (lineForNeedle && progress < 0.82) {
+        const local = smoothstep((progress - lineForNeedle.delay) / drawWindow);
+        const point = lineForNeedle.visiblePath.getPointAtLength(lineForNeedle.length * clamp(local));
+        needleEl.setAttribute("transform", `translate(${point.x} ${point.y}) rotate(76)`);
+        needleEl.style.opacity = String(clamp(local * 2, 0, 0.95));
+      } else {
+        needleEl.style.opacity = "0";
+      }
+
+      rootEl.classList.toggle("is-settled", progress > 0.94);
+    }
+
+    if (window.__prefersReducedMotion) {
+      lines.forEach((line) => {
+        line.maskPath.style.strokeDashoffset = "0";
+        line.visiblePath.style.strokeDashoffset = "0";
+        line.visiblePath.style.opacity = "0";
+      });
+      ambientThreads.forEach((path) => {
+        path.style.strokeDashoffset = "0";
+      });
+      maskFullEl.setAttribute("opacity", "1");
+      finalPhotoEl.style.opacity = "1";
+      objects.forEach((object) => {
+        object.style.opacity = "1";
+      });
+      if (caption) caption.style.opacity = "0.86";
+      rootEl.classList.add("is-settled");
+      return;
+    }
+
+    updateThreads(0);
+
+    gsap.set(objects, {
+      autoAlpha: 0,
+      y: (index) => (index % 2 === 0 ? 42 : -34),
+      x: (index) => (index < 2 ? -38 : 38),
+      rotate: (index) => [-9, 8, 16, -13, 10][index] ?? 0,
+      scale: 0.92,
+    });
+    gsap.set(photoWrapEl, { scale: 0.9, y: 30, rotate: -1.4 });
+
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: root,
+        start: "top top",
+        end: "+=175%",
+        pin: true,
+        scrub: true,
+        onUpdate: (self) => updateThreads(self.progress),
+      },
+    })
+      .to(objects, {
+        autoAlpha: 1,
+        x: 0,
+        y: 0,
+        rotate: 0,
+        scale: 1,
+        ease: "none",
+        stagger: 0.03,
+        duration: 0.32,
+      }, 0.02)
+      .to(photoWrapEl, { scale: 1, y: 0, rotate: 0, ease: "none", duration: 0.7 }, 0.08)
+      .to(objects, {
+        y: (index) => (index % 2 === 0 ? -20 : 18),
+        rotate: (index) => [-4, 3, -7, 5, -3][index] ?? 0,
+        ease: "none",
+        duration: 0.5,
+      }, 0.48);
   }
 
   setUp();
