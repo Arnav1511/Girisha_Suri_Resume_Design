@@ -1,455 +1,640 @@
 ---
 /**
- * Landing-page textile reveal.
+ * Landing-page fabric scroll.
  *
- * The karigar photo begins as stitched paths: many drawn thread lines act as
- * an SVG mask over the real image, then the full photograph settles in as the
- * scroll completes. Surrounding atelier objects (pattern paper, swatches,
- * tape, spool, thread card) keep the page from feeling empty while reinforcing
- * the fashion-design world.
+ * A denim selvage roll opens downward like a textile scroll. Rough
+ * watercolor-style tools spill from the cloth as it unfurls, then beads fall
+ * off the bottom toward the work sections below.
  */
-interface Props {
-  image: string;
-  imageAlt: string;
-  imageWidth: number;
-  imageHeight: number;
-}
 
-const { image, imageAlt, imageWidth, imageHeight } = Astro.props;
-const maskId = `thread-photo-mask-${Math.random().toString(36).slice(2, 9)}`;
+const beadCount = 54;
+const fringeCount = 28;
 ---
 
-<section class="assembly" data-thread-assembly>
-  <div class="assembly-backdrop" aria-hidden="true">
-    <img src={image} alt="" />
-  </div>
-
-  <svg class="ambient-threads" viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden="true">
-    <path data-ambient-thread d="M -80 190 C 230 80, 380 290, 650 160 S 1020 40, 1280 210" />
-    <path data-ambient-thread d="M -120 610 C 190 470, 350 690, 610 560 S 960 430, 1280 575" />
-    <path data-ambient-thread d="M 80 860 C 240 560, 490 650, 720 430 S 1020 290, 1240 80" />
+<section class="fabric-story" data-fabric-story aria-label="A denim fabric scroll opening with fashion tools and beads">
+  <svg class="texture-defs" aria-hidden="true">
+    <filter id="watercolor-wobble">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="8" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="paper-wobble">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="12" />
+      <feDisplacementMap in="SourceGraphic" scale="1.2" />
+    </filter>
   </svg>
 
-  <div class="atelier-object sketchbook" data-atelier-object aria-hidden="true">
-    <span class="paper page-back"></span>
-    <span class="paper page-front">
-      <svg viewBox="0 0 220 280" preserveAspectRatio="none">
-        <path d="M54 54 C86 36, 132 36, 166 55" />
-        <path d="M78 76 C70 122, 70 176, 86 230" />
-        <path d="M144 76 C156 124, 154 178, 136 230" />
-        <path d="M80 118 C112 128, 140 128, 154 116" />
-        <path d="M62 246 C102 232, 142 233, 178 249" />
+  <div class="table-grain" aria-hidden="true"></div>
+
+  <div class="fabric-scene">
+    <div class="fabric-roll" data-scroll-part>
+      <span class="roll-shadow"></span>
+      <span class="roll-face"></span>
+      <span class="roll-core left"></span>
+      <span class="roll-core right"></span>
+      <span class="roll-selvage top"></span>
+      <span class="roll-selvage bottom"></span>
+    </div>
+
+    <div class="fabric-panel" data-fabric-panel>
+      <span class="selvage left"></span>
+      <span class="selvage right"></span>
+      <span class="weft-lines"></span>
+      <span class="stitch-line stitch-left"></span>
+      <span class="stitch-line stitch-right"></span>
+      <span class="fabric-label">raw selvedge</span>
+      <span class="bottom-fringe" aria-hidden="true">
+        {Array.from({ length: fringeCount }).map((_, index) => <span style={`--i:${index}`}></span>)}
+      </span>
+    </div>
+
+    <div class="tool tool-thread-roll" data-fall-tool style="--tx:-21vw; --ty:11vh; --rot:-16deg;">
+      <span class="bobbin"></span>
+      <span class="thread-wrap red"></span>
+      <span class="thread-wrap cream"></span>
+      <span class="thread-wrap sage"></span>
+    </div>
+
+    <div class="tool tool-hoop" data-fall-tool style="--tx:20vw; --ty:10vh; --rot:12deg;">
+      <span class="hoop-ring"></span>
+      <span class="hoop-cloth"></span>
+      <span class="hoop-screw"></span>
+      <svg viewBox="0 0 150 120" aria-hidden="true">
+        <path d="M36 70 C56 36, 93 32, 112 62" />
+        <path d="M50 80 C70 94, 96 92, 113 77" />
       </svg>
-    </span>
-  </div>
+    </div>
 
-  <div class="atelier-object swatches" data-atelier-object aria-hidden="true">
-    <span class="swatch swatch-denim"></span>
-    <span class="swatch swatch-canvas"></span>
-    <span class="swatch swatch-thread"></span>
-  </div>
-
-  <div class="atelier-object spool" data-atelier-object aria-hidden="true">
-    <span class="spool-cap top"></span>
-    <span class="spool-thread"></span>
-    <span class="spool-cap bottom"></span>
-    <span class="spool-tail"></span>
-  </div>
-
-  <div class="atelier-object tape" data-atelier-object aria-hidden="true">
-    {Array.from({ length: 17 }).map((_, index) => <span style={`--tick:${index}`}></span>)}
-  </div>
-
-  <div class="atelier-object thread-card" data-atelier-object aria-hidden="true">
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-
-  <div class="assembly-stage">
-    <div class="photo-wrap" data-photo-wrap>
-      <img class="photo-complete" data-final-photo src={image} alt={imageAlt} loading="eager" />
-      <svg
-        class="thread-reveal"
-        data-thread-reveal
-        data-image-href={image}
-        viewBox={`0 0 ${imageWidth} ${imageHeight}`}
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <defs>
-          <mask id={maskId} maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" x="0" y="0" width={imageWidth} height={imageHeight}>
-            <rect width={imageWidth} height={imageHeight} fill="black" />
-            <g data-mask-threads></g>
-            <rect data-mask-full width={imageWidth} height={imageHeight} fill="white" opacity="0" />
-          </mask>
-        </defs>
-        <image href={image} x="0" y="0" width={imageWidth} height={imageHeight} mask={`url(#${maskId})`} />
-        <g data-visible-threads></g>
-        <g class="needle" data-needle>
-          <path d="M0 -15 L4 15 L0 23 L-4 15 Z" />
-          <circle cx="0" cy="-7" r="2.4" />
-        </g>
+    <div class="tool tool-tablet" data-fall-tool style="--tx:-24vw; --ty:32vh; --rot:8deg;">
+      <span class="tablet-screen"></span>
+      <svg viewBox="0 0 180 120" aria-hidden="true">
+        <path d="M36 74 C55 44, 89 38, 124 52" />
+        <path d="M48 86 C78 72, 108 72, 138 88" />
+        <path d="M56 34 L142 34" />
       </svg>
+    </div>
+
+    <div class="tool tool-palette" data-fall-tool style="--tx:24vw; --ty:32vh; --rot:-10deg;">
+      <span class="palette-body"></span>
+      <span class="paint p1"></span>
+      <span class="paint p2"></span>
+      <span class="paint p3"></span>
+      <span class="paint p4"></span>
+      <span class="thumb-hole"></span>
+    </div>
+
+    <div class="tool tool-ruler" data-fall-tool style="--tx:-16vw; --ty:47vh; --rot:-27deg;">
+      {Array.from({ length: 16 }).map((_, index) => <span style={`--tick:${index}`}></span>)}
+    </div>
+
+    <div class="tool tool-tape" data-fall-tool style="--tx:17vw; --ty:49vh; --rot:20deg;">
+      <svg viewBox="0 0 260 130" aria-hidden="true">
+        <path d="M18 82 C70 18, 130 34, 118 78 C104 128, 37 118, 58 70 C83 12, 188 8, 238 48" />
+        {Array.from({ length: 13 }).map((_, index) => (
+          <line x1={42 + index * 14} y1={58 - (index % 2) * 9} x2={45 + index * 14} y2={73 - (index % 2) * 9} />
+        ))}
+      </svg>
+    </div>
+
+    <div class="tool tool-needle" data-fall-tool style="--tx:1vw; --ty:56vh; --rot:42deg;">
+      <svg viewBox="0 0 260 46" aria-hidden="true">
+        <path class="needle-body" d="M18 25 C86 16, 160 16, 244 23" />
+        <ellipse cx="221" cy="23" rx="13" ry="5" />
+        <path class="needle-thread" d="M223 24 C192 58, 134 54, 104 28" />
+      </svg>
+    </div>
+
+    <div class="tool tool-pencil" data-fall-tool style="--tx:0vw; --ty:21vh; --rot:-42deg;">
+      <span class="pencil-body"></span>
+      <span class="pencil-tip"></span>
+      <span class="pencil-eraser"></span>
+    </div>
+
+    <div class="bead-field" aria-hidden="true">
+      {Array.from({ length: beadCount }).map((_, index) => (
+        <span
+          class="bead"
+          data-bead
+          style={`--i:${index}; --x:${(index * 37) % 100}; --fall:${70 + ((index * 23) % 55)}; --drift:${-38 + ((index * 29) % 76)}; --size:${0.42 + ((index * 17) % 42) / 100}; --hue:${index % 7};`}
+        ></span>
+      ))}
     </div>
   </div>
 
-  <p class="assembly-caption" data-assembly-caption>Threads become the mark. The mark becomes the garment.</p>
+  <p class="fabric-caption" data-fabric-caption>Open the cloth. Let the studio spill out.</p>
 </section>
 
 <style>
-  .assembly {
+  .fabric-story {
     position: relative;
     height: 100vh;
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    place-items: center;
     background:
-      linear-gradient(90deg, color-mix(in srgb, var(--color-ink) 88%, #253242) 0 1px, transparent 1px 100%),
-      linear-gradient(0deg, color-mix(in srgb, var(--color-ink) 90%, #b9935a) 0 1px, transparent 1px 100%),
-      color-mix(in srgb, var(--color-ink) 92%, #253242);
-    background-size: 78px 78px, 78px 78px, auto;
+      linear-gradient(90deg, rgba(247, 245, 240, 0.025) 0 1px, transparent 1px 100%),
+      linear-gradient(0deg, rgba(247, 245, 240, 0.025) 0 1px, transparent 1px 100%),
+      #24211d;
+    background-size: 76px 76px, 76px 76px, auto;
     isolation: isolate;
   }
 
-  .assembly::before,
-  .assembly::after {
+  .fabric-story::before {
     content: "";
     position: absolute;
     inset: 0;
+    background:
+      radial-gradient(ellipse 54% 48% at 50% 48%, rgba(247, 245, 240, 0.1), transparent 66%),
+      linear-gradient(to bottom, rgba(30, 27, 23, 0.04), rgba(30, 27, 23, 0.34));
     pointer-events: none;
   }
 
-  .assembly::before {
+  .texture-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  .table-grain {
+    position: absolute;
+    inset: -10%;
+    opacity: 0.25;
     background:
-      linear-gradient(115deg, rgba(247, 245, 240, 0.12), transparent 28%),
-      linear-gradient(245deg, rgba(140, 42, 53, 0.18), transparent 32%),
-      linear-gradient(to bottom, rgba(30, 27, 23, 0.16), rgba(30, 27, 23, 0.42));
+      linear-gradient(8deg, transparent 0 48%, rgba(185, 147, 90, 0.14) 49% 50%, transparent 51%),
+      repeating-linear-gradient(0deg, transparent 0 34px, rgba(185, 147, 90, 0.09) 35px 36px);
+    transform: rotate(-2deg);
+  }
+
+  .fabric-scene {
+    position: relative;
+    z-index: 1;
+    width: min(78vw, 64rem);
+    height: min(82vh, 48rem);
+  }
+
+  .fabric-roll,
+  .fabric-panel,
+  .tool,
+  .bead {
+    filter: url("#watercolor-wobble") drop-shadow(0 1.1rem 2rem rgba(0, 0, 0, 0.28));
+  }
+
+  .fabric-roll {
+    position: absolute;
+    left: 50%;
+    top: 6%;
+    width: min(62vw, 42rem);
+    height: clamp(4.5rem, 9vh, 6.4rem);
+    transform: translateX(-50%);
+    z-index: 6;
+  }
+
+  .roll-shadow {
+    position: absolute;
+    inset: 26% 3% -10%;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.32);
+    filter: blur(16px);
+  }
+
+  .roll-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(247, 245, 240, 0.18);
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(247, 245, 240, 0.18), transparent 48%),
+      repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.07) 0 2px, transparent 2px 7px),
+      repeating-linear-gradient(90deg, rgba(30, 27, 23, 0.18) 0 1px, transparent 1px 10px),
+      #20344a;
+    box-shadow: inset 0 -1.2rem 2rem rgba(0, 0, 0, 0.32), inset 0 1rem 1.6rem rgba(247, 245, 240, 0.08);
+  }
+
+  .roll-core {
+    position: absolute;
+    top: 13%;
+    width: clamp(3.6rem, 6vw, 5.6rem);
+    height: 74%;
+    border-radius: 50%;
+    border: 1px solid rgba(247, 245, 240, 0.24);
+    background:
+      radial-gradient(circle, #d2c5ad 0 25%, #25364a 26% 55%, #172231 56%);
+  }
+
+  .roll-core.left {
+    left: -1.2rem;
+  }
+
+  .roll-core.right {
+    right: -1.2rem;
+  }
+
+  .roll-selvage {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(247, 245, 240, 0.36);
+  }
+
+  .roll-selvage.top {
+    top: 22%;
+  }
+
+  .roll-selvage.bottom {
+    bottom: 23%;
+  }
+
+  .fabric-panel {
+    position: absolute;
+    left: 50%;
+    top: calc(6% + clamp(4.5rem, 9vh, 6.4rem) * 0.58);
+    width: min(54vw, 34rem);
+    height: min(66vh, 38rem);
+    transform: translateX(-50%) scaleY(var(--open, 0.04));
+    transform-origin: top center;
+    z-index: 3;
+    background:
+      linear-gradient(90deg, transparent 0 8%, rgba(247, 245, 240, 0.08) 8.5% 9%, transparent 9.5% 91%, rgba(247, 245, 240, 0.08) 91.5% 92%, transparent 92.5%),
+      repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.055) 0 1px, transparent 1px 12px),
+      repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.14) 0 1px, transparent 1px 9px),
+      linear-gradient(115deg, #253d58, #17283b 58%, #223a55);
+    border-left: 3px solid #d9c58f;
+    border-right: 3px solid #d9c58f;
+    box-shadow: inset 0 0 4rem rgba(0, 0, 0, 0.24), 0 2rem 5rem rgba(0, 0, 0, 0.32);
+  }
+
+  .fabric-panel::before,
+  .fabric-panel::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1.2rem;
+    background: repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.55) 0 1px, transparent 1px 7px);
+    opacity: 0.48;
+  }
+
+  .fabric-panel::before {
+    left: -1.35rem;
+  }
+
+  .fabric-panel::after {
+    right: -1.35rem;
+  }
+
+  .weft-lines {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(95deg, rgba(247, 245, 240, 0.08), transparent 28%, rgba(247, 245, 240, 0.05) 55%, transparent),
+      radial-gradient(ellipse at 30% 12%, rgba(247, 245, 240, 0.14), transparent 38%);
     mix-blend-mode: screen;
     opacity: 0.75;
   }
 
-  .assembly::after {
-    background: linear-gradient(to bottom, transparent 70%, rgba(30, 27, 23, 0.64));
-    z-index: 4;
-  }
-
-  .assembly-backdrop {
+  .stitch-line {
     position: absolute;
-    inset: -8vh -6vw;
-    opacity: 0.28;
-    overflow: hidden;
+    top: 4%;
+    bottom: 7%;
+    width: 2px;
+    background: repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.8) 0 8px, transparent 8px 16px);
+    opacity: 0.46;
   }
 
-  .assembly-backdrop img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform: scale(1.16);
-    filter: blur(48px) brightness(0.5) saturate(1.1);
+  .stitch-left {
+    left: 12%;
   }
 
-  .ambient-threads {
+  .stitch-right {
+    right: 12%;
+  }
+
+  .fabric-label {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    overflow: visible;
-    opacity: 0.9;
+    left: 50%;
+    top: 48%;
+    transform: translate(-50%, -50%) rotate(-7deg);
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 4vw, 4rem);
+    line-height: 1;
+    color: rgba(247, 245, 240, 0.15);
+    white-space: nowrap;
   }
 
-  .ambient-threads path {
-    fill: none;
-    stroke: color-mix(in srgb, var(--color-thread) 72%, var(--color-chalk));
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-dasharray: 12 16;
-  }
-
-  .assembly-stage {
-    position: relative;
-    z-index: 2;
-    width: min(48vw, 38rem);
-    max-width: calc(100vw - 2 * var(--page-gutter));
-  }
-
-  .photo-wrap {
-    position: relative;
-    aspect-ratio: 620 / 795;
-    filter: drop-shadow(0 3rem 7rem rgba(0, 0, 0, 0.58));
-    transform-origin: center center;
-  }
-
-  .photo-wrap::before {
-    content: "";
+  .bottom-fringe {
     position: absolute;
-    inset: -1.1rem;
-    border: 1px solid rgba(247, 245, 240, 0.28);
-    transform: rotate(-1.8deg);
-  }
-
-  .photo-wrap::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(90deg, rgba(247, 245, 240, 0.09) 0 1px, transparent 1px 100%),
-      linear-gradient(0deg, rgba(247, 245, 240, 0.07) 0 1px, transparent 1px 100%);
-    background-size: 32px 32px;
-    mix-blend-mode: screen;
-    opacity: 0.28;
+    left: -1.3rem;
+    right: -1.3rem;
+    bottom: -3.2rem;
+    height: 3.4rem;
+    display: flex;
+    justify-content: space-between;
     pointer-events: none;
   }
 
-  .photo-complete,
-  .thread-reveal {
+  .bottom-fringe span {
+    width: 1px;
+    height: calc(1rem + (var(--i) % 5) * 0.45rem);
+    background: rgba(221, 204, 160, 0.78);
+    transform: rotate(calc(-16deg + (var(--i) % 9) * 4deg));
+  }
+
+  .tool {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .photo-complete {
-    object-fit: cover;
+    left: 50%;
+    top: 19%;
+    z-index: 5;
     opacity: 0;
-  }
-
-  .thread-reveal {
-    overflow: visible;
-  }
-
-  .needle {
-    opacity: 0;
-    color: var(--color-chalk);
-    filter: drop-shadow(0 0.5rem 0.8rem rgba(0, 0, 0, 0.35));
-  }
-
-  .needle path {
-    fill: currentColor;
-  }
-
-  .needle circle {
-    fill: color-mix(in srgb, var(--color-ink) 72%, transparent);
-  }
-
-  .atelier-object {
-    position: absolute;
-    z-index: 2;
-    opacity: 0;
+    transform: translate(-50%, -50%);
     transform-origin: center center;
     pointer-events: none;
   }
 
-  .sketchbook {
-    left: clamp(1.25rem, 8vw, 8rem);
-    top: 18vh;
-    width: min(24vw, 17rem);
-    aspect-ratio: 0.78;
+  .tool-thread-roll {
+    width: min(20vw, 15rem);
+    height: 7rem;
   }
 
-  .paper {
+  .bobbin {
     position: absolute;
-    inset: 0;
-    border: 1px solid rgba(30, 27, 23, 0.28);
-    background: #efe7d4;
-    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.24);
+    left: 6%;
+    right: 6%;
+    top: 25%;
+    height: 50%;
+    border-radius: 999px;
+    background: #eee1c6;
+    border: 1px solid rgba(30, 27, 23, 0.25);
   }
 
-  .page-back {
-    transform: rotate(-8deg) translate(-8%, 4%);
-    background:
-      linear-gradient(90deg, rgba(30, 27, 23, 0.08) 0 1px, transparent 1px 100%),
-      #d8ceb6;
-    background-size: 22px 100%;
-  }
-
-  .page-front {
-    transform: rotate(4deg);
-  }
-
-  .page-front svg {
+  .thread-wrap {
     position: absolute;
-    inset: 10%;
-    width: 80%;
-    height: 80%;
+    top: 18%;
+    width: 24%;
+    height: 64%;
+    border-radius: 24% / 50%;
+    box-shadow: inset 0 0 1rem rgba(30, 27, 23, 0.28);
   }
 
-  .page-front path {
+  .thread-wrap.red {
+    left: 18%;
+    background: repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.18) 0 2px, transparent 2px 7px), #8c2a35;
+  }
+
+  .thread-wrap.cream {
+    left: 39%;
+    background: repeating-linear-gradient(0deg, rgba(30, 27, 23, 0.08) 0 2px, transparent 2px 7px), #efe4c9;
+  }
+
+  .thread-wrap.sage {
+    left: 60%;
+    background: repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.18) 0 2px, transparent 2px 7px), #9ba77b;
+  }
+
+  .tool-hoop {
+    width: min(20vw, 13rem);
+    aspect-ratio: 1;
+  }
+
+  .hoop-ring,
+  .hoop-cloth {
+    position: absolute;
+    inset: 8%;
+    border-radius: 50%;
+  }
+
+  .hoop-ring {
+    border: 0.8rem solid #b88448;
+  }
+
+  .hoop-cloth {
+    inset: 18%;
+    background: rgba(239, 231, 212, 0.82);
+    border: 1px solid rgba(30, 27, 23, 0.18);
+  }
+
+  .hoop-screw {
+    position: absolute;
+    top: 2%;
+    left: 43%;
+    width: 14%;
+    height: 12%;
+    border-radius: 5px;
+    background: #b88448;
+  }
+
+  .tool-hoop svg {
+    position: absolute;
+    inset: 18%;
+  }
+
+  .tool-hoop path,
+  .tool-tablet path,
+  .tool-tape path,
+  .tool-tape line {
     fill: none;
     stroke: rgba(30, 27, 23, 0.62);
     stroke-width: 2.2;
     stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  .swatches {
-    left: clamp(1rem, 11vw, 10rem);
-    bottom: 12vh;
-    width: min(24vw, 18rem);
-    height: 10rem;
+  .tool-tablet {
+    width: min(22vw, 15rem);
+    aspect-ratio: 1.36;
+    border-radius: 1rem;
+    background: #20262f;
+    border: 2px solid rgba(247, 245, 240, 0.24);
+    padding: 0.6rem;
   }
 
-  .swatch {
+  .tablet-screen {
     position: absolute;
-    width: 68%;
-    height: 58%;
-    border: 1px solid rgba(247, 245, 240, 0.18);
-    box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.3);
+    inset: 0.65rem;
+    border-radius: 0.7rem;
+    background: #eadfc7;
   }
 
-  .swatch-denim {
-    left: 4%;
-    top: 8%;
-    transform: rotate(-10deg);
-    background:
-      repeating-linear-gradient(90deg, rgba(247, 245, 240, 0.08) 0 1px, transparent 1px 7px),
-      #263242;
-  }
-
-  .swatch-canvas {
-    left: 24%;
-    top: 24%;
-    transform: rotate(5deg);
-    background:
-      repeating-linear-gradient(0deg, rgba(30, 27, 23, 0.08) 0 1px, transparent 1px 8px),
-      #d6ccb8;
-  }
-
-  .swatch-thread {
-    left: 44%;
-    top: 3%;
-    transform: rotate(14deg);
-    background:
-      linear-gradient(90deg, rgba(247, 245, 240, 0.12), transparent),
-      var(--color-thread);
-  }
-
-  .spool {
-    right: clamp(1.5rem, 9vw, 8rem);
-    top: 17vh;
-    width: min(16vw, 9rem);
-    height: min(24vw, 13rem);
-  }
-
-  .spool-cap,
-  .spool-thread {
+  .tool-tablet svg {
     position: absolute;
-    left: 16%;
-    width: 68%;
+    inset: 0.9rem;
+  }
+
+  .tool-palette {
+    width: min(19vw, 12rem);
+    aspect-ratio: 1.25;
+  }
+
+  .palette-body {
+    position: absolute;
+    inset: 0;
+    border-radius: 58% 42% 54% 46%;
+    background: #e8d8b7;
+    border: 1px solid rgba(30, 27, 23, 0.18);
+  }
+
+  .paint,
+  .thumb-hole {
+    position: absolute;
     border-radius: 50%;
   }
 
-  .spool-cap {
-    height: 22%;
-    background: #d0c2aa;
+  .paint {
+    width: 18%;
+    aspect-ratio: 1;
+  }
+
+  .p1 { left: 22%; top: 24%; background: #8c2a35; }
+  .p2 { left: 46%; top: 18%; background: #d4a03f; }
+  .p3 { left: 62%; top: 42%; background: #557f87; }
+  .p4 { left: 33%; top: 55%; background: #70845d; }
+
+  .thumb-hole {
+    right: 18%;
+    bottom: 17%;
+    width: 18%;
+    aspect-ratio: 1;
+    background: #24211d;
+  }
+
+  .tool-ruler {
+    width: min(24vw, 18rem);
+    height: 2.4rem;
+    background: #d9bf73;
     border: 1px solid rgba(30, 27, 23, 0.28);
   }
 
-  .spool-cap.top {
-    top: 0;
-  }
-
-  .spool-cap.bottom {
-    bottom: 0;
-  }
-
-  .spool-thread {
-    top: 10%;
-    height: 80%;
-    border-radius: 42% / 12%;
-    background:
-      repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.18) 0 2px, transparent 2px 7px),
-      var(--color-thread);
-    box-shadow: inset 0 0 1.4rem rgba(30, 27, 23, 0.38), 0 1.5rem 4rem rgba(0, 0, 0, 0.3);
-  }
-
-  .spool-tail {
+  .tool-ruler span {
     position: absolute;
-    right: 54%;
-    top: 48%;
-    width: 14rem;
-    height: 9rem;
-    border: 2px solid var(--color-thread-dim);
-    border-color: var(--color-thread-dim) transparent transparent transparent;
-    border-radius: 50%;
-    transform: rotate(20deg);
-  }
-
-  .tape {
-    right: clamp(1rem, 8vw, 7rem);
-    bottom: 12vh;
-    width: min(32vw, 24rem);
-    height: 2.7rem;
-    border: 1px solid rgba(30, 27, 23, 0.34);
-    background: #d9bf73;
-    box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.28);
-    transform: rotate(-13deg);
-  }
-
-  .tape span {
-    position: absolute;
-    left: calc(var(--tick) * 6%);
+    left: calc(var(--tick) * 6.4%);
     top: 0;
     width: 1px;
-    height: 58%;
-    background: rgba(30, 27, 23, 0.54);
+    height: 55%;
+    background: rgba(30, 27, 23, 0.58);
   }
 
-  .tape span:nth-child(4n) {
+  .tool-ruler span:nth-child(4n) {
     height: 100%;
   }
 
-  .thread-card {
-    right: clamp(1rem, 17vw, 16rem);
-    bottom: 25vh;
-    width: min(16vw, 10rem);
-    aspect-ratio: 0.75;
-    background: #efe7d4;
-    border: 1px solid rgba(30, 27, 23, 0.26);
-    transform: rotate(7deg);
-    box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.24);
+  .tool-tape {
+    width: min(25vw, 17rem);
   }
 
-  .thread-card span {
+  .tool-tape path {
+    stroke: #d8bd66;
+    stroke-width: 12;
+  }
+
+  .tool-tape line {
+    stroke: rgba(30, 27, 23, 0.55);
+    stroke-width: 2;
+  }
+
+  .tool-needle {
+    width: min(26vw, 18rem);
+  }
+
+  .needle-body {
+    fill: none;
+    stroke: #e7e1d1;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+  }
+
+  .tool-needle ellipse {
+    fill: none;
+    stroke: #e7e1d1;
+    stroke-width: 2.2;
+  }
+
+  .needle-thread {
+    fill: none;
+    stroke: #b97e84;
+    stroke-width: 2.3;
+    stroke-linecap: round;
+  }
+
+  .tool-pencil {
+    width: min(18vw, 13rem);
+    height: 2.2rem;
+  }
+
+  .pencil-body {
     position: absolute;
-    left: 16%;
-    right: 16%;
-    height: 9%;
-    border-radius: 999px;
-    background: var(--thread-color, var(--color-thread));
-    box-shadow: 0 0.15rem 0.2rem rgba(30, 27, 23, 0.22);
+    left: 12%;
+    right: 14%;
+    top: 24%;
+    height: 52%;
+    background: #c7a25a;
+    border: 1px solid rgba(30, 27, 23, 0.24);
   }
 
-  .thread-card span:nth-child(1) {
-    top: 22%;
-    --thread-color: #8c2a35;
+  .pencil-tip {
+    position: absolute;
+    right: 3%;
+    top: 12%;
+    width: 14%;
+    height: 76%;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    background: #eadfc7;
   }
 
-  .thread-card span:nth-child(2) {
-    top: 38%;
-    --thread-color: #253242;
+  .pencil-tip::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 37%;
+    width: 35%;
+    height: 26%;
+    background: #2c2721;
   }
 
-  .thread-card span:nth-child(3) {
-    top: 54%;
-    --thread-color: #c8b26a;
+  .pencil-eraser {
+    position: absolute;
+    left: 0;
+    top: 18%;
+    width: 14%;
+    height: 64%;
+    background: #b97e84;
+    border-radius: 4px;
   }
 
-  .thread-card span:nth-child(4) {
-    top: 70%;
-    --thread-color: #f7f5f0;
+  .bead-field {
+    position: absolute;
+    inset: 0;
+    z-index: 7;
+    pointer-events: none;
   }
 
-  .assembly-caption {
+  .bead {
+    position: absolute;
+    left: calc(38% + var(--x) * 0.24%);
+    top: 48%;
+    width: calc(0.48rem + var(--size) * 0.6rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    opacity: 0;
+    background: var(--bead-color);
+    box-shadow: inset -0.12rem -0.15rem 0 rgba(30, 27, 23, 0.28), inset 0.08rem 0.08rem 0 rgba(247, 245, 240, 0.45);
+  }
+
+  .bead:nth-child(7n + 1) { --bead-color: #8c2a35; }
+  .bead:nth-child(7n + 2) { --bead-color: #e8dcc2; }
+  .bead:nth-child(7n + 3) { --bead-color: #d5a44d; }
+  .bead:nth-child(7n + 4) { --bead-color: #6f897f; }
+  .bead:nth-child(7n + 5) { --bead-color: #557f87; }
+  .bead:nth-child(7n + 6) { --bead-color: #b97e84; }
+  .bead:nth-child(7n + 7) { --bead-color: #d2c5ad; }
+
+  .fabric-caption {
     position: absolute;
     left: var(--page-gutter);
     right: var(--page-gutter);
-    bottom: var(--space-xl);
-    z-index: 5;
-    text-align: center;
+    bottom: var(--space-lg);
+    z-index: 8;
     color: var(--color-chalk);
+    text-align: center;
     font-size: var(--fs-label);
     text-transform: uppercase;
     letter-spacing: var(--tracking-label);
@@ -457,64 +642,44 @@ const maskId = `thread-photo-mask-${Math.random().toString(36).slice(2, 9)}`;
   }
 
   @media (max-width: 900px) {
-    .assembly-stage {
-      width: min(72vw, 34rem);
+    .fabric-scene {
+      width: 92vw;
+      height: 78vh;
     }
 
-    .sketchbook,
-    .thread-card {
+    .fabric-roll {
+      width: 76vw;
+    }
+
+    .fabric-panel {
+      width: 68vw;
+      height: 58vh;
+    }
+
+    .tool {
+      scale: 0.82;
+    }
+
+    .tool-tablet,
+    .tool-hoop {
       display: none;
-    }
-
-    .swatches {
-      left: -5vw;
-      bottom: 10vh;
-      width: 34vw;
-    }
-
-    .spool {
-      right: -1rem;
-      top: 16vh;
-      width: 7rem;
-      height: 10rem;
-    }
-
-    .tape {
-      right: -9vw;
-      bottom: 16vh;
-      width: 48vw;
     }
   }
 
   @media (max-width: 620px) {
-    .assembly-stage {
-      width: min(84vw, 28rem);
+    .fabric-scene {
+      width: 100vw;
+      height: 76vh;
     }
 
-    .swatches,
-    .spool {
-      opacity: 0.5;
+    .tool {
+      scale: 0.72;
     }
 
-    .tape {
-      bottom: 8vh;
+    .tool-palette,
+    .tool-pencil {
+      display: none;
     }
-  }
-</style>
-
-<style is:global>
-  .thread-mask-path {
-    fill: none;
-    stroke: #fff;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .thread-visible-path {
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    filter: drop-shadow(0 0.45rem 0.5rem rgba(0, 0, 0, 0.28));
   }
 </style>
 
@@ -524,211 +689,92 @@ const maskId = `thread-photo-mask-${Math.random().toString(36).slice(2, 9)}`;
 
   gsap.registerPlugin(ScrollTrigger);
 
-  const SVG_NS = "http://www.w3.org/2000/svg";
-
-  interface ThreadLine {
-    maskPath: SVGPathElement;
-    visiblePath: SVGPathElement;
-    length: number;
-    delay: number;
-  }
-
-  function clamp(value: number, min = 0, max = 1): number {
-    return Math.min(max, Math.max(min, value));
-  }
-
-  function smoothstep(value: number): number {
-    const t = clamp(value);
-    return t * t * (3 - 2 * t);
-  }
-
-  function seeded(seed: number): number {
-    const x = Math.sin(seed * 9301 + 49297) * 233280;
-    return x - Math.floor(x);
-  }
-
-  function createThreadPath(index: number, count: number, width: number, height: number): string {
-    const yBase = ((index + 0.45) / count) * height;
-    const y = yBase + (seeded(index + 2) - 0.5) * (height / count) * 0.8;
-    const amp = height * (0.014 + seeded(index + 7) * 0.028);
-    const bend = seeded(index + 11) > 0.5 ? 1 : -1;
-
-    return [
-      `M ${-width * 0.08} ${y}`,
-      `C ${width * 0.18} ${y - amp * bend}, ${width * 0.3} ${y + amp * 1.1 * bend}, ${width * 0.48} ${y}`,
-      `S ${width * 0.75} ${y - amp * 1.2 * bend}, ${width * 1.08} ${y + amp * 0.45 * bend}`,
-    ].join(" ");
-  }
-
-  function buildThreads(
-    maskGroup: SVGGElement,
-    visibleGroup: SVGGElement,
-    width: number,
-    height: number,
-    isMobile: boolean,
-  ): ThreadLine[] {
-    const count = isMobile ? 34 : 52;
-    const palette = ["#f7f5f0", "#8c2a35", "#c8b26a", "#b97e84", "#253242"];
-
-    return Array.from({ length: count }, (_, index) => {
-      const d = createThreadPath(index, count, width, height);
-      const maskPath = document.createElementNS(SVG_NS, "path");
-      maskPath.setAttribute("class", "thread-mask-path");
-      maskPath.setAttribute("d", d);
-      maskPath.setAttribute("stroke-width", String(isMobile ? 24 : 21));
-
-      const visiblePath = document.createElementNS(SVG_NS, "path");
-      visiblePath.setAttribute("class", "thread-visible-path");
-      visiblePath.setAttribute("d", d);
-      visiblePath.setAttribute("stroke", palette[index % palette.length]);
-      visiblePath.setAttribute("stroke-width", String(1.4 + seeded(index + 21) * 2.4));
-      visiblePath.setAttribute("opacity", "0");
-
-      maskGroup.appendChild(maskPath);
-      visibleGroup.appendChild(visiblePath);
-
-      const length = visiblePath.getTotalLength();
-      [maskPath, visiblePath].forEach((path) => {
-        path.style.strokeDasharray = String(length);
-        path.style.strokeDashoffset = String(length);
-      });
-
-      return {
-        maskPath,
-        visiblePath,
-        length,
-        delay: seeded(index + 31) * 0.28,
-      };
-    });
-  }
-
   function setUp() {
-    const root = document.querySelector<HTMLElement>("[data-thread-assembly]");
-    const reveal = document.querySelector<SVGSVGElement>("[data-thread-reveal]");
-    const maskGroup = document.querySelector<SVGGElement>("[data-mask-threads]");
-    const visibleGroup = document.querySelector<SVGGElement>("[data-visible-threads]");
-    const maskFull = document.querySelector<SVGRectElement>("[data-mask-full]");
-    const finalPhoto = document.querySelector<HTMLImageElement>("[data-final-photo]");
-    const photoWrap = document.querySelector<HTMLElement>("[data-photo-wrap]");
-    const needle = document.querySelector<SVGGElement>("[data-needle]");
-    const caption = document.querySelector<HTMLElement>("[data-assembly-caption]");
-    const objects = Array.from(document.querySelectorAll<HTMLElement>("[data-atelier-object]"));
-    const ambientThreads = Array.from(document.querySelectorAll<SVGPathElement>("[data-ambient-thread]"));
+    const root = document.querySelector<HTMLElement>("[data-fabric-story]");
+    const panel = document.querySelector<HTMLElement>("[data-fabric-panel]");
+    const rollParts = Array.from(document.querySelectorAll<HTMLElement>("[data-scroll-part]"));
+    const tools = Array.from(document.querySelectorAll<HTMLElement>("[data-fall-tool]"));
+    const beads = Array.from(document.querySelectorAll<HTMLElement>("[data-bead]"));
+    const caption = document.querySelector<HTMLElement>("[data-fabric-caption]");
 
-    if (!root || !reveal || !maskGroup || !visibleGroup || !maskFull || !finalPhoto || !photoWrap || !needle) {
-      return;
-    }
-
-    const rootEl = root;
-    const revealEl = reveal;
-    const maskFullEl = maskFull;
-    const finalPhotoEl = finalPhoto;
-    const photoWrapEl = photoWrap;
-    const needleEl = needle;
-    const width = reveal.viewBox.baseVal.width || 1;
-    const height = reveal.viewBox.baseVal.height || 1;
-    const isMobile = window.matchMedia("(max-width: 720px)").matches;
-    const lines = buildThreads(maskGroup, visibleGroup, width, height, isMobile);
-
-    ambientThreads.forEach((path) => {
-      const length = path.getTotalLength();
-      path.style.strokeDasharray = String(length);
-      path.style.strokeDashoffset = String(length);
-    });
-
-    function updateThreads(progress: number) {
-      const drawWindow = 0.7;
-      const lineForNeedle = lines[Math.min(lines.length - 1, Math.floor(progress * lines.length))];
-
-      lines.forEach((line) => {
-        const local = smoothstep((progress - line.delay) / drawWindow);
-        const offset = line.length * (1 - local);
-        line.maskPath.style.strokeDashoffset = String(offset);
-        line.visiblePath.style.strokeDashoffset = String(offset);
-        line.visiblePath.style.opacity = String(clamp(local * 1.2, 0, 0.92) * (1 - clamp((progress - 0.78) / 0.2, 0, 0.8)));
-      });
-
-      ambientThreads.forEach((path, index) => {
-        const length = path.getTotalLength();
-        const local = smoothstep((progress - index * 0.08) / 0.58);
-        path.style.strokeDashoffset = String(length * (1 - local));
-      });
-
-      const fullReveal = smoothstep((progress - 0.62) / 0.28);
-      maskFullEl.setAttribute("opacity", String(fullReveal));
-      finalPhotoEl.style.opacity = String(smoothstep((progress - 0.7) / 0.22));
-      revealEl.style.opacity = String(1 - clamp((progress - 0.84) / 0.16, 0, 0.7));
-      if (caption) caption.style.opacity = String(smoothstep((progress - 0.82) / 0.16) * 0.86);
-
-      if (lineForNeedle && progress < 0.82) {
-        const local = smoothstep((progress - lineForNeedle.delay) / drawWindow);
-        const point = lineForNeedle.visiblePath.getPointAtLength(lineForNeedle.length * clamp(local));
-        needleEl.setAttribute("transform", `translate(${point.x} ${point.y}) rotate(76)`);
-        needleEl.style.opacity = String(clamp(local * 2, 0, 0.95));
-      } else {
-        needleEl.style.opacity = "0";
-      }
-
-      rootEl.classList.toggle("is-settled", progress > 0.94);
-    }
+    if (!root || !panel) return;
 
     if (window.__prefersReducedMotion) {
-      lines.forEach((line) => {
-        line.maskPath.style.strokeDashoffset = "0";
-        line.visiblePath.style.strokeDashoffset = "0";
-        line.visiblePath.style.opacity = "0";
+      panel.style.setProperty("--open", "1");
+      tools.forEach((tool) => {
+        tool.style.opacity = "1";
+        tool.style.transform = `translate(calc(-50% + ${tool.style.getPropertyValue("--tx")}), calc(-50% + ${tool.style.getPropertyValue("--ty")})) rotate(${tool.style.getPropertyValue("--rot")})`;
       });
-      ambientThreads.forEach((path) => {
-        path.style.strokeDashoffset = "0";
+      beads.forEach((bead) => {
+        bead.style.opacity = "0.75";
       });
-      maskFullEl.setAttribute("opacity", "1");
-      finalPhotoEl.style.opacity = "1";
-      objects.forEach((object) => {
-        object.style.opacity = "1";
-      });
-      if (caption) caption.style.opacity = "0.86";
-      rootEl.classList.add("is-settled");
+      if (caption) caption.style.opacity = "0.82";
       return;
     }
 
-    updateThreads(0);
+    gsap.set(panel, { "--open": 0.04 });
+    gsap.set(rollParts, { y: -22, rotate: -1 });
+    gsap.set(tools, { autoAlpha: 0, x: 0, y: -70, rotate: 0, scale: 0.76 });
+    gsap.set(beads, { autoAlpha: 0, x: 0, y: -20, scale: 0.4 });
+    if (caption) gsap.set(caption, { autoAlpha: 0, y: 14 });
 
-    gsap.set(objects, {
-      autoAlpha: 0,
-      y: (index) => (index % 2 === 0 ? 42 : -34),
-      x: (index) => (index < 2 ? -38 : 38),
-      rotate: (index) => [-9, 8, 16, -13, 10][index] ?? 0,
-      scale: 0.92,
-    });
-    gsap.set(photoWrapEl, { scale: 0.9, y: 30, rotate: -1.4 });
-
-    gsap.timeline({
+    const timeline = gsap.timeline({
       scrollTrigger: {
         trigger: root,
         start: "top top",
-        end: "+=175%",
+        end: "+=190%",
         pin: true,
         scrub: true,
-        onUpdate: (self) => updateThreads(self.progress),
       },
-    })
-      .to(objects, {
+    });
+
+    timeline
+      .to(panel, { "--open": 1, ease: "none", duration: 0.48 }, 0)
+      .to(rollParts, { y: 0, rotate: 0, ease: "none", duration: 0.35 }, 0)
+      .to(tools, {
         autoAlpha: 1,
-        x: 0,
-        y: 0,
-        rotate: 0,
+        x: (_index, element) => element.style.getPropertyValue("--tx"),
+        y: (_index, element) => element.style.getPropertyValue("--ty"),
+        rotate: (_index, element) => element.style.getPropertyValue("--rot"),
         scale: 1,
         ease: "none",
-        stagger: 0.03,
-        duration: 0.32,
-      }, 0.02)
-      .to(photoWrapEl, { scale: 1, y: 0, rotate: 0, ease: "none", duration: 0.7 }, 0.08)
-      .to(objects, {
-        y: (index) => (index % 2 === 0 ? -20 : 18),
-        rotate: (index) => [-4, 3, -7, 5, -3][index] ?? 0,
+        stagger: 0.035,
+        duration: 0.42,
+      }, 0.22)
+      .to(tools, {
+        y: (_index, element) => `calc(${element.style.getPropertyValue("--ty")} + 1.4rem)`,
+        rotate: (_index, element) => `calc(${element.style.getPropertyValue("--rot")} + ${_index % 2 === 0 ? 3 : -3}deg)`,
         ease: "none",
-        duration: 0.5,
-      }, 0.48);
+        stagger: 0.02,
+        duration: 0.28,
+      }, 0.6)
+      .to(beads, {
+        autoAlpha: 1,
+        scale: 1,
+        x: (_index, element) => `${element.style.getPropertyValue("--drift")}vw`,
+        y: (_index, element) => `${element.style.getPropertyValue("--fall")}vh`,
+        rotate: (_index) => (_index % 2 === 0 ? 180 : -180),
+        ease: "power1.in",
+        stagger: {
+          amount: 0.28,
+          from: "random",
+        },
+        duration: 0.48,
+      }, 0.54)
+      .to(beads, {
+        autoAlpha: 0.22,
+        y: (_index, element) => `calc(${element.style.getPropertyValue("--fall")}vh + 24vh)`,
+        ease: "none",
+        stagger: {
+          amount: 0.12,
+          from: "random",
+        },
+        duration: 0.22,
+      }, 0.84);
+
+    if (caption) {
+      timeline.to(caption, { autoAlpha: 0.82, y: 0, ease: "none", duration: 0.18 }, 0.72);
+    }
   }
 
   setUp();

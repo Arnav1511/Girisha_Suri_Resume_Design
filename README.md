@@ -45,13 +45,11 @@ deploys.
   (`thread/`, `cards/`, `gate/`, `filter/`, `scroll/`, `process/`, `layout/`).
   The landing page's signature moment is
   [thread/ParticleAssemblyHero.astro](src/components/thread/ParticleAssemblyHero.astro)
-  — the karigar photo is revealed through drawn SVG thread paths that act as
-  a stitched mask over the real image. Pattern paper, swatches, tape, a spool,
-  and a thread card animate into the surrounding field so the section feels
-  like an atelier table instead of empty negative space. Takes the image via
-  props (`image`, `imageAlt`, `imageWidth`, `imageHeight` — the last two must
-  be the file's real pixel dimensions, used as the SVG viewBox). Respects
-  `prefers-reduced-motion` by showing the finished photo directly.
+  — an illustrated denim selvage fabric scroll unfurls on scroll. Thread
+  rolls, a needle, embroidery frame, tablet sketch, colour palette, ruler,
+  inch tape, pencil, and beads spill out in a rough watercolor style; the
+  beads fall toward the next section as the scroll exits. Respects
+  `prefers-reduced-motion` by showing the opened layout directly.
 - **Password-gate logic (active, static-hosting path)** —
   [src/lib/clientGate.ts](src/lib/clientGate.ts) and
   [scripts/prepare-protected-assets.mjs](scripts/prepare-protected-assets.mjs).
