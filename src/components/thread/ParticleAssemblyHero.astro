@@ -77,6 +77,16 @@ const colorCards = [
   { no: "05", name: "Brass Ochre", tone: "#c49a45" },
   { no: "06", name: "Sage Dye", tone: "#84906f" },
 ];
+const kineticPieces = [
+  { type: "street-jacket", x: 82, y: 18, rot: 11, scale: 1, dx: -13, dy: 11 },
+  { type: "ethnic-border", x: 15, y: 73, rot: -18, scale: 1.1, dx: 10, dy: -10 },
+  { type: "evening-beads", x: 76, y: 72, rot: 24, scale: 0.92, dx: -8, dy: -14 },
+  { type: "spec-sheet", x: 21, y: 23, rot: -9, scale: 0.94, dx: 13, dy: 8 },
+  { type: "thread-card", x: 63, y: 12, rot: -7, scale: 0.88, dx: -10, dy: 13 },
+  { type: "denim-pocket", x: 11, y: 43, rot: 9, scale: 0.9, dx: 12, dy: -5 },
+  { type: "drape-cloth", x: 89, y: 47, rot: -13, scale: 1, dx: -14, dy: 4 },
+  { type: "zari-motif", x: 43, y: 81, rot: 8, scale: 0.84, dx: 4, dy: -13 },
+];
 ---
 
 <section class="indigo-scroll" data-indigo-scroll aria-label="A long illustrated denim scroll story">
@@ -115,8 +125,8 @@ const colorCards = [
     </article>
     <article class="chapter" data-chapter>
       <p>04 / work</p>
-      <h2>Then the pieces begin.</h2>
-      <span>A quiet handoff from craft world to portfolio grid.</span>
+      <h2>The work surfaces appear.</h2>
+      <span>The cloth becomes a table of worlds: streetwear, ethnic hybridity, evening, contemporary, and vendor rooms.</span>
     </article>
     <article class="chapter" data-chapter>
       <p>05 / worlds</p>
@@ -131,6 +141,20 @@ const colorCards = [
       <path data-thread-river d="M-130 650 C145 485, 385 735, 650 570 S1030 440, 1320 630" />
       <path data-thread-river d="M170 980 C260 720, 520 710, 730 505 S1020 300, 1260 120" />
     </svg>
+
+    <div class="kinetic-layer" aria-hidden="true">
+      {kineticPieces.map((piece) => (
+        <span
+          class:list={["kinetic-piece", `kinetic-${piece.type}`]}
+          data-kinetic-piece
+          style={`--kx:${piece.x}%; --ky:${piece.y}%; --kr:${piece.rot}deg; --ks:${piece.scale}; --dx:${piece.dx}; --dy:${piece.dy};`}
+        >
+          <span class="kinetic-shadow"></span>
+          <span class="kinetic-face"></span>
+          <span class="kinetic-mark"></span>
+        </span>
+      ))}
+    </div>
 
     <div class="scroll-worktable" data-worktable>
       <div class="fabric-roll" data-roll>
@@ -148,17 +172,22 @@ const colorCards = [
         <span class="weft"></span>
         <span class="stitch-line left"></span>
         <span class="stitch-line right"></span>
-        <span class="fabric-title">selvedge study</span>
+        <span class="fabric-depth left"></span>
+        <span class="fabric-depth right"></span>
+        <span class="fabric-bottom-shadow"></span>
         <span class="fringe" aria-hidden="true">
           {Array.from({ length: fringeCount }).map((_, index) => <span style={`--i:${index}`}></span>)}
         </span>
       </div>
 
       <div class="studio-tool thread-roll" data-fall-tool style="--tx:-24; --ty:10; --rot:-15;">
+        <span class="bobbin-cap left"></span>
+        <span class="bobbin-cap right"></span>
         <span class="bobbin"></span>
         <span class="thread red"></span>
         <span class="thread cream"></span>
         <span class="thread sage"></span>
+        <span class="loose-thread"></span>
       </div>
 
       <div class="studio-tool hoop" data-fall-tool style="--tx:23; --ty:8; --rot:13;">
@@ -403,6 +432,245 @@ const colorCards = [
     stroke-dasharray: 13 17;
   }
 
+  .kinetic-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    overflow: hidden;
+    pointer-events: none;
+    perspective: 1200px;
+  }
+
+  .kinetic-piece {
+    position: absolute;
+    left: var(--kx);
+    top: var(--ky);
+    width: clamp(5.8rem, 10vw, 11rem);
+    aspect-ratio: 1;
+    opacity: 0;
+    --kx-shift: 0vw;
+    --ky-shift: 9vh;
+    --spin: -8deg;
+    transform:
+      translate(-50%, -50%)
+      translate3d(var(--kx-shift), var(--ky-shift), 0)
+      rotate(calc(var(--kr) + var(--spin)))
+      scale(var(--ks));
+    transform-style: preserve-3d;
+    will-change: transform, opacity;
+    filter: drop-shadow(0 1.4rem 1.2rem rgba(0, 0, 0, 0.24));
+  }
+
+  .kinetic-shadow {
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: -0.45rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.32);
+    filter: blur(9px);
+    transform: translateZ(-36px) rotateX(64deg);
+  }
+
+  .kinetic-face,
+  .kinetic-mark {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+  }
+
+  .kinetic-face {
+    border: 1px solid rgba(247, 245, 240, 0.12);
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 34%),
+      rgba(232, 222, 198, 0.9);
+    box-shadow:
+      inset -0.5rem -0.5rem 0.85rem rgba(0, 0, 0, 0.16),
+      inset 0.35rem 0.35rem 0.55rem rgba(255, 255, 255, 0.35);
+  }
+
+  .kinetic-street-jacket {
+    width: clamp(6rem, 9vw, 9.5rem);
+    aspect-ratio: 0.84;
+  }
+
+  .kinetic-street-jacket .kinetic-face {
+    clip-path: polygon(20% 10%, 38% 0, 50% 14%, 62% 0, 80% 10%, 94% 100%, 62% 100%, 57% 51%, 43% 51%, 38% 100%, 6% 100%);
+    background:
+      linear-gradient(90deg, transparent 48%, rgba(247, 245, 240, 0.26) 49% 50%, transparent 51%),
+      radial-gradient(circle at 36% 27%, rgba(247, 245, 240, 0.22), transparent 15%),
+      repeating-linear-gradient(90deg, rgba(247, 245, 240, 0.07) 0 1px, transparent 1px 8px),
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.13) 0 1px, transparent 1px 9px),
+      #20344a;
+  }
+
+  .kinetic-street-jacket .kinetic-mark {
+    inset: 24% 22% 26%;
+    border-left: 1px dashed rgba(247, 245, 240, 0.45);
+    border-right: 1px dashed rgba(247, 245, 240, 0.45);
+  }
+
+  .kinetic-ethnic-border {
+    width: clamp(10rem, 17vw, 18rem);
+    aspect-ratio: 4.6;
+  }
+
+  .kinetic-ethnic-border .kinetic-face {
+    border-color: rgba(196, 154, 69, 0.55);
+    background:
+      repeating-linear-gradient(90deg, rgba(196, 154, 69, 0.85) 0 4px, transparent 4px 12px),
+      repeating-linear-gradient(45deg, rgba(140, 42, 53, 0.48) 0 3px, transparent 3px 13px),
+      linear-gradient(180deg, #263d58, #17263a);
+  }
+
+  .kinetic-ethnic-border .kinetic-mark {
+    inset: 28% 5%;
+    border-top: 2px solid rgba(238, 211, 129, 0.82);
+    border-bottom: 2px solid rgba(238, 211, 129, 0.62);
+  }
+
+  .kinetic-evening-beads {
+    width: clamp(8rem, 13vw, 14rem);
+    aspect-ratio: 2.4;
+  }
+
+  .kinetic-evening-beads .kinetic-face {
+    border: 0;
+    background:
+      radial-gradient(circle at 8% 52%, #f7f5f0 0 5%, transparent 6%),
+      radial-gradient(circle at 22% 48%, #d5a44d 0 5%, transparent 6%),
+      radial-gradient(circle at 36% 56%, #b97e84 0 5%, transparent 6%),
+      radial-gradient(circle at 50% 46%, #f7f5f0 0 5%, transparent 6%),
+      radial-gradient(circle at 64% 54%, #8c2a35 0 5%, transparent 6%),
+      radial-gradient(circle at 78% 48%, #d5a44d 0 5%, transparent 6%),
+      radial-gradient(circle at 92% 52%, #f7f5f0 0 5%, transparent 6%);
+    box-shadow: none;
+  }
+
+  .kinetic-evening-beads .kinetic-mark {
+    top: 50%;
+    height: 1px;
+    background: rgba(247, 245, 240, 0.46);
+  }
+
+  .kinetic-spec-sheet {
+    width: clamp(6.2rem, 9vw, 9rem);
+    aspect-ratio: 0.72;
+  }
+
+  .kinetic-spec-sheet .kinetic-face {
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.84), transparent 36%),
+      repeating-linear-gradient(0deg, transparent 0 15%, rgba(30, 27, 23, 0.12) 15% 16%),
+      #eadfc7;
+  }
+
+  .kinetic-spec-sheet .kinetic-mark {
+    inset: 16% 14%;
+    border: 1px solid rgba(30, 27, 23, 0.23);
+    background:
+      linear-gradient(90deg, transparent 45%, rgba(30, 27, 23, 0.24) 46% 47%, transparent 48%),
+      linear-gradient(0deg, transparent 58%, rgba(140, 42, 53, 0.5) 59% 61%, transparent 62%);
+  }
+
+  .kinetic-thread-card {
+    width: clamp(6rem, 8.5vw, 8.5rem);
+    aspect-ratio: 0.78;
+  }
+
+  .kinetic-thread-card .kinetic-face {
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.7), transparent 40%),
+      #efe4c9;
+  }
+
+  .kinetic-thread-card .kinetic-mark {
+    inset: 18% 19%;
+    background:
+      linear-gradient(90deg, #8c2a35 0 22%, transparent 22% 38%, #557f87 38% 60%, transparent 60% 76%, #84906f 76%),
+      repeating-linear-gradient(0deg, rgba(30, 27, 23, 0.12) 0 1px, transparent 1px 7px);
+    border-radius: 999px;
+    box-shadow: inset -0.25rem -0.25rem 0.45rem rgba(0, 0, 0, 0.18);
+  }
+
+  .kinetic-denim-pocket {
+    width: clamp(5.6rem, 8vw, 8rem);
+    aspect-ratio: 0.86;
+  }
+
+  .kinetic-denim-pocket .kinetic-face {
+    clip-path: polygon(10% 0, 90% 0, 80% 100%, 20% 100%);
+    background:
+      repeating-linear-gradient(90deg, rgba(247, 245, 240, 0.06) 0 1px, transparent 1px 8px),
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 9px),
+      #233e5a;
+  }
+
+  .kinetic-denim-pocket .kinetic-mark {
+    inset: 14%;
+    border: 1px dashed rgba(247, 245, 240, 0.5);
+    clip-path: polygon(9% 0, 91% 0, 79% 100%, 21% 100%);
+  }
+
+  .kinetic-drape-cloth {
+    width: clamp(8rem, 13vw, 13rem);
+    aspect-ratio: 1.6;
+  }
+
+  .kinetic-drape-cloth .kinetic-face {
+    clip-path: polygon(4% 20%, 27% 0, 61% 12%, 96% 5%, 84% 82%, 58% 100%, 26% 84%, 0 96%);
+    background:
+      linear-gradient(105deg, rgba(255, 255, 255, 0.22), transparent 28%, rgba(0, 0, 0, 0.18) 75%),
+      repeating-linear-gradient(90deg, rgba(247, 245, 240, 0.08) 0 1px, transparent 1px 12px),
+      #6f897f;
+  }
+
+  .kinetic-zari-motif {
+    width: clamp(5.2rem, 7vw, 7.4rem);
+    aspect-ratio: 1;
+  }
+
+  .kinetic-zari-motif .kinetic-face {
+    border-radius: 50%;
+    border-color: rgba(196, 154, 69, 0.52);
+    background:
+      radial-gradient(circle, transparent 0 22%, rgba(196, 154, 69, 0.92) 23% 28%, transparent 29% 42%, rgba(140, 42, 53, 0.62) 43% 48%, transparent 49%),
+      conic-gradient(from 10deg, #c49a45, #eadfc7, #8c2a35, #253d58, #c49a45);
+  }
+
+  .kinetic-zari-motif .kinetic-mark {
+    inset: 25%;
+    border-radius: 50%;
+    border: 2px dotted rgba(247, 245, 240, 0.68);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .kinetic-face {
+      animation: kinetic-breathe 5.8s ease-in-out infinite alternate;
+    }
+
+    .kinetic-piece:nth-child(2n) .kinetic-face {
+      animation-duration: 7.2s;
+      animation-delay: -1.8s;
+    }
+
+    .kinetic-piece:nth-child(3n) .kinetic-face {
+      animation-duration: 6.4s;
+      animation-delay: -2.7s;
+    }
+  }
+
+  @keyframes kinetic-breathe {
+    from {
+      transform: translateY(-0.18rem) rotate(-0.45deg);
+    }
+
+    to {
+      transform: translateY(0.28rem) rotate(0.55deg);
+    }
+  }
+
   .scroll-worktable {
     position: absolute;
     inset: 0;
@@ -548,18 +816,6 @@ const colorCards = [
 
   .stitch-line.right {
     right: 12%;
-  }
-
-  .fabric-title {
-    position: absolute;
-    left: 50%;
-    top: 48%;
-    transform: translate(-50%, -50%) rotate(-7deg);
-    color: rgba(247, 245, 240, 0.16);
-    font-family: var(--font-display);
-    font-size: clamp(1.9rem, 4vw, 4rem);
-    line-height: 1;
-    white-space: nowrap;
   }
 
   .fringe {
@@ -1038,6 +1294,511 @@ const colorCards = [
       #253d58;
   }
 
+  /* Depth and material pass: keep the illustration handmade, but give every
+     object weight, bevels, and cast shadows so the scene reads dimensional. */
+  .scroll-worktable {
+    perspective: 1300px;
+    transform-style: preserve-3d;
+  }
+
+  .fabric-roll,
+  .fabric-panel,
+  .studio-tool,
+  .color-card,
+  .world-card {
+    transform-style: preserve-3d;
+    will-change: transform, opacity;
+  }
+
+  .fabric-roll,
+  .fabric-panel,
+  .studio-tool,
+  .color-card,
+  .bead {
+    filter: drop-shadow(0 1.25rem 1.8rem rgba(0, 0, 0, 0.24)) drop-shadow(0 0.25rem 0.35rem rgba(0, 0, 0, 0.18));
+  }
+
+  .fabric-roll {
+    height: clamp(5.2rem, 10vh, 7.4rem);
+  }
+
+  .fabric-roll::before {
+    content: "";
+    position: absolute;
+    left: 7%;
+    right: 7%;
+    bottom: -0.65rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.34);
+    filter: blur(12px);
+    transform: translateZ(-30px);
+  }
+
+  .roll-face {
+    border: 1px solid rgba(247, 245, 240, 0.16);
+    background:
+      linear-gradient(180deg, rgba(247, 245, 240, 0.22), transparent 17%, rgba(0, 0, 0, 0.2) 78%, rgba(0, 0, 0, 0.38)),
+      radial-gradient(ellipse at 50% 12%, rgba(255, 255, 255, 0.28), transparent 34%),
+      repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.07) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 9px),
+      #213951;
+    box-shadow:
+      inset 0 -1.8rem 2.2rem rgba(0, 0, 0, 0.42),
+      inset 0 1.1rem 1.3rem rgba(247, 245, 240, 0.1),
+      inset 0 0 0 0.45rem rgba(19, 32, 47, 0.5),
+      0 1.4rem 2.2rem rgba(0, 0, 0, 0.34);
+  }
+
+  .roll-face::before,
+  .roll-face::after {
+    content: "";
+    position: absolute;
+    left: 11%;
+    right: 11%;
+    height: 0.18rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, rgba(247, 245, 240, 0.58), transparent);
+  }
+
+  .roll-face::before {
+    top: 29%;
+  }
+
+  .roll-face::after {
+    bottom: 29%;
+    opacity: 0.7;
+  }
+
+  .roll-core {
+    box-shadow:
+      inset 0.4rem 0.2rem 0.7rem rgba(255, 255, 255, 0.22),
+      inset -0.55rem -0.45rem 0.8rem rgba(0, 0, 0, 0.32),
+      0 0.55rem 0.8rem rgba(0, 0, 0, 0.26);
+  }
+
+  .roll-line {
+    height: 4px;
+    background: linear-gradient(90deg, transparent, rgba(247, 245, 240, 0.52), rgba(247, 245, 240, 0.3), transparent);
+    filter: blur(0.2px);
+  }
+
+  .fabric-panel {
+    top: calc(5% + clamp(5.2rem, 10vh, 7.4rem) * 0.55);
+    border-left: 1px solid rgba(220, 196, 127, 0.78);
+    border-right: 1px solid rgba(220, 196, 127, 0.78);
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.09), transparent 8%, transparent 88%, rgba(0, 0, 0, 0.24)),
+      radial-gradient(ellipse at 35% 7%, rgba(247, 245, 240, 0.16), transparent 35%),
+      repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.055) 0 1px, transparent 1px 10px),
+      repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 8px),
+      linear-gradient(115deg, #2a4866, #172b41 52%, #213a58);
+    box-shadow:
+      inset 1.2rem 0 1.6rem rgba(247, 245, 240, 0.045),
+      inset -1.45rem 0 2rem rgba(0, 0, 0, 0.24),
+      inset 0 -2.5rem 3.6rem rgba(0, 0, 0, 0.24),
+      0 2.4rem 4rem rgba(0, 0, 0, 0.36);
+  }
+
+  .fabric-panel::before,
+  .fabric-panel::after {
+    width: 1.8rem;
+    background:
+      repeating-linear-gradient(0deg, rgba(221, 204, 160, 0.78) 0 1px, transparent 1px 9px),
+      linear-gradient(90deg, rgba(221, 204, 160, 0.55), rgba(40, 55, 65, 0.1));
+    filter: drop-shadow(0.2rem 0 0.25rem rgba(0, 0, 0, 0.26));
+  }
+
+  .fabric-panel::before {
+    left: -1.9rem;
+  }
+
+  .fabric-panel::after {
+    right: -1.9rem;
+    transform: scaleX(-1);
+  }
+
+  .selvage {
+    position: absolute;
+    top: 0;
+    bottom: -0.2rem;
+    z-index: 2;
+    width: 0.9rem;
+    background:
+      linear-gradient(90deg, rgba(220, 196, 127, 0.88), rgba(220, 196, 127, 0.24), transparent),
+      repeating-linear-gradient(0deg, transparent 0 9px, rgba(247, 245, 240, 0.24) 9px 10px);
+    opacity: 0.95;
+  }
+
+  .selvage.left {
+    left: 0;
+  }
+
+  .selvage.right {
+    right: 0;
+    transform: scaleX(-1);
+  }
+
+  .fabric-depth {
+    position: absolute;
+    top: 0.4rem;
+    bottom: 0.4rem;
+    z-index: 1;
+    width: 2.8rem;
+    pointer-events: none;
+  }
+
+  .fabric-depth.left {
+    left: 1.2rem;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.14), transparent);
+  }
+
+  .fabric-depth.right {
+    right: 1.2rem;
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.28));
+  }
+
+  .fabric-bottom-shadow {
+    position: absolute;
+    left: 3%;
+    right: 3%;
+    bottom: -0.35rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.32);
+    filter: blur(10px);
+    pointer-events: none;
+  }
+
+  .weft {
+    background:
+      linear-gradient(95deg, rgba(247, 245, 240, 0.11), transparent 24%, rgba(247, 245, 240, 0.06) 55%, transparent),
+      radial-gradient(ellipse at 30% 12%, rgba(247, 245, 240, 0.16), transparent 38%),
+      radial-gradient(ellipse at 80% 86%, rgba(0, 0, 0, 0.18), transparent 42%);
+  }
+
+  .stitch-line {
+    width: 1px;
+    background: repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.72) 0 8px, transparent 8px 18px);
+    filter: drop-shadow(0.08rem 0.08rem 0 rgba(0, 0, 0, 0.24));
+  }
+
+  .fringe {
+    left: -1.15rem;
+    right: -1.15rem;
+    bottom: -3.75rem;
+    height: 4rem;
+  }
+
+  .fringe span {
+    width: calc(1px + (var(--i) % 4) * 0.35px);
+    height: calc(1.15rem + (var(--i) % 7) * 0.38rem);
+    background: linear-gradient(to bottom, rgba(224, 205, 150, 0.92), rgba(224, 205, 150, 0.28));
+    opacity: calc(0.52 + (var(--i) % 5) * 0.08);
+    transform: translateY(calc((var(--i) % 3) * -0.18rem)) rotate(calc(-20deg + (var(--i) % 11) * 4deg));
+  }
+
+  .studio-tool::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 78%;
+    z-index: -1;
+    width: 72%;
+    height: 24%;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.34);
+    filter: blur(10px);
+    transform: translate3d(-50%, -50%, -40px) rotateX(68deg);
+  }
+
+  .thread-roll {
+    height: min(11vw, 8.2rem);
+  }
+
+  .thread-roll::after {
+    content: "";
+    position: absolute;
+    left: 12%;
+    right: 0;
+    bottom: 8%;
+    height: 1.2rem;
+    border-bottom: 2px solid rgba(232, 220, 194, 0.78);
+    border-radius: 50%;
+    transform: rotate(8deg);
+  }
+
+  .bobbin {
+    left: 3%;
+    right: 3%;
+    top: 24%;
+    height: 52%;
+    border-color: rgba(30, 27, 23, 0.32);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.72), transparent 18%, rgba(0, 0, 0, 0.12) 80%),
+      #eee1c6;
+    box-shadow:
+      inset 0 -0.6rem 0.85rem rgba(0, 0, 0, 0.14),
+      inset 0 0.35rem 0.65rem rgba(255, 255, 255, 0.4);
+  }
+
+  .bobbin-cap {
+    position: absolute;
+    top: 15%;
+    z-index: 4;
+    width: 16%;
+    height: 70%;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 38% 34%, rgba(255, 255, 255, 0.82), transparent 18%),
+      radial-gradient(circle, #f1e4c9 0 36%, #b9aa8d 37% 54%, #eee1c6 55%);
+    box-shadow: inset -0.25rem -0.25rem 0.55rem rgba(0, 0, 0, 0.18), 0 0.3rem 0.45rem rgba(0, 0, 0, 0.18);
+  }
+
+  .bobbin-cap.left {
+    left: 0;
+  }
+
+  .bobbin-cap.right {
+    right: 0;
+  }
+
+  .thread {
+    top: 15%;
+    height: 70%;
+    border-radius: 30% / 50%;
+    box-shadow:
+      inset 0.4rem 0.25rem 0.55rem rgba(255, 255, 255, 0.2),
+      inset -0.6rem -0.2rem 0.8rem rgba(0, 0, 0, 0.3),
+      0 0.25rem 0.35rem rgba(0, 0, 0, 0.16);
+  }
+
+  .thread.red {
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.18), transparent 18%, rgba(0, 0, 0, 0.18) 85%),
+      repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.2) 0 2px, transparent 2px 6px),
+      #8c2a35;
+  }
+
+  .thread.cream {
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.34), transparent 20%, rgba(0, 0, 0, 0.12) 86%),
+      repeating-linear-gradient(0deg, rgba(30, 27, 23, 0.08) 0 2px, transparent 2px 6px),
+      #efe4c9;
+  }
+
+  .thread.sage {
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.22), transparent 18%, rgba(0, 0, 0, 0.18) 86%),
+      repeating-linear-gradient(0deg, rgba(247, 245, 240, 0.18) 0 2px, transparent 2px 6px),
+      #9ba77b;
+  }
+
+  .loose-thread {
+    position: absolute;
+    left: 15%;
+    right: -4%;
+    bottom: 10%;
+    height: 1.8rem;
+    border-bottom: 2px solid rgba(239, 228, 201, 0.7);
+    border-radius: 50%;
+    transform: rotate(12deg);
+    filter: drop-shadow(0 0.15rem 0.12rem rgba(0, 0, 0, 0.2));
+  }
+
+  .hoop-ring {
+    border: 0;
+    background:
+      radial-gradient(circle, transparent 0 50%, #d8a35f 51% 60%, #86572e 61% 68%, transparent 69%),
+      radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.45), transparent 28%);
+    box-shadow:
+      inset -0.7rem -0.7rem 1rem rgba(0, 0, 0, 0.22),
+      inset 0.55rem 0.45rem 0.7rem rgba(255, 255, 255, 0.24),
+      0 0.8rem 1.1rem rgba(0, 0, 0, 0.24);
+  }
+
+  .hoop-cloth {
+    background:
+      repeating-linear-gradient(90deg, rgba(30, 27, 23, 0.055) 0 1px, transparent 1px 9px),
+      repeating-linear-gradient(0deg, rgba(30, 27, 23, 0.045) 0 1px, transparent 1px 9px),
+      rgba(239, 231, 212, 0.9);
+    box-shadow: inset 0 -0.8rem 1rem rgba(0, 0, 0, 0.1), inset 0 0.5rem 0.8rem rgba(255, 255, 255, 0.45);
+  }
+
+  .hoop-screw {
+    box-shadow: inset 0 -0.25rem 0.2rem rgba(0, 0, 0, 0.28), 0 0.25rem 0.25rem rgba(0, 0, 0, 0.2);
+  }
+
+  .tablet {
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.14), transparent 30%),
+      linear-gradient(180deg, #303843, #171e27);
+    box-shadow:
+      inset 0 0 0 0.28rem rgba(0, 0, 0, 0.35),
+      inset 0 0.45rem 0.8rem rgba(255, 255, 255, 0.08),
+      0 1.2rem 1.7rem rgba(0, 0, 0, 0.32);
+  }
+
+  .tablet::after {
+    content: "";
+    position: absolute;
+    inset: 0.75rem 0.9rem auto 0.9rem;
+    height: 32%;
+    border-radius: 0.8rem;
+    background: linear-gradient(110deg, rgba(255, 255, 255, 0.18), transparent 55%);
+    pointer-events: none;
+  }
+
+  .screen {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.42), transparent 33%),
+      linear-gradient(180deg, #f1e7d0, #d8c8a9);
+    box-shadow: inset 0 0 0.6rem rgba(0, 0, 0, 0.13);
+  }
+
+  .palette-body {
+    border-color: rgba(30, 27, 23, 0.24);
+    background:
+      radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.64), transparent 20%),
+      linear-gradient(145deg, #f0dfbd, #c6a56f);
+    box-shadow:
+      inset -0.7rem -0.8rem 1rem rgba(0, 0, 0, 0.16),
+      inset 0.45rem 0.4rem 0.75rem rgba(255, 255, 255, 0.38),
+      0 1rem 1.3rem rgba(0, 0, 0, 0.26);
+  }
+
+  .paint {
+    box-shadow:
+      inset -0.2rem -0.24rem 0.25rem rgba(0, 0, 0, 0.26),
+      inset 0.12rem 0.12rem 0.16rem rgba(255, 255, 255, 0.44),
+      0 0.25rem 0.22rem rgba(0, 0, 0, 0.16);
+  }
+
+  .thumb-hole {
+    background: radial-gradient(circle at 35% 35%, #3a332b, #16130f 68%);
+    box-shadow: inset 0.18rem 0.18rem 0.28rem rgba(0, 0, 0, 0.58), 0 0.12rem 0.16rem rgba(255, 255, 255, 0.22);
+  }
+
+  .ruler {
+    height: 2.65rem;
+    border-color: rgba(30, 27, 23, 0.32);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.26), transparent 28%, rgba(0, 0, 0, 0.18)),
+      #d9bf73;
+    box-shadow:
+      inset 0 -0.55rem 0.45rem rgba(0, 0, 0, 0.16),
+      inset 0 0.25rem 0.3rem rgba(255, 255, 255, 0.36),
+      0 0.8rem 1rem rgba(0, 0, 0, 0.25);
+  }
+
+  .ruler::after {
+    content: "";
+    position: absolute;
+    left: 0.1rem;
+    right: 0.1rem;
+    bottom: -0.45rem;
+    height: 0.45rem;
+    background: #9b7732;
+    transform: skewX(-36deg);
+    opacity: 0.72;
+  }
+
+  .tape svg {
+    filter: drop-shadow(0 0.55rem 0.45rem rgba(0, 0, 0, 0.32));
+  }
+
+  .tape path {
+    stroke: #e4c768;
+    stroke-linecap: round;
+    stroke-width: 14;
+  }
+
+  .needle svg {
+    filter: drop-shadow(0 0.5rem 0.35rem rgba(0, 0, 0, 0.3));
+  }
+
+  .needle-body {
+    stroke: #f7f3e8;
+    stroke-width: 4.4;
+  }
+
+  .needle ellipse {
+    stroke: #f7f3e8;
+    stroke-width: 2.8;
+    filter: drop-shadow(0 0.08rem 0 rgba(0, 0, 0, 0.24));
+  }
+
+  .needle-thread {
+    stroke: #c78a91;
+    stroke-width: 2.8;
+  }
+
+  .pencil-body {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.34), transparent 37%, rgba(0, 0, 0, 0.16)),
+      #c7a25a;
+    box-shadow: inset 0 -0.3rem 0.25rem rgba(0, 0, 0, 0.18), 0 0.55rem 0.45rem rgba(0, 0, 0, 0.24);
+  }
+
+  .pencil-tip {
+    background: linear-gradient(90deg, #eadfc7, #ad8d54);
+    filter: drop-shadow(0 0.42rem 0.32rem rgba(0, 0, 0, 0.22));
+  }
+
+  .color-card {
+    border-color: rgba(30, 27, 23, 0.24);
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.82), transparent 36%),
+      #eadfc7;
+    box-shadow:
+      inset -0.25rem -0.25rem 0.55rem rgba(0, 0, 0, 0.08),
+      0 1.4rem 2.2rem rgba(0, 0, 0, 0.28);
+  }
+
+  .color-card::after {
+    content: "";
+    position: absolute;
+    left: 0.8rem;
+    right: 0.8rem;
+    bottom: -0.45rem;
+    height: 0.45rem;
+    background: rgba(120, 101, 71, 0.36);
+    transform: skewX(-28deg);
+  }
+
+  .world-card {
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.86), transparent 32%),
+      linear-gradient(135deg, rgba(247, 245, 240, 0.96), rgba(216, 203, 174, 0.96)),
+      #eadfc7;
+    box-shadow:
+      inset -0.4rem -0.4rem 0.7rem rgba(30, 27, 23, 0.09),
+      inset 0.35rem 0.3rem 0.5rem rgba(255, 255, 255, 0.42),
+      0 1.8rem 3rem rgba(0, 0, 0, 0.3),
+      0 0.2rem 0.35rem rgba(0, 0, 0, 0.22);
+  }
+
+  .world-card::after {
+    border-top-style: solid;
+    box-shadow: 0 0.16rem 0 rgba(255, 255, 255, 0.35);
+  }
+
+  .world-swatch {
+    box-shadow:
+      inset -0.35rem -0.45rem 0.6rem rgba(0, 0, 0, 0.18),
+      inset 0.25rem 0.25rem 0.4rem rgba(255, 255, 255, 0.28),
+      0 0.4rem 0.55rem rgba(0, 0, 0, 0.16);
+  }
+
+  .world-swatch::after {
+    content: "";
+    position: absolute;
+    inset: 0.45rem;
+    border: 1px dashed rgba(247, 245, 240, 0.38);
+    pointer-events: none;
+  }
+
   .bead-field {
     position: absolute;
     inset: 0;
@@ -1209,6 +1970,7 @@ const colorCards = [
     const panel = document.querySelector<HTMLElement>("[data-fabric-panel]");
     const roll = document.querySelector<HTMLElement>("[data-roll]");
     const tools = Array.from(document.querySelectorAll<HTMLElement>("[data-fall-tool]"));
+    const kinetics = Array.from(document.querySelectorAll<HTMLElement>("[data-kinetic-piece]"));
     const beads = Array.from(document.querySelectorAll<HTMLElement>("[data-bead]"));
     const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-color-card]"));
     const worldMap = document.querySelector<HTMLElement>("[data-world-map]");
@@ -1232,6 +1994,12 @@ const colorCards = [
         tool.style.opacity = "1";
         tool.style.transform = `translate(calc(-50% + ${num(tool, "--tx")}vw), calc(-50% + ${num(tool, "--ty")}vh)) rotate(${num(tool, "--rot")}deg)`;
       });
+      kinetics.forEach((piece) => {
+        piece.style.opacity = "0.78";
+        piece.style.setProperty("--kx-shift", "0vw");
+        piece.style.setProperty("--ky-shift", "0vh");
+        piece.style.setProperty("--spin", "0deg");
+      });
       cards.forEach((card) => {
         card.style.opacity = "1";
       });
@@ -1249,6 +2017,7 @@ const colorCards = [
     gsap.set(panel, { "--open": 0.035 });
     gsap.set(roll, { y: -26, rotate: -1.4 });
     gsap.set(tools, { autoAlpha: 0, x: 0, y: -80, rotate: 0, scale: 0.74 });
+    gsap.set(kinetics, { autoAlpha: 0, "--kx-shift": "0vw", "--ky-shift": "10vh", "--spin": "-10deg" });
     gsap.set(beads, { autoAlpha: 0, x: 0, y: -20, scale: 0.35 });
     gsap.set(cards, { autoAlpha: 0, y: 80, rotate: (index) => -10 + index * 4 });
     gsap.set(worlds, { autoAlpha: 0, "--world-y": "4rem" });
@@ -1288,6 +2057,14 @@ const colorCards = [
     timeline
       .to(panel, { "--open": 1, ease: "none", duration: 0.24 }, 0)
       .to(roll, { y: 0, rotate: 0, ease: "none", duration: 0.2 }, 0)
+      .to(kinetics, {
+        autoAlpha: 0.88,
+        "--ky-shift": "0vh",
+        "--spin": "0deg",
+        ease: "none",
+        stagger: { amount: 0.28, from: "random" },
+        duration: 0.28,
+      }, 0.06)
       .to(tools, {
         autoAlpha: 1,
         x: (_index, element) => `${num(element as HTMLElement, "--tx")}vw`,
@@ -1298,6 +2075,15 @@ const colorCards = [
         stagger: 0.035,
         duration: 0.34,
       }, 0.2)
+      .to(kinetics, {
+        "--kx-shift": (_index: number, element: Element) => `${num(element as HTMLElement, "--dx")}vw`,
+        "--ky-shift": (_index: number, element: Element) => `${num(element as HTMLElement, "--dy")}vh`,
+        "--spin": (_index: number) => (_index % 2 === 0 ? "12deg" : "-12deg"),
+        autoAlpha: 0.62,
+        ease: "none",
+        stagger: { amount: 0.18, from: "edges" },
+        duration: 0.42,
+      }, 0.38)
       .to(tools, {
         y: (_index, element) => `${num(element as HTMLElement, "--ty") + 3}vh`,
         rotate: (_index, element) => num(element as HTMLElement, "--rot") + (_index % 2 === 0 ? 4 : -4),
@@ -1323,6 +2109,13 @@ const colorCards = [
         stagger: 0.04,
         duration: 0.28,
       }, 0.62)
+      .to(kinetics, {
+        autoAlpha: 0.16,
+        "--ky-shift": (_index: number, element: Element) => `${num(element as HTMLElement, "--dy") - 12}vh`,
+        ease: "none",
+        stagger: { amount: 0.12, from: "random" },
+        duration: 0.2,
+      }, 0.76)
       .to(worlds, {
         autoAlpha: 1,
         "--world-y": "0rem",
