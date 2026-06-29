@@ -24,12 +24,15 @@ const PRIVATE_ROOT = path.join(ROOT, "private", "protected-images");
 const PUBLIC_ROOT = path.join(ROOT, "public", "images", "protected");
 // private/ is gitignored — a public-repo deploy (e.g. Render) never has it.
 // Render Secret Files land at /etc/secrets/<filename>, so a real protected
-// photo can reach the build that way instead — but Render's Secret File
-// editor is a plain-text box, so a raw binary image can't be pasted into it
-// directly. Base64-encode the photo into text first (pure ASCII, safe to
-// paste anywhere) and name the secret file "<projectId>-hero-real.<ext>.b64"
-// (e.g. "overrun-bomber-hero-real.jpg.b64"); this script decodes it back to
-// real image bytes before copying it into the public build.
+// photo can reach the build that way instead. Two supported forms, since
+// it's unclear up front which one Render's dashboard will actually accept
+// for a given file size:
+//  - "<projectId>-hero-real.<ext>" uploaded as the file itself (binary,
+//    via Render's upload/drag-and-drop) — read directly.
+//  - "<projectId>-hero-real.<ext>.b64" pasted as text into the Contents box
+//    (Render's Secret File editor is a plain-text field, so a raw binary
+//    image can't always be pasted directly — base64 dodges that, at the
+//    cost of being ~33% bigger) — decoded back to real bytes before use.
 const SECRETS_ROOT = "/etc/secrets";
 
 function loadDotEnvFallback() {
@@ -76,13 +79,18 @@ function resolveHeroSource(projectId) {
   }
 
   if (existsSync(SECRETS_ROOT)) {
-    const secretFile = readdirSync(SECRETS_ROOT).find(
-      (name) => name.startsWith(`${projectId}-hero-real`) && name.endsWith(".b64"),
-    );
-    if (secretFile) {
-      const ext = path.extname(secretFile.slice(0, -".b64".length));
-      const base64 = readFileSync(path.join(SECRETS_ROOT, secretFile), "utf8").trim();
+    const candidates = readdirSync(SECRETS_ROOT).filter((name) => name.startsWith(`${projectId}-hero-real`));
+
+    const base64File = candidates.find((name) => name.endsWith(".b64"));
+    if (base64File) {
+      const ext = path.extname(base64File.slice(0, -".b64".length));
+      const base64 = readFileSync(path.join(SECRETS_ROOT, base64File), "utf8").trim();
       return { ext, buffer: Buffer.from(base64, "base64") };
+    }
+
+    const rawFile = candidates[0];
+    if (rawFile) {
+      return { ext: path.extname(rawFile), buffer: readFileSync(path.join(SECRETS_ROOT, rawFile)) };
     }
   }
 
