@@ -6,16 +6,15 @@ import { getSegmentBySlug } from "../../../data/segments";
 import { projects, getProjectBySlug } from "../../../data/projects";
 
 export function getStaticPaths() {
-  // Protected projects have no case-study page in Phase 1 — they only
-  // ever appear as a locked card (see ProjectCard.astro + the gate modal).
-  return projects
-    .filter((project) => !project.protected)
-    .map((project) => ({
-      params: {
-        segment: getSegmentBySlug(project.segmentId)?.slug,
-        project: project.slug,
-      },
-    }));
+  // Every project gets a case-study page, protected or not — only the
+  // hero image is gated for protected ones (see the hero markup below
+  // and ProjectCard.astro for the matching grid-card behavior).
+  return projects.map((project) => ({
+    params: {
+      segment: getSegmentBySlug(project.segmentId)?.slug,
+      project: project.slug,
+    },
+  }));
 }
 
 const { segment: segmentSlug, project: projectSlug } = Astro.params;
@@ -27,7 +26,30 @@ const lookbookStage = project ? String(project.process.length + 1).padStart(2, "
 <BaseLayout title={`${project?.title ?? "Project"} — Girisha Suri`}>
   <main class="case-study">
     <section class="hero">
-      <img class="hero-image" src={project?.heroImage} alt={project?.heroAlt} />
+      {
+        project?.protected ? (
+          <button
+            type="button"
+            class="hero-image hero-gate"
+            data-gate-trigger
+            data-project-id={project.id}
+            data-project-title={project.title}
+            data-project-href={`/work/${segment?.slug}/${project.slug}`}
+            aria-haspopup="dialog"
+          >
+            <img src={project.heroImage} alt={project.heroAlt} />
+            <span class="hero-lock" data-role="lock-affordance">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="11" width="14" height="10" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg>
+              <span>Protected — enter password to view</span>
+            </span>
+          </button>
+        ) : (
+          <img class="hero-image" src={project?.heroImage} alt={project?.heroAlt} />
+        )
+      }
       <div class="hero-caption">
         <p class="kicker">
           {segment?.name}
@@ -72,6 +94,44 @@ const lookbookStage = project ? String(project.process.length + 1).padStart(2, "
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .hero-gate {
+    display: block;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+
+  .hero-gate img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-lock {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    color: var(--color-chalk);
+    background: color-mix(in srgb, var(--color-ink) 35%, transparent);
+  }
+
+  .hero-lock svg {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .hero-lock span {
+    font-size: var(--fs-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
   }
 
   .hero-caption {

@@ -3,14 +3,16 @@
  * paths below — nothing in the page templates needs to change. Paths
  * starting with /images/ resolve from public/images/ (see README).
  *
- * `protected: true` projects never get a case-study page in Phase 1 —
- * they only appear as a locked card (see ProjectCard.astro / the gate
- * modal). Their `heroImage` MUST point at a genuinely low-res, blurred,
+ * `protected: true` projects get a full case-study page like any other —
+ * only the hero image is gated (see [project].astro and ProjectCard.astro).
+ * Their `heroImage` MUST point at a genuinely low-res, blurred,
  * separately-exported file (see public/images/streetwear/overrun-bomber/
  * hero-blurred.svg) — never the real asset with a CSS blur on top. The
  * real source file lives outside public/ entirely (/private/protected-images,
  * gitignored) and only reaches the public build as a hashed filename — see
- * scripts/prepare-protected-assets.mjs and src/lib/clientGate.ts.
+ * scripts/prepare-protected-assets.mjs and src/lib/clientGate.ts. Process
+ * and lookbook images for a protected project are ordinary public files —
+ * only the final reveal shot is treated as sensitive.
  */
 
 export type ProcessSectionType = "research" | "inspiration" | "mood" | "mock" | "techpack" | "lookbook";
@@ -118,9 +120,53 @@ export const projects: Project[] = [
     description:
       "An unreleased bomber developed for a commercial client. Construction and finish detail available on request while the release stays under wraps.",
     tags: ["outerwear", "bomber", "commercial development", "unreleased", "technical outerwear"],
-    process: [],
-    lookbookImages: [],
-    lookbookAlt: [],
+    process: [
+      {
+        type: "research",
+        heading: "Research",
+        body: "The brief came in against an existing factory pattern block — a flight-jacket silhouette the client already had tooled up. The job was reconciling that constraint with a sharper, more current proportion without triggering a re-grade across their full size run.",
+        images: ["/images/streetwear/overrun-bomber/research.svg"],
+        alt: ["Reference tear sheet of flight-jacket archetypes annotated against the client's existing pattern block."],
+      },
+      {
+        type: "inspiration",
+        heading: "Inspiration",
+        body: "Vintage flight and field jackets for proportion, modern technical outerwear for the hardware — zip pulls, rib-knit trims, placement of the chest pocket. The client wanted nostalgic shape with current-season detailing.",
+        images: ["/images/streetwear/overrun-bomber/inspiration.svg"],
+        alt: ["Mood reference grid pairing archival flight jackets with current technical-outerwear hardware."],
+      },
+      {
+        type: "mood",
+        heading: "Mood",
+        body: "Ripstop nylon in the client's seasonal colourway, contrast rib at the collar and cuff, tonal topstitching rather than a contrast thread — quiet branding, no logo on the body.",
+        images: ["/images/streetwear/overrun-bomber/mood.svg"],
+        alt: ["Mood board with ripstop nylon swatch, rib-knit trim, and tonal topstitching thread."],
+      },
+      {
+        type: "mock",
+        heading: "Fit mock",
+        body: "First sample against the client's existing block, graded proportion checked across three sizes before committing to bulk. This is the stage that decides whether the brief's two constraints — nostalgic shape, no re-grade — actually hold together.",
+        images: ["/images/streetwear/overrun-bomber/mock.svg"],
+        alt: ["Fit sample of the bomber on a form, pinned for proportion adjustment."],
+      },
+      {
+        type: "techpack",
+        heading: "Tech pack",
+        body: "Full construction spec handed to the client's production floor: seam allowances, trim sourcing, placement grid for the chest pocket, and grading notes carried over from the original block.",
+        images: ["/images/streetwear/overrun-bomber/techpack.svg"],
+        alt: ["Technical flat sketch of the bomber with construction and trim-placement annotations."],
+      },
+    ],
+    lookbookImages: [
+      "/images/streetwear/overrun-bomber/lookbook-1.svg",
+      "/images/streetwear/overrun-bomber/lookbook-2.svg",
+      "/images/streetwear/overrun-bomber/lookbook-3.svg",
+    ],
+    lookbookAlt: [
+      "Lookbook image of the finished bomber worn, three-quarter front view.",
+      "Lookbook detail shot of the collar and zip hardware.",
+      "Lookbook image of the bomber laid flat, full back view.",
+    ],
   },
 ];
 

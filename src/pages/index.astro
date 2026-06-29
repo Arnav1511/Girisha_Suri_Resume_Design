@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import ThreadStitch from "../components/thread/ThreadStitch.astro";
+import ParticleAssemblyHero from "../components/thread/ParticleAssemblyHero.astro";
 import SegmentCard from "../components/cards/SegmentCard.astro";
 import { getOrderedSegments } from "../data/segments";
 
@@ -9,10 +9,9 @@ const segments = getOrderedSegments();
 
 <BaseLayout title="Girisha Suri — Fashion Design Portfolio">
   <main>
-    <div class="thread-scope" data-thread-scope>
-      <ThreadStitch />
-
-      <section class="hero">
+    <section class="hero" data-hero>
+      <div class="hero-veil" data-hero-veil></div>
+      <div class="hero-content">
         <p class="kicker">Fashion design portfolio</p>
         <h1>Girisha Suri</h1>
         <p class="tagline">
@@ -20,26 +19,93 @@ const segments = getOrderedSegments();
           and the spaces between.
         </p>
         <p class="scroll-cue">Scroll to explore</p>
-      </section>
+      </div>
+    </section>
 
-      <section class="segments" aria-label="Work by segment">
-        <ul>
-          {segments.map((segment, index) => (
-            <SegmentCard segment={segment} index={index} />
-          ))}
-        </ul>
-      </section>
-    </div>
+    <ParticleAssemblyHero
+      image="/images/landing/karigar-mark.jpg"
+      imageAlt="A karigar hand-stitching a running pattern into indigo cloth."
+      imageWidth={620}
+      imageHeight={795}
+    />
+
+    <div class="outro-fade" data-outro-fade></div>
+
+    <section class="segments" aria-label="Work by segment">
+      <ul>
+        {segments.map((segment, index) => (
+          <SegmentCard segment={segment} index={index} />
+        ))}
+      </ul>
+    </section>
   </main>
 </BaseLayout>
 
-<style>
-  .thread-scope {
-    position: relative;
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function setUp() {
+    const hero = document.querySelector<HTMLElement>("[data-hero]");
+    const veil = document.querySelector<HTMLElement>("[data-hero-veil]");
+    const outro = document.querySelector<HTMLElement>("[data-outro-fade]");
+    if (!hero || !veil || !outro) return;
+
+    if (window.__prefersReducedMotion) return;
+
+    const kicker = hero.querySelector(".kicker");
+    const h1 = hero.querySelector("h1");
+    const tagline = hero.querySelector(".tagline");
+    const cue = hero.querySelector(".scroll-cue");
+
+    // A dark veil rises from the bottom of the hero as you scroll — not a
+    // flat color swap on the whole section, an actual tide moving through
+    // it — so it always matches the (already-dark) assembly section right
+    // beneath it, with no hard seam at any scroll position. The text
+    // recedes (shrinks + lifts) rather than growing, and .hero clips
+    // anything that travels past its own edges so nothing ever
+    // double-exposes against the fixed header.
+    gsap.timeline({
+      scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true },
+    })
+      .fromTo(veil, { scaleY: 0 }, { scaleY: 1, ease: "none", duration: 1 }, 0)
+      .to([kicker, tagline, cue], { opacity: 0, y: -30, ease: "none", duration: 0.5 }, 0)
+      .to(h1, { opacity: 0, scale: 0.82, y: -36, ease: "none", duration: 0.5 }, 0);
+
+    // Mirror fade back to canvas in a dedicated buffer band, so the grid
+    // section itself never has to deal with a transitioning background.
+    gsap.to(outro, {
+      backgroundColor: "#E4E1D6",
+      ease: "none",
+      scrollTrigger: { trigger: outro, start: "top bottom", end: "bottom center", scrub: true },
+    });
   }
 
+  setUp();
+</script>
+
+<style>
   .hero {
-    min-height: 100vh;
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .hero-veil {
+    position: absolute;
+    inset: 0;
+    background: var(--color-ink);
+    transform: scaleY(0);
+    transform-origin: bottom center;
+    z-index: 0;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -63,6 +129,7 @@ const segments = getOrderedSegments();
     line-height: var(--lh-display);
     letter-spacing: var(--tracking-display);
     margin: 0;
+    transform-origin: center center;
   }
 
   .tagline {
@@ -78,6 +145,11 @@ const segments = getOrderedSegments();
     letter-spacing: var(--tracking-label);
     color: var(--color-text-muted);
     opacity: 0.7;
+  }
+
+  .outro-fade {
+    height: 30vh;
+    background: var(--color-ink);
   }
 
   .segments {

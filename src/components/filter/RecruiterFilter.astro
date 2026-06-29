@@ -314,6 +314,7 @@ const searchIndexJson = JSON.stringify(searchIndex).replace(/</g, "\\u003c");
       button.dataset.gateTrigger = "";
       button.dataset.projectId = entry.id;
       button.dataset.projectTitle = entry.title;
+      button.dataset.projectHref = entry.href;
       surface = button;
     } else {
       segment.textContent = entry.segmentName;

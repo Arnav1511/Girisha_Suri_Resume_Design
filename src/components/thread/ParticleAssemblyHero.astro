@@ -1,0 +1,300 @@
+---
+/**
+ * The landing-page signature moment: the karigar's photo is sliced into a
+ * grid of rigid rectangular plates, each carrying its own exact slice of
+ * the real photo. They start scattered and tumbling off-frame and fly
+ * together — translating and rotating as solid pieces, dbrand-plate style
+ * — locking edge-to-edge into the finished photo with zero gaps, because
+ * the grid is an exact partition of the image (no overlap margin, no
+ * sampling). Pinned and scrubbed to scroll, then settling before scroll
+ * continues normally into the segment list below.
+ *
+ * Each tile is a <clipPath> window onto the same full-resolution <image>,
+ * not a sampled colour swatch — so the pixels inside every tile are the
+ * real photo. That is the deliberate difference from an earlier version
+ * that sampled the photo into a Three.js particle field: at any particle
+ * count that performs well, that approach has visible gaps/pixelation,
+ * because each particle approximates a region's colour rather than
+ * showing it. A grid of exact tiles can never show a gap at rest, by
+ * construction — every tile's home rectangle is a precise, non-overlapping
+ * partition of the full image.
+ *
+ * The backdrop is the same photo, heavily blurred and darkened, filling
+ * the section behind the frame — so the surrounding space reads as an
+ * extension of the image's own colour rather than empty negative space.
+ *
+ * Respects prefers-reduced-motion: every tile is shown at its home
+ * position immediately (the photo reads as complete with no animation).
+ */
+interface Props {
+  image: string;
+  imageAlt: string;
+  imageWidth: number;
+  imageHeight: number;
+}
+
+const { image, imageAlt, imageWidth, imageHeight } = Astro.props;
+---
+
+<section class="assembly" data-assembly-root>
+  <div class="assembly-backdrop" aria-hidden="true">
+    <img src={image} alt="" />
+  </div>
+  <div class="assembly-frame">
+    <img class="assembly-sizer" src={image} alt={imageAlt} loading="eager" />
+    <svg
+      class="assembly-reveal"
+      data-assembly-reveal
+      data-image-href={image}
+      viewBox={`0 0 ${imageWidth} ${imageHeight}`}
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <defs data-assembly-defs></defs>
+      <g data-assembly-tiles></g>
+    </svg>
+  </div>
+  <p class="assembly-caption">Made by hand. Stitched into every piece.</p>
+</section>
+
+<style>
+  .assembly {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--color-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .assembly-backdrop {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .assembly-backdrop img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.2);
+    filter: blur(60px) brightness(0.38) saturate(1.15);
+  }
+
+  .assembly-backdrop::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 72% 68% at 50% 50%, transparent 0%, var(--color-ink) 88%);
+  }
+
+  .assembly-frame {
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+  }
+
+  .assembly-sizer {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: min(80vw, 64rem);
+    max-height: 84vh;
+    opacity: 0;
+  }
+
+  .assembly-reveal {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 3rem 7rem rgba(0, 0, 0, 0.55));
+  }
+
+  .assembly-caption {
+    position: absolute;
+    bottom: var(--space-xl);
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: var(--color-chalk);
+    font-size: var(--fs-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    opacity: 0;
+    z-index: 1;
+    transition: opacity var(--duration-slow) var(--ease-thread);
+  }
+
+  .assembly.is-settled .assembly-caption {
+    opacity: 0.85;
+  }
+
+  @media (max-width: 720px) {
+    .assembly-sizer {
+      max-width: 88vw;
+      max-height: 70vh;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const SVG_NS = "http://www.w3.org/2000/svg";
+
+  interface Tile {
+    g: SVGGElement;
+    seed: number;
+    cx: number;
+    cy: number;
+    fromX: number;
+    fromY: number;
+    fromR: number;
+    fromS: number;
+  }
+
+  // An exact grid partition of the photo — every tile's clip rectangle is
+  // a precise, non-overlapping slice (no rounding, no overlap margin), so
+  // once every tile reaches its home transform (identity), the tiles abut
+  // exactly and there is no possible gap. Each tile carries its own slice
+  // of the real <image> with it as it flies in, like a rigid plate.
+  function buildTileGrid(
+    defs: SVGDefsElement,
+    container: SVGGElement,
+    rows: number,
+    cols: number,
+    vbW: number,
+    vbH: number,
+    href: string,
+    instanceId: string,
+  ): Tile[] {
+    const tileW = vbW / cols;
+    const tileH = vbH / rows;
+    const tiles: Tile[] = [];
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = c * tileW;
+        const y = r * tileH;
+        const cx = x + tileW / 2;
+        const cy = y + tileH / 2;
+
+        // Clip rects overlap their neighbours by a hair (clamped to the
+        // image bounds) so adjacent tiles' anti-aliased edges double up
+        // instead of leaving a 1px seam once they're sitting flush.
+        const eps = Math.min(tileW, tileH) * 0.04;
+        const clipX = Math.max(0, x - eps);
+        const clipY = Math.max(0, y - eps);
+        const clipW = Math.min(vbW, x + tileW + eps) - clipX;
+        const clipH = Math.min(vbH, y + tileH + eps) - clipY;
+
+        const clipId = `assembly-clip-${instanceId}-${r}-${c}`;
+        const clipPath = document.createElementNS(SVG_NS, "clipPath");
+        clipPath.setAttribute("id", clipId);
+        const clipRect = document.createElementNS(SVG_NS, "rect");
+        clipRect.setAttribute("x", String(clipX));
+        clipRect.setAttribute("y", String(clipY));
+        clipRect.setAttribute("width", String(clipW));
+        clipRect.setAttribute("height", String(clipH));
+        clipPath.appendChild(clipRect);
+        defs.appendChild(clipPath);
+
+        const g = document.createElementNS(SVG_NS, "g");
+        g.setAttribute("clip-path", `url(#${clipId})`);
+        const img = document.createElementNS(SVG_NS, "image");
+        img.setAttribute("href", href);
+        img.setAttribute("x", "0");
+        img.setAttribute("y", "0");
+        img.setAttribute("width", String(vbW));
+        img.setAttribute("height", String(vbH));
+        g.appendChild(img);
+        container.appendChild(g);
+
+        const angle = Math.random() * Math.PI * 2;
+        const dist = vbW * (0.12 + Math.random() * 0.32);
+
+        tiles.push({
+          g,
+          seed: Math.random(),
+          cx,
+          cy,
+          fromX: Math.cos(angle) * dist,
+          fromY: Math.sin(angle) * dist,
+          fromR: (Math.random() - 0.5) * 150,
+          fromS: 0.55 + Math.random() * 0.25,
+        });
+      }
+    }
+    return tiles;
+  }
+
+  // Rotate/scale a tile around its own home centre, then offset by the
+  // remaining flight distance — composing to an exact identity transform
+  // (and therefore its precise grid slot) once the tile has fully arrived.
+  function applyTile(t: Tile, factor: number) {
+    const dx = t.fromX * (1 - factor);
+    const dy = t.fromY * (1 - factor);
+    const angle = t.fromR * (1 - factor);
+    const scale = t.fromS + (1 - t.fromS) * factor;
+    t.g.setAttribute(
+      "transform",
+      `translate(${dx} ${dy}) translate(${t.cx} ${t.cy}) rotate(${angle}) scale(${scale}) translate(${-t.cx} ${-t.cy})`,
+    );
+  }
+
+  function setUp() {
+    const root = document.querySelector<HTMLElement>("[data-assembly-root]");
+    const reveal = document.querySelector<SVGSVGElement>("[data-assembly-reveal]");
+    const defs = document.querySelector<SVGDefsElement>("[data-assembly-defs]");
+    const container = document.querySelector<SVGGElement>("[data-assembly-tiles]");
+    if (!root || !reveal || !defs || !container) return;
+
+    const href = reveal.dataset.imageHref ?? "";
+    const vbWidth = reveal.viewBox.baseVal.width || 1;
+    const vbHeight = reveal.viewBox.baseVal.height || 1;
+    const isMobile = window.matchMedia("(max-width: 720px)").matches;
+    const rows = isMobile ? 6 : 9;
+    const cols = isMobile ? 8 : 16;
+    const instanceId = Math.random().toString(36).slice(2, 8);
+
+    const tiles = buildTileGrid(defs, container, rows, cols, vbWidth, vbHeight, href, instanceId);
+
+    if (window.__prefersReducedMotion) {
+      tiles.forEach((t) => applyTile(t, 1));
+      root.classList.add("is-settled");
+      return;
+    }
+
+    tiles.forEach((t) => applyTile(t, 0));
+
+    ScrollTrigger.create({
+      trigger: root,
+      start: "top top",
+      end: "+=150%",
+      pin: true,
+      scrub: true,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        const spread = 0.6;
+
+        tiles.forEach((t) => {
+          const localStart = t.seed * (1 - spread);
+          const local = Math.min(1, Math.max(0, (progress - localStart) / spread));
+          const eased = local * local * (3 - 2 * local);
+          applyTile(t, eased);
+        });
+
+        if (progress > 0.97) root.classList.add("is-settled");
+        else root.classList.remove("is-settled");
+      },
+    });
+  }
+
+  setUp();
+</script>

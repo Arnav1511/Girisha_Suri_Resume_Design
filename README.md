@@ -43,6 +43,16 @@ deploys.
   (`work/[segment]/[project].astro`), `about.astro`.
 - **Components** — [src/components/](src/components/), grouped by concern
   (`thread/`, `cards/`, `gate/`, `filter/`, `scroll/`, `process/`, `layout/`).
+  The landing page's signature moment is
+  [thread/ParticleAssemblyHero.astro](src/components/thread/ParticleAssemblyHero.astro)
+  — the photo is sliced into a grid of rigid rectangular tiles (SVG
+  `clipPath` windows onto the real full-resolution image, not sampled
+  colour swatches), which scatter and tumble in from random positions and
+  lock edge-to-edge into the finished photo as you scroll (pinned,
+  scrubbed). Takes the image via props (`image`, `imageAlt`, `imageWidth`,
+  `imageHeight` — the last two must be the file's real pixel dimensions, used
+  as the SVG viewBox). Respects `prefers-reduced-motion` (shows the finished
+  photo directly, no animation) and uses a smaller grid on small viewports.
 - **Password-gate logic (active, static-hosting path)** —
   [src/lib/clientGate.ts](src/lib/clientGate.ts) and
   [scripts/prepare-protected-assets.mjs](scripts/prepare-protected-assets.mjs).
@@ -65,12 +75,17 @@ Edit [src/data/projects.ts](src/data/projects.ts) — add an entry to the
 `public/images/<segment>/<project-slug>/` and point the project's
 `heroImage`/`process[].images`/`lookbookImages` at them.
 
-- `protected: false` → gets a full case-study page automatically at
-  `/work/<segment>/<project-slug>`, built from the `process` array (ordered
-  research → inspiration → mood → mock → tech pack) plus a closing
-  `lookbookImages` gallery.
-- `protected: true` → no case-study page in Phase 1. It only ever appears as a
-  locked card; clicking it opens the password gate. You must also:
+Every project gets a full case-study page at `/work/<segment>/<project-slug>`,
+built from the `process` array (ordered research → inspiration → mood → mock →
+tech pack) plus a closing `lookbookImages` gallery — `protected` only changes
+what happens to the hero image:
+
+- `protected: false` → hero image renders normally.
+- `protected: true` → the grid card and the case-study hero both render the
+  blurred placeholder behind a lock affordance; clicking either opens the
+  password gate in place. Once unlocked in a browser (see
+  [src/lib/gateStorage.ts](src/lib/gateStorage.ts)), both self-unlock without
+  re-prompting. You must also:
   1. Add the real, full-resolution image as
      `/private/protected-images/<projectId>/hero-real.<ext>` (gitignored —
      never committed, this repo is public).
