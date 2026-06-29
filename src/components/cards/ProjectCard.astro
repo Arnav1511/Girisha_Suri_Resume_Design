@@ -13,35 +13,51 @@ const href = `/work/${segment?.slug}/${project.slug}`;
 
 <li class:list={["project-card", { "is-protected": project.protected }]}>
   {project.protected ? (
-    <button
-      type="button"
-      class="card-surface"
-      data-gate-trigger
-      data-project-id={project.id}
-      data-project-title={project.title}
-      data-project-href={href}
-      aria-haspopup="dialog"
-    >
-      <span class="image-wrap">
-        <img src={project.heroImage} alt={project.heroAlt} loading="lazy" width="1200" height="1500" />
-        <span class="lock" data-role="lock-affordance" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="5" y="11" width="14" height="10" rx="2" />
-            <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-          </svg>
+    <>
+      <button
+        type="button"
+        class="card-surface"
+        data-gate-trigger
+        data-project-id={project.id}
+        data-project-title={project.title}
+        data-project-href={href}
+        aria-haspopup="dialog"
+      >
+        <span class="image-wrap">
+          <img src={project.heroImage} alt={project.heroAlt} loading="lazy" width="1200" height="1500" />
+          <span class="lock" data-role="lock-affordance" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="11" width="14" height="10" rx="2" />
+              <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+            </svg>
+          </span>
         </span>
-      </span>
-      <span class="meta">
-        <span class="title-row">
-          <span class="title">{project.title}</span>
-          <span class="protected-tag" data-role="protected-tag">Viewable on request</span>
+        <span class="meta">
+          <span class="title-row">
+            <span class="title">{project.title}</span>
+            <span class="protected-tag" data-role="protected-tag">Viewable on request</span>
+          </span>
+          <span class="description">{project.description}</span>
+          <span class="tags">
+            {project.tags.map((tag) => <span class="tag">{tag}</span>)}
+          </span>
         </span>
-        <span class="description">{project.description}</span>
-        <span class="tags">
-          {project.tags.map((tag) => <span class="tag">{tag}</span>)}
-        </span>
-      </span>
-    </button>
+      </button>
+      <button
+        type="button"
+        class="relock-button"
+        data-gate-lock
+        data-project-id={project.id}
+        aria-label={`Lock ${project.title} again`}
+        title="Lock again"
+        hidden
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="5" y="11" width="14" height="10" rx="2" />
+          <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+        </svg>
+      </button>
+    </>
   ) : (
     <a class="card-surface" href={href}>
       <span class="image-wrap">
@@ -62,6 +78,7 @@ const href = `/work/${segment?.slug}/${project.slug}`;
 
 <style>
   .project-card {
+    position: relative;
     list-style: none;
   }
 
@@ -99,7 +116,8 @@ const href = `/work/${segment?.slug}/${project.slug}`;
     transform: scale(1.03);
   }
 
-  .lock {
+  .lock,
+  .relock-button {
     position: absolute;
     top: var(--space-sm);
     right: var(--space-sm);
@@ -113,7 +131,17 @@ const href = `/work/${segment?.slug}/${project.slug}`;
     border-radius: 50%;
   }
 
-  .lock svg {
+  .relock-button {
+    z-index: 2;
+    border: 1px solid color-mix(in srgb, var(--color-chalk) 35%, transparent);
+  }
+
+  .relock-button[hidden] {
+    display: none;
+  }
+
+  .lock svg,
+  .relock-button svg {
     width: 1.1rem;
     height: 1.1rem;
   }
