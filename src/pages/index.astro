@@ -74,12 +74,27 @@ import ParticleAssemblyHero from "../components/thread/ParticleAssemblyHero.astr
     position: relative;
     height: 100vh;
     overflow: hidden;
+    background:
+      linear-gradient(90deg, rgba(247, 245, 240, 0.025) 0 1px, transparent 1px 100%),
+      linear-gradient(0deg, rgba(247, 245, 240, 0.025) 0 1px, transparent 1px 100%),
+      #211f1c;
+    background-size: 78px 78px, 78px 78px, auto;
+  }
+
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 52% 42% at 50% 48%, rgba(247, 245, 240, 0.09), transparent 68%),
+      radial-gradient(ellipse 36% 34% at 24% 76%, rgba(140, 42, 53, 0.11), transparent 74%);
+    pointer-events: none;
   }
 
   .hero-veil {
     position: absolute;
     inset: 0;
-    background: var(--color-ink);
+    background: linear-gradient(to bottom, rgba(33, 31, 28, 0), #211f1c 55%);
     transform: scaleY(0);
     transform-origin: bottom center;
     z-index: 0;
@@ -102,7 +117,7 @@ import ParticleAssemblyHero from "../components/thread/ParticleAssemblyHero.astr
     font-size: var(--fs-label);
     text-transform: uppercase;
     letter-spacing: var(--tracking-label);
-    color: var(--color-text-muted);
+    color: color-mix(in srgb, var(--color-thread) 64%, var(--color-chalk));
   }
 
   .hero h1 {
@@ -112,13 +127,14 @@ import ParticleAssemblyHero from "../components/thread/ParticleAssemblyHero.astr
     line-height: var(--lh-display);
     letter-spacing: var(--tracking-display);
     margin: 0;
+    color: var(--color-chalk);
     transform-origin: center center;
   }
 
   .tagline {
     max-width: 34rem;
     font-size: var(--fs-body-lg);
-    color: var(--color-text-muted);
+    color: rgba(247, 245, 240, 0.7);
   }
 
   .scroll-cue {
@@ -126,7 +142,7 @@ import ParticleAssemblyHero from "../components/thread/ParticleAssemblyHero.astr
     font-size: var(--fs-label);
     text-transform: uppercase;
     letter-spacing: var(--tracking-label);
-    color: var(--color-text-muted);
+    color: rgba(247, 245, 240, 0.62);
     opacity: 0.7;
   }
 

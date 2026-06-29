@@ -45,13 +45,11 @@ deploys.
   (`thread/`, `cards/`, `gate/`, `filter/`, `scroll/`, `process/`, `layout/`).
   The landing page's signature moment is
   [thread/ParticleAssemblyHero.astro](src/components/thread/ParticleAssemblyHero.astro)
-  — an illustrated denim selvage fabric scroll unfurls on scroll. Thread
-  rolls, a needle, embroidery frame, tablet sketch, colour palette, ruler,
-  inch tape, pencil, and beads spill out in a rough watercolor style; the
-  portfolio segments then appear as tactile textile-study cards embedded in
-  the cloth, so Streetwear, Indo-Western, Evening Wear, Contemporary, and
-  Vendor/Client work are selected inside the scroll rather than from a
-  separate block grid. Respects
+  — an illustrated raw denim fabric scroll unfurls on scroll. The cloth stays
+  unbranded and texture-led, then studio objects and beads fall vertically with
+  weight, bounce, and settle near the bottom before a final "Go to" portfolio
+  menu appears for Streetwear, Indo-Western, Evening Wear, Contemporary, and
+  Vendor/Client work. Respects
   `prefers-reduced-motion` by showing the opened layout directly.
 - **Password-gate logic (active, static-hosting path)** —
   [src/lib/clientGate.ts](src/lib/clientGate.ts) and
