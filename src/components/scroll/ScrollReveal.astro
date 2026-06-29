@@ -1,0 +1,47 @@
+---
+/**
+ * Generic "settle into place" reveal for any element marked data-reveal.
+ * Used by long-form pages (case study, about) instead of one-off
+ * animation code per section — paced deliberately (45r, not a parade of
+ * effects): a single fade + gentle rise, once, the first time it enters
+ * view. Mount once per page that needs it.
+ */
+---
+
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function setUp() {
+    const targets = document.querySelectorAll<HTMLElement>("[data-reveal]");
+
+    if (window.__prefersReducedMotion) {
+      targets.forEach((el) => {
+        el.style.opacity = "1";
+      });
+      return;
+    }
+
+    targets.forEach((el) => {
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: 28 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: el,
+            start: "top 82%",
+            once: true,
+          },
+        },
+      );
+    });
+  }
+
+  setUp();
+</script>

@@ -1,0 +1,172 @@
+---
+import type { Project } from "../../data/projects";
+import { getSegmentBySlug } from "../../data/segments";
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const segment = getSegmentBySlug(project.segmentId);
+const href = `/work/${segment?.slug}/${project.slug}`;
+---
+
+<li class:list={["project-card", { "is-protected": project.protected }]}>
+  {project.protected ? (
+    <button
+      type="button"
+      class="card-surface"
+      data-gate-trigger
+      data-project-id={project.id}
+      data-project-title={project.title}
+      aria-haspopup="dialog"
+    >
+      <span class="image-wrap">
+        <img src={project.heroImage} alt={project.heroAlt} loading="lazy" width="1200" height="1500" />
+        <span class="lock" data-role="lock-affordance" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="11" width="14" height="10" rx="2" />
+            <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+          </svg>
+        </span>
+      </span>
+      <span class="meta">
+        <span class="title-row">
+          <span class="title">{project.title}</span>
+          <span class="protected-tag" data-role="protected-tag">Viewable on request</span>
+        </span>
+        <span class="description">{project.description}</span>
+        <span class="tags">
+          {project.tags.map((tag) => <span class="tag">{tag}</span>)}
+        </span>
+      </span>
+    </button>
+  ) : (
+    <a class="card-surface" href={href}>
+      <span class="image-wrap">
+        <img src={project.heroImage} alt={project.heroAlt} loading="lazy" width="1200" height="1500" />
+      </span>
+      <span class="meta">
+        <span class="title-row">
+          <span class="title">{project.title}</span>
+        </span>
+        <span class="description">{project.description}</span>
+        <span class="tags">
+          {project.tags.map((tag) => <span class="tag">{tag}</span>)}
+        </span>
+      </span>
+    </a>
+  )}
+</li>
+
+<style>
+  .project-card {
+    list-style: none;
+  }
+
+  .card-surface {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    text-align: left;
+    text-decoration: none;
+    color: var(--color-text);
+    width: 100%;
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .image-wrap {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-raised);
+  }
+
+  .image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-slow) var(--ease-thread);
+  }
+
+  .card-surface:hover .image-wrap img,
+  .card-surface:focus-visible .image-wrap img {
+    transform: scale(1.03);
+  }
+
+  .lock {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
+    width: 2.25rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--color-ink) 70%, transparent);
+    color: var(--color-chalk);
+    border-radius: 50%;
+  }
+
+  .lock svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-sm);
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fv-h3);
+    font-size: var(--fs-h3);
+  }
+
+  .protected-tag {
+    font-size: var(--fs-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-accent);
+    white-space: nowrap;
+  }
+
+  .description {
+    color: var(--color-text-muted);
+    font-size: var(--fs-small);
+    max-width: 28rem;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity var(--duration-base) var(--ease-thread);
+  }
+
+  .card-surface:hover .description,
+  .card-surface:focus-visible .description {
+    opacity: 1;
+    max-height: 6rem;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+  }
+
+  .tag {
+    font-size: var(--fs-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.2em 0.6em;
+  }
+</style>

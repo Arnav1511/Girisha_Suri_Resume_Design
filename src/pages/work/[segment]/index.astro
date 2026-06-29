@@ -1,0 +1,100 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ProjectCard from "../../../components/cards/ProjectCard.astro";
+import { segments, getSegmentBySlug } from "../../../data/segments";
+import { getProjectsBySegment } from "../../../data/projects";
+
+export function getStaticPaths() {
+  return segments.map((segment) => ({ params: { segment: segment.slug } }));
+}
+
+const { segment: segmentSlug } = Astro.params;
+const segment = getSegmentBySlug(segmentSlug as string);
+const segmentProjects = segment ? getProjectsBySegment(segment.id) : [];
+---
+
+<BaseLayout title={`${segment?.name ?? "Work"} — Girisha Suri`}>
+  <main class="segment-page">
+    <header class="segment-head">
+      <p class="kicker">Work</p>
+      <h1>{segment?.name}</h1>
+      <p class="blurb">{segment?.blurb}</p>
+    </header>
+
+    {
+      segmentProjects.length > 0 ? (
+        <ul class="grid">
+          {segmentProjects.map((project) => (
+            <ProjectCard project={project} />
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">
+          Projects for this segment arrive in Phase 2 — the pattern is proved out on
+          <a href="/work/streetwear">Streetwear</a> for now.
+        </p>
+      )
+    }
+  </main>
+</BaseLayout>
+
+<style>
+  .segment-page {
+    max-width: var(--max-width-wide);
+    margin: 0 auto;
+    padding: calc(var(--space-3xl) + var(--space-md)) var(--page-gutter) var(--space-3xl);
+  }
+
+  .segment-head {
+    max-width: var(--measure-prose);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .kicker {
+    font-size: var(--fs-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--color-text-muted);
+  }
+
+  .segment-head h1 {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fv-h1);
+    font-size: var(--fs-h1);
+    margin: var(--space-2xs) 0 var(--space-sm);
+  }
+
+  .blurb {
+    color: var(--color-text-muted);
+    font-size: var(--fs-body-lg);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: var(--space-xl) var(--space-lg);
+    align-items: start;
+  }
+
+  .grid li:nth-child(2) {
+    margin-top: var(--space-2xl);
+  }
+
+  .empty {
+    color: var(--color-text-muted);
+  }
+
+  .empty a {
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 760px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .grid li:nth-child(2) {
+      margin-top: 0;
+    }
+  }
+</style>

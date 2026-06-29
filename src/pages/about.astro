@@ -1,0 +1,156 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ScrollReveal from "../components/scroll/ScrollReveal.astro";
+import { getOrderedSegments } from "../data/segments";
+import { projects } from "../data/projects";
+
+const segments = getOrderedSegments();
+const skills = [...new Set(projects.flatMap((project) => project.tags))].sort();
+---
+
+<BaseLayout title="About — Girisha Suri" description="About Girisha Suri — fashion designer working across streetwear, evening wear, and contemporary ready-to-wear.">
+  <main class="about">
+    <section class="intro" data-reveal>
+      <div class="portrait">
+        <img src="/images/about/portrait.svg" alt="Portrait of Girisha Suri" loading="lazy" width="900" height="1100" />
+      </div>
+      <div class="intro-copy">
+        <p class="kicker">About</p>
+        <h1>Girisha Suri</h1>
+        <p>
+          A fashion designer working across commercial development and couture-level finishing —
+          building pieces that hold up under both a stylist's eye and a production line. The
+          common thread, literally: construction that's honest about how it's made, dressed up
+          with just enough hand-finishing to feel considered rather than mass-produced.
+        </p>
+        <p>
+          Comfortable moving between a client's brief and a personal point of view — developing
+          for other labels one season, building an independent capsule the next, and bringing the
+          same attention to seam allowance and surface detail to both.
+        </p>
+        <p class="contact">
+          <a href="mailto:hello@girishasuri.example">hello@girishasuri.example</a>
+        </p>
+      </div>
+    </section>
+
+    <section class="segments-spanned" data-reveal>
+      <p class="kicker">Segments</p>
+      <ul>
+        {segments.map((segment) => (
+          <li>
+            <h2><a href={`/work/${segment.slug}`}>{segment.name}</a></h2>
+            <p>{segment.blurb}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="skills" data-reveal>
+      <p class="kicker">Techniques &amp; materials</p>
+      <ul>
+        {skills.map((skill) => <li>{skill}</li>)}
+      </ul>
+    </section>
+  </main>
+  <ScrollReveal />
+</BaseLayout>
+
+<style>
+  .about {
+    max-width: var(--max-width-content);
+    margin: 0 auto;
+    padding: calc(var(--space-3xl) + var(--space-md)) var(--page-gutter) var(--space-3xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xl);
+  }
+
+  .kicker {
+    font-size: var(--fs-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-sm);
+  }
+
+  .intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .portrait img {
+    width: 100%;
+    border-radius: var(--radius-md);
+  }
+
+  .intro-copy h1 {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fv-h1);
+    font-size: var(--fs-h1);
+    margin-bottom: var(--space-md);
+  }
+
+  .intro-copy p {
+    max-width: var(--measure-prose);
+    margin-bottom: var(--space-sm);
+  }
+
+  .contact a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .segments-spanned ul {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+  }
+
+  .segments-spanned h2 {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fv-h3);
+    font-size: var(--fs-h3);
+    margin-bottom: var(--space-3xs);
+  }
+
+  .segments-spanned a {
+    text-decoration: none;
+    color: var(--color-text);
+  }
+
+  .segments-spanned a:hover {
+    color: var(--color-accent);
+  }
+
+  .segments-spanned p {
+    color: var(--color-text-muted);
+    font-size: var(--fs-small);
+    max-width: 26rem;
+  }
+
+  .skills ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+  }
+
+  .skills li {
+    font-size: var(--fs-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.3em 0.7em;
+  }
+
+  @media (max-width: 760px) {
+    .intro,
+    .segments-spanned ul {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

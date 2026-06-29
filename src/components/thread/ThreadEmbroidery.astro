@@ -1,0 +1,115 @@
+---
+/**
+ * The thread-into-embroidery interaction (brief 6.6) — the proof of
+ * concept for every bespoke scroll interaction on the site. A coiled
+ * thread unwinds into a running-stitch trace as the visitor scrolls past
+ * the mock; the underlying image sharpens and settles in step, so the
+ * thread reads as becoming the embroidery rather than sitting on top of
+ * it. Driven by scroll position only — no autoplay, no loop, reversible
+ * if the visitor scrolls back up.
+ *
+ * Self-contained and reusable: a second interaction type (`measure-scale`,
+ * Phase 2) follows the same contract — a root element, a base image, and
+ * an SVG path animated against the same ScrollTrigger progress value.
+ *
+ * The path below is a placeholder trace (spiral -> running stitch). Once
+ * the real embroidery photography replaces mock-embroidery.svg, redraw
+ * `d` to actually follow the embroidered motif in that image — the script
+ * needs no changes for that, it just measures whatever path is here.
+ */
+interface Props {
+  image: string;
+  imageAlt: string;
+}
+
+const { image, imageAlt } = Astro.props;
+---
+
+<div class="thread-embroidery" data-thread-embroidery>
+  <img class="base-image" src={image} alt={imageAlt} loading="lazy" width="1200" height="1500" />
+  <svg class="thread-overlay" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <path
+      class="unwind-path"
+      d="M 64 70
+         C 92 44, 118 46, 114 76
+         C 110 106, 76 108, 73 80
+         C 71 58, 96 52, 110 64
+         L 150 96
+         C 176 118, 168 152, 142 162
+         C 210 188, 244 222, 220 256
+         C 196 290, 246 316, 280 300
+         C 306 288, 332 308, 316 334
+         C 300 358, 264 364, 246 382
+         C 232 396, 236 414, 256 420"
+    />
+  </svg>
+</div>
+
+<style>
+  .thread-embroidery {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-raised);
+    --progress: 0;
+  }
+
+  .base-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: calc(0.55 + var(--progress) * 0.45);
+    filter: blur(calc((1 - var(--progress)) * 3px)) saturate(calc(0.7 + var(--progress) * 0.3));
+  }
+
+  .thread-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .unwind-path {
+    fill: none;
+    stroke: var(--color-thread);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>
+
+<script>
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  function setUp() {
+    document.querySelectorAll<HTMLElement>("[data-thread-embroidery]").forEach((root) => {
+      const path = root.querySelector<SVGPathElement>(".unwind-path");
+      if (!path) return;
+
+      const length = path.getTotalLength();
+      path.style.strokeDasharray = `${length}`;
+
+      if (window.__prefersReducedMotion) {
+        path.style.strokeDashoffset = "0";
+        root.style.setProperty("--progress", "1");
+        return;
+      }
+
+      path.style.strokeDashoffset = `${length}`;
+
+      ScrollTrigger.create({
+        trigger: root,
+        start: "top 75%",
+        end: "bottom 45%",
+        scrub: true,
+        onUpdate: (self) => {
+          path.style.strokeDashoffset = `${length * (1 - self.progress)}`;
+          root.style.setProperty("--progress", `${self.progress}`);
+        },
+      });
+    });
+  }
+
+  setUp();
+</script>

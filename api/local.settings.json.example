@@ -1,0 +1,9 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "AzureWebJobsStorage": "",
+    "UNLOCK_PASSWORDS": "{\"overrun-bomber\":\"thread2024\"}",
+    "UNLOCK_TOKEN_SECRET": "replace-with-a-long-random-string"
+  }
+}

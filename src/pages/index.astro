@@ -1,0 +1,92 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ThreadStitch from "../components/thread/ThreadStitch.astro";
+import SegmentCard from "../components/cards/SegmentCard.astro";
+import { getOrderedSegments } from "../data/segments";
+
+const segments = getOrderedSegments();
+---
+
+<BaseLayout title="Girisha Suri — Fashion Design Portfolio">
+  <main>
+    <div class="thread-scope" data-thread-scope>
+      <ThreadStitch />
+
+      <section class="hero">
+        <p class="kicker">Fashion design portfolio</p>
+        <h1>Girisha Suri</h1>
+        <p class="tagline">
+          Commercial discipline, couture finishing — built across streetwear, evening wear,
+          and the spaces between.
+        </p>
+        <p class="scroll-cue">Scroll to explore</p>
+      </section>
+
+      <section class="segments" aria-label="Work by segment">
+        <ul>
+          {segments.map((segment, index) => (
+            <SegmentCard segment={segment} index={index} />
+          ))}
+        </ul>
+      </section>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .thread-scope {
+    position: relative;
+  }
+
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--space-md);
+    padding: var(--space-xl) var(--page-gutter);
+  }
+
+  .kicker {
+    font-size: var(--fs-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--color-text-muted);
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fv-hero);
+    font-size: var(--fs-hero);
+    line-height: var(--lh-display);
+    letter-spacing: var(--tracking-display);
+    margin: 0;
+  }
+
+  .tagline {
+    max-width: 34rem;
+    font-size: var(--fs-body-lg);
+    color: var(--color-text-muted);
+  }
+
+  .scroll-cue {
+    margin-top: var(--space-2xl);
+    font-size: var(--fs-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--color-text-muted);
+    opacity: 0.7;
+  }
+
+  .segments {
+    max-width: var(--max-width-content);
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--page-gutter) var(--space-3xl);
+  }
+
+  .segments ul {
+    border-bottom: 1px solid var(--color-border);
+  }
+</style>

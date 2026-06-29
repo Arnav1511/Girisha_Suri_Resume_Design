@@ -1,0 +1,75 @@
+/**
+ * Minimal global reset + base element styles. Component-level styling
+ * stays scoped inside .astro components; this file only sets the things
+ * that must apply document-wide (box model, base type, focus visibility).
+ */
+@import "@fontsource-variable/fraunces/full.css";
+@import "@fontsource-variable/hanken-grotesk/wght.css";
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-bg);
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+/* Visible keyboard focus everywhere — never suppressed. */
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+figure {
+  margin: 0;
+}
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Reveal baseline: ScrollReveal.astro fades these in via GSAP, including
+   the prefers-reduced-motion branch. If JS never runs (disabled/blocked),
+   the noscript rule below keeps content visible rather than hiding it. */
+[data-reveal] {
+  opacity: 0;
+}

@@ -1,0 +1,116 @@
+/**
+ * Design tokens — the single source of truth for every brand/aesthetic
+ * value in the codebase. Components reference these custom properties;
+ * nothing hardcodes a color, font, size, or timing directly. Tune the
+ * site's whole look by editing this file.
+ *
+ * Palette names are drawn from garment-construction materials (raw
+ * canvas, tailor's chalk, embroidery thread) rather than generic brand
+ * labels — see the design plan for the reasoning. `--color-stone` is
+ * decorative only (dividers, disabled states) — its contrast against
+ * canvas is too low for text.
+ */
+
+:root {
+  /* ---- Color: raw values ---- */
+  --color-canvas: #e4e1d6;
+  --color-ink: #1e1b17;
+  --color-chalk: #f7f5f0;
+  --color-thread: #8c2a35;
+  --color-thread-dim: #b97e84; /* thread at reduced emphasis: disabled / quiet hover */
+  --color-stone: #9a9690;
+
+  /* ---- Color: semantic roles ---- */
+  --color-bg: var(--color-canvas);
+  --color-bg-raised: var(--color-chalk);
+  --color-bg-inverted: var(--color-ink);
+  --color-text: var(--color-ink);
+  --color-text-muted: var(--color-stone);
+  --color-text-inverted: var(--color-chalk);
+  --color-accent: var(--color-thread);
+  --color-border: color-mix(in srgb, var(--color-stone) 45%, transparent);
+  --color-focus-ring: var(--color-thread);
+
+  /* ---- Type: families ---- */
+  --font-display: "Fraunces Variable", "Iowan Old Style", serif;
+  --font-body: "Hanken Grotesk Variable", "Hanken Grotesk", system-ui, sans-serif;
+
+  /* ---- Type: Fraunces variation axes ----
+     opsz scales the display face's character with size: pushed high for
+     hero-scale text, pulled down as headings get smaller and closer to
+     text-like sizes. SOFT stays moderate throughout ("playful luxury"
+     without going twee). WONK is reserved for the landing hero only. */
+  --opsz-hero: 144;
+  --opsz-h1: 96;
+  --opsz-h2: 48;
+  --opsz-h3: 28;
+  --soft-display: 38;
+  --wonk-off: 0;
+  --wonk-on: 1;
+
+  --fv-hero: "opsz" var(--opsz-hero), "SOFT" var(--soft-display), "WONK" var(--wonk-on);
+  --fv-h1: "opsz" var(--opsz-h1), "SOFT" var(--soft-display), "WONK" var(--wonk-off);
+  --fv-h2: "opsz" var(--opsz-h2), "SOFT" var(--soft-display), "WONK" var(--wonk-off);
+  --fv-h3: "opsz" var(--opsz-h3), "SOFT" var(--soft-display), "WONK" var(--wonk-off);
+
+  /* ---- Type: scale ---- */
+  --fs-hero: clamp(3.5rem, 11vw, 9rem);
+  --fs-h1: clamp(2.25rem, 6vw, 4.5rem);
+  --fs-h2: clamp(1.5rem, 3.4vw, 2.5rem);
+  --fs-h3: clamp(1.125rem, 2vw, 1.5rem);
+  --fs-body: 1rem;
+  --fs-body-lg: 1.125rem;
+  --fs-small: 0.875rem;
+  --fs-label: 0.75rem;
+
+  --lh-display: 1.05;
+  --lh-body: 1.6;
+
+  --tracking-label: 0.14em;
+  --tracking-display: -0.01em;
+
+  /* ---- Spacing scale ---- */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2.5rem;
+  --space-xl: 4rem;
+  --space-2xl: 6.5rem;
+  --space-3xl: 10rem;
+
+  /* ---- Layout ---- */
+  --measure-prose: 38rem; /* ~62-68ch at body size */
+  --max-width-content: 72rem;
+  --max-width-wide: 96rem;
+  --page-gutter: clamp(1.25rem, 5vw, 4rem);
+
+  /* ---- Radii ---- */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+
+  /* ---- Motion ----
+     One calm, deliberate ease for everything scroll-driven — no bounce,
+     no overshoot. Durations are intentionally unhurried (45r pacing). */
+  --ease-thread: cubic-bezier(0.22, 0.61, 0.18, 0.99);
+  --duration-fast: 0.2s;
+  --duration-base: 0.45s;
+  --duration-slow: 0.9s;
+
+  /* ---- Protected placeholder ----
+     Decorative only: the real security blur is baked into the exported
+     low-res asset at build time (see src/server/protectedAssets.ts).
+     This token is a *small* supplementary blur used for hover/loading
+     transitions on that already-safe asset — never applied to a
+     full-resolution image. */
+  --protected-blur-overlay: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0.01s;
+    --duration-base: 0.01s;
+    --duration-slow: 0.01s;
+  }
+}

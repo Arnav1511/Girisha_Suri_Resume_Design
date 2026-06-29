@@ -1,0 +1,91 @@
+---
+/**
+ * The signature element: a single running-stitch line that draws itself
+ * as the visitor scrolls from the hero into segment selection.
+ *
+ * Convention, not props: this component positions itself absolutely and
+ * fills the nearest ancestor carrying `data-thread-scope` — wrap the hero
+ * + segment-selection block in that attribute on the page and this just
+ * works. Texture (the dash/gap stitch pattern) and reveal (how much of
+ * the line has "been sewn") are deliberately decoupled — see the script
+ * below — so the stitch always looks handmade regardless of scroll speed.
+ */
+---
+
+<div class="thread-stitch" aria-hidden="true">
+  <svg viewBox="0 0 60 1000" preserveAspectRatio="none">
+    <path
+      class="thread-path"
+      d="M 30 0
+         C 10 60, 50 110, 30 170
+         C 12 225, 48 270, 30 330
+         C 14 380, 46 420, 30 480
+         C 16 530, 44 565, 30 620
+         C 18 665, 42 695, 30 740
+         C 20 780, 40 805, 30 840
+         C 22 875, 38 895, 30 920
+         L 30 1000"
+    />
+  </svg>
+</div>
+
+<style>
+  .thread-stitch {
+    position: absolute;
+    inset: 0;
+    width: clamp(24px, 2vw, 36px);
+    /* Sits inside the page-gutter margin, left of all content in both the
+       centered hero text and the segment list's number column — never
+       crosses a line of text at any viewport width. */
+    left: calc(var(--page-gutter) / 2);
+    pointer-events: none;
+    z-index: 1;
+    /* Driven by ThreadStitch's own script via ScrollTrigger.onUpdate. */
+    --reveal: 0%;
+    clip-path: inset(0 0 calc(100% - var(--reveal)) 0);
+  }
+
+  .thread-stitch svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .thread-path {
+    fill: none;
+    stroke: var(--color-thread);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    /* Permanent running-stitch texture — never animated. */
+    stroke-dasharray: 9 7;
+  }
+
+</style>
+
+<script>
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  function setUp() {
+    const scope = document.querySelector<HTMLElement>("[data-thread-scope]");
+    const stitch = document.querySelector<HTMLElement>(".thread-stitch");
+    if (!scope || !stitch) return;
+
+    if (window.__prefersReducedMotion) {
+      stitch.style.setProperty("--reveal", "100%");
+      return;
+    }
+
+    ScrollTrigger.create({
+      trigger: scope,
+      start: "top top",
+      end: "bottom bottom",
+      scrub: true,
+      onUpdate: (self) => {
+        stitch.style.setProperty("--reveal", `${self.progress * 100}%`);
+      },
+    });
+  }
+
+  // Module scripts run after the document is parsed, so the rest of the
+  // page (including the [data-thread-scope] wrapper) is already in the DOM.
+  setUp();
+</script>

@@ -1,0 +1,142 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ProcessSection from "../../../components/process/ProcessSection.astro";
+import ScrollReveal from "../../../components/scroll/ScrollReveal.astro";
+import { getSegmentBySlug } from "../../../data/segments";
+import { projects, getProjectBySlug } from "../../../data/projects";
+
+export function getStaticPaths() {
+  // Protected projects have no case-study page in Phase 1 — they only
+  // ever appear as a locked card (see ProjectCard.astro + the gate modal).
+  return projects
+    .filter((project) => !project.protected)
+    .map((project) => ({
+      params: {
+        segment: getSegmentBySlug(project.segmentId)?.slug,
+        project: project.slug,
+      },
+    }));
+}
+
+const { segment: segmentSlug, project: projectSlug } = Astro.params;
+const segment = getSegmentBySlug(segmentSlug as string);
+const project = segment ? getProjectBySlug(segment.id, projectSlug as string) : undefined;
+const lookbookStage = project ? String(project.process.length + 1).padStart(2, "0") : "";
+---
+
+<BaseLayout title={`${project?.title ?? "Project"} — Girisha Suri`}>
+  <main class="case-study">
+    <section class="hero">
+      <img class="hero-image" src={project?.heroImage} alt={project?.heroAlt} />
+      <div class="hero-caption">
+        <p class="kicker">
+          {segment?.name}
+          {project?.year ? ` · ${project.year}` : ""}
+        </p>
+        <h1>{project?.title}</h1>
+      </div>
+      <p class="scroll-cue">Scroll for the process</p>
+    </section>
+
+    <div class="process">
+      {project?.process.map((section, index) => <ProcessSection section={section} index={index} />)}
+    </div>
+
+    {
+      project && project.lookbookImages.length > 0 && (
+        <section class="lookbook" data-reveal>
+          <p class="stage">{lookbookStage} — LOOKBOOK</p>
+          <div class="lookbook-grid">
+            {project.lookbookImages.map((src, i) => (
+              <img src={src} alt={project.lookbookAlt[i]} loading="lazy" width="1200" height="1500" />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </main>
+  <ScrollReveal />
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .hero-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-caption {
+    position: relative;
+    z-index: 1;
+    padding: var(--space-xl) var(--page-gutter) var(--space-2xl);
+    color: var(--color-chalk);
+    background: linear-gradient(to top, color-mix(in srgb, var(--color-ink) 55%, transparent), transparent);
+    width: 100%;
+  }
+
+  .kicker {
+    font-size: var(--fs-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    opacity: 0.85;
+  }
+
+  .hero-caption h1 {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fv-h1);
+    font-size: var(--fs-h1);
+    margin-top: var(--space-2xs);
+  }
+
+  .scroll-cue {
+    position: absolute;
+    bottom: var(--space-md);
+    right: var(--page-gutter);
+    z-index: 1;
+    color: var(--color-chalk);
+    font-size: var(--fs-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    opacity: 0.75;
+  }
+
+  .lookbook {
+    max-width: var(--max-width-wide);
+    margin: 0 auto;
+    padding: var(--space-3xl) var(--page-gutter) var(--space-3xl);
+  }
+
+  .lookbook .stage {
+    font-size: var(--fs-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+  }
+
+  .lookbook-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+  }
+
+  .lookbook-grid img {
+    width: 100%;
+    border-radius: var(--radius-md);
+  }
+
+  @media (max-width: 760px) {
+    .lookbook-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

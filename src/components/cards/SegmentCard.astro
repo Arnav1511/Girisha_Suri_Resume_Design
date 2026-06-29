@@ -1,0 +1,88 @@
+---
+import type { Segment } from "../../data/segments";
+
+interface Props {
+  segment: Segment;
+  index: number;
+}
+
+const { segment, index } = Astro.props;
+const stage = String(index + 1).padStart(2, "0");
+---
+
+<li class="segment-entry">
+  <a href={`/work/${segment.slug}`}>
+    <span class="stage">{stage}</span>
+    <span class="name">{segment.name}</span>
+    <span class="blurb">{segment.blurb}</span>
+  </a>
+</li>
+
+<style>
+  .segment-entry {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .segment-entry a {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    align-items: baseline;
+    gap: var(--space-xs) var(--space-md);
+    padding: var(--space-lg) 0;
+    text-decoration: none;
+    color: var(--color-text);
+  }
+
+  .stage {
+    font-size: var(--fs-label);
+    letter-spacing: var(--tracking-label);
+    color: var(--color-text-muted);
+    grid-row: 1;
+  }
+
+  .name {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fv-h1);
+    font-size: var(--fs-h1);
+    line-height: var(--lh-display);
+    letter-spacing: var(--tracking-display);
+    grid-column: 2;
+    grid-row: 1;
+    position: relative;
+    width: fit-content;
+  }
+
+  .name::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 100%;
+    bottom: -0.1em;
+    height: 2px;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--color-accent) 0 6px,
+      transparent 6px 11px
+    );
+    transition: right var(--duration-base) var(--ease-thread);
+  }
+
+  .segment-entry a:hover .name::after,
+  .segment-entry a:focus-visible .name::after {
+    right: 0;
+  }
+
+  .blurb {
+    grid-column: 2;
+    grid-row: 2;
+    color: var(--color-text-muted);
+    font-size: var(--fs-body);
+    max-width: 34rem;
+  }
+
+  @media (max-width: 640px) {
+    .segment-entry a {
+      grid-template-columns: 2.5rem 1fr;
+    }
+  }
+</style>

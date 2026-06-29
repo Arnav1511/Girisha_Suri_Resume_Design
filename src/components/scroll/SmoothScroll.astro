@@ -1,0 +1,39 @@
+---
+// Sitewide smooth-scroll + ScrollTrigger foundation. Mounted once in
+// BaseLayout. Everything else that animates against scroll (the thread
+// line, case-study reveals, the embroidery interactive) assumes Lenis and
+// ScrollTrigger are already wired correctly by the time it runs — get
+// this component right and the rest of the motion system stays simple.
+---
+
+<script>
+  import Lenis from "lenis";
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Other islands read this instead of re-querying matchMedia themselves.
+  window.__prefersReducedMotion = prefersReducedMotion;
+
+  if (prefersReducedMotion) {
+    // Native scroll, no rAF-driven smoothing — ScrollTrigger still works
+    // off the browser's own scroll position, it just has nothing to sync.
+    ScrollTrigger.refresh();
+  } else {
+    const lenis = new Lenis({
+      autoRaf: false,
+      smoothWheel: true,
+    });
+
+    window.__lenis = lenis;
+
+    lenis.on("scroll", ScrollTrigger.update);
+
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+  }
+</script>

@@ -1,0 +1,32 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+api/node_modules/
+
+# env / secrets
+.env
+.env.*
+!.env.example
+api/local.settings.json
+
+# real protected-project source images — this repo is public, these never
+# get committed. See scripts/prepare-protected-assets.mjs.
+private/
+
+# generated from private/ at build time by scripts/prepare-protected-assets.mjs
+# — hashed filenames, regenerate locally rather than committing
+public/images/protected/
+
+# superseded old static site folder (its own nested .git, same remote) —
+# left on disk untouched, just not part of this repo. Safe to delete by hand.
+Girisha_Suri_Resume_Design/
+
+# editor / os
+.DS_Store
+Thumbs.db
+
+# logs
+npm-debug.log*

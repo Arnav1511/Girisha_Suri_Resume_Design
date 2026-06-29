@@ -1,0 +1,375 @@
+---
+/**
+ * Global recruiter filter: a quiet overlay reachable from the header on
+ * every page (and the landing CTA), searching across every project in
+ * src/data/projects.ts regardless of which segment page you're on.
+ * Phase 1 only has two projects, but the filtering pattern — free text +
+ * tag chips, protected results route through the same gate modal as the
+ * grid — is the same one Phase 2 scales to every segment.
+ */
+import { projects } from "../../data/projects";
+import { getSegmentBySlug } from "../../data/segments";
+
+const searchIndex = projects.map((project) => {
+  const segment = getSegmentBySlug(project.segmentId);
+  return {
+    id: project.id,
+    title: project.title,
+    description: project.description,
+    tags: project.tags,
+    heroImage: project.heroImage,
+    heroAlt: project.heroAlt,
+    protected: project.protected,
+    href: `/work/${segment?.slug}/${project.slug}`,
+    segmentName: segment?.name ?? "",
+  };
+});
+
+const allTags = [...new Set(projects.flatMap((project) => project.tags))].sort();
+
+// Escape "<" so a stray "</script>" inside any data string can't break out
+// of this script tag — standard guard for embedding JSON in HTML.
+const searchIndexJson = JSON.stringify(searchIndex).replace(/</g, "\\u003c");
+---
+
+<dialog id="filter-modal" class="filter-modal" aria-labelledby="filter-title">
+  <div class="filter-shell">
+    <header class="filter-head">
+      <div>
+        <p class="kicker">Recruiter filter</p>
+        <h2 id="filter-title">Find work by technique</h2>
+      </div>
+      <button type="button" class="close" data-filter-close aria-label="Close">&times;</button>
+    </header>
+
+    <input
+      type="search"
+      class="search"
+      placeholder="Search by garment, technique, aesthetic…"
+      data-filter-input
+      aria-label="Search projects"
+    />
+
+    <div class="chips" role="group" aria-label="Filter by tag">
+      {allTags.map((tag) => (
+        <button type="button" class="chip" data-filter-chip data-tag={tag} aria-pressed="false">
+          {tag}
+        </button>
+      ))}
+    </div>
+
+    <ul class="results" data-filter-results></ul>
+    <p class="empty" data-filter-empty hidden>No projects match yet — try a different word or tag.</p>
+  </div>
+</dialog>
+
+<script type="application/json" id="filter-data" set:html={searchIndexJson} is:inline />
+
+<style>
+  .filter-modal {
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 0;
+    width: min(40rem, calc(100% - 2 * var(--page-gutter)));
+    max-height: 85vh;
+    background: var(--color-bg-raised);
+    color: var(--color-text);
+  }
+
+  .filter-modal::backdrop {
+    background: color-mix(in srgb, var(--color-ink) 60%, transparent);
+  }
+
+  .filter-shell {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .filter-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .kicker {
+    font-size: var(--fs-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--color-accent);
+  }
+
+  .filter-head h2 {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fv-h3);
+    font-size: var(--fs-h3);
+  }
+
+  .close {
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--color-text-muted);
+  }
+
+  .search {
+    font: inherit;
+    font-size: var(--fs-body-lg);
+    padding: var(--space-2xs) 0;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    background: none;
+    color: var(--color-text);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+  }
+
+  .chip {
+    font-size: var(--fs-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    padding: 0.3em 0.7em;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+  }
+
+  .chip[aria-pressed="true"] {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .empty {
+    color: var(--color-text-muted);
+    font-size: var(--fs-small);
+  }
+</style>
+
+<style is:global>
+  /*
+   * Astro only scopes CSS to elements present in this component's own
+   * template at build time — results here are built client-side by
+   * buildResultItem() in the script below, so they never get Astro's
+   * scoping attribute and a normal scoped <style> block silently
+   * wouldn't apply to them. Named uniquely (filter-result-*) so this
+   * unscoped block can't leak onto unrelated components.
+   */
+  .filter-result {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    gap: var(--space-sm);
+    align-items: center;
+    text-decoration: none;
+    color: var(--color-text);
+    text-align: left;
+    font: inherit;
+    width: 100%;
+  }
+
+  .filter-result-thumb {
+    position: relative;
+    width: 4.5rem;
+    height: 5.5rem;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--color-canvas);
+  }
+
+  .filter-result-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .filter-result-lock {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--color-ink) 55%, transparent);
+    color: var(--color-chalk);
+  }
+
+  .filter-result-lock svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .filter-result-title {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fv-h3);
+    font-size: 1.1rem;
+    display: block;
+  }
+
+  .filter-result-segment {
+    font-size: var(--fs-label);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    display: block;
+  }
+</style>
+
+<script>
+  interface SearchEntry {
+    id: string;
+    title: string;
+    description: string;
+    tags: string[];
+    heroImage: string;
+    heroAlt: string;
+    protected: boolean;
+    href: string;
+    segmentName: string;
+  }
+
+  const dataEl = document.getElementById("filter-data");
+  const entries: SearchEntry[] = dataEl ? JSON.parse(dataEl.textContent ?? "[]") : [];
+
+  const modal = document.getElementById("filter-modal") as HTMLDialogElement | null;
+  const input = document.querySelector<HTMLInputElement>("[data-filter-input]");
+  const resultsEl = document.querySelector<HTMLUListElement>("[data-filter-results]");
+  const emptyEl = document.querySelector<HTMLElement>("[data-filter-empty]");
+  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-filter-chip]"));
+  const closeBtn = document.querySelector<HTMLButtonElement>("[data-filter-close]");
+
+  const activeTags = new Set<string>();
+  const SVG_NS = "http://www.w3.org/2000/svg";
+
+  function buildLockIcon(): SVGSVGElement {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "1.8");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+
+    const body = document.createElementNS(SVG_NS, "rect");
+    body.setAttribute("x", "5");
+    body.setAttribute("y", "11");
+    body.setAttribute("width", "14");
+    body.setAttribute("height", "10");
+    body.setAttribute("rx", "2");
+
+    const shackle = document.createElementNS(SVG_NS, "path");
+    shackle.setAttribute("d", "M8 11V7a4 4 0 0 1 8 0v4");
+
+    svg.append(body, shackle);
+    return svg;
+  }
+
+  function buildResultItem(entry: SearchEntry): HTMLLIElement {
+    const li = document.createElement("li");
+
+    const thumb = document.createElement("span");
+    thumb.className = "filter-result-thumb";
+    const img = document.createElement("img");
+    img.src = entry.heroImage;
+    img.alt = entry.heroAlt;
+    img.loading = "lazy";
+    img.width = 180;
+    img.height = 220;
+    thumb.appendChild(img);
+
+    const title = document.createElement("span");
+    title.className = "filter-result-title";
+    title.textContent = entry.title;
+
+    const segment = document.createElement("span");
+    segment.className = "filter-result-segment";
+
+    const meta = document.createElement("span");
+    meta.append(title, segment);
+
+    let surface: HTMLAnchorElement | HTMLButtonElement;
+
+    if (entry.protected) {
+      const lock = document.createElement("span");
+      lock.className = "filter-result-lock";
+      lock.dataset.role = "lock-affordance";
+      lock.setAttribute("aria-hidden", "true");
+      lock.appendChild(buildLockIcon());
+      thumb.appendChild(lock);
+
+      segment.dataset.role = "protected-tag";
+      segment.textContent = `${entry.segmentName} · Viewable on request`;
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.gateTrigger = "";
+      button.dataset.projectId = entry.id;
+      button.dataset.projectTitle = entry.title;
+      surface = button;
+    } else {
+      segment.textContent = entry.segmentName;
+      const anchor = document.createElement("a");
+      anchor.href = entry.href;
+      surface = anchor;
+    }
+
+    surface.className = "filter-result";
+    surface.append(thumb, meta);
+    li.appendChild(surface);
+    return li;
+  }
+
+  function renderResults() {
+    if (!resultsEl) return;
+    const query = (input?.value ?? "").trim().toLowerCase();
+
+    const matches = entries.filter((entry) => {
+      const textMatch =
+        !query ||
+        entry.title.toLowerCase().includes(query) ||
+        entry.description.toLowerCase().includes(query) ||
+        entry.tags.some((tag) => tag.toLowerCase().includes(query));
+
+      const tagMatch = activeTags.size === 0 || entry.tags.some((tag) => activeTags.has(tag));
+
+      return textMatch && tagMatch;
+    });
+
+    resultsEl.replaceChildren(...matches.map(buildResultItem));
+
+    if (emptyEl) emptyEl.hidden = matches.length > 0;
+  }
+
+  input?.addEventListener("input", renderResults);
+
+  chips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const tag = chip.dataset.tag ?? "";
+      if (activeTags.has(tag)) {
+        activeTags.delete(tag);
+        chip.setAttribute("aria-pressed", "false");
+      } else {
+        activeTags.add(tag);
+        chip.setAttribute("aria-pressed", "true");
+      }
+      renderResults();
+    });
+  });
+
+  window.addEventListener("recruiter-filter:open", () => {
+    renderResults();
+    modal?.showModal();
+    input?.focus();
+  });
+
+  closeBtn?.addEventListener("click", () => modal?.close());
+</script>

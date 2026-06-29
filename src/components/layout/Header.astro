@@ -1,0 +1,66 @@
+---
+// Persistent, quiet top bar. Sits over hero imagery via a translucent
+// backdrop rather than switching color schemes per-page, so it never
+// needs to know what's beneath it.
+---
+
+<header class="site-header">
+  <a class="wordmark" href="/">Girisha Suri</a>
+  <nav class="nav" aria-label="Primary">
+    <a href="/about">About</a>
+    <button type="button" id="open-filter" aria-haspopup="dialog">
+      Filter
+    </button>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--page-gutter);
+    background: color-mix(in srgb, var(--color-canvas) 78%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-variation-settings: var(--fv-h3);
+    font-size: var(--fs-h3);
+    letter-spacing: var(--tracking-display);
+    text-decoration: none;
+    color: var(--color-text);
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    font-size: var(--fs-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+  }
+
+  .nav a,
+  .nav button {
+    text-decoration: none;
+    color: var(--color-text);
+    position: relative;
+  }
+
+  .nav a:hover,
+  .nav button:hover {
+    color: var(--color-accent);
+  }
+</style>
+
+<script>
+  document.getElementById("open-filter")?.addEventListener("click", () => {
+    window.dispatchEvent(new CustomEvent("recruiter-filter:open"));
+  });
+</script>
