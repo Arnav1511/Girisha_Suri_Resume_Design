@@ -21,6 +21,7 @@ const { title, description = "Girisha Suri — fashion design portfolio." } = As
     <meta name="description" content={description} />
     <title>{title}</title>
     <noscript><style>[data-reveal] { opacity: 1 !important; }</style></noscript>
+    <slot name="head" />
   </head>
   <body>
     <SmoothScroll />
