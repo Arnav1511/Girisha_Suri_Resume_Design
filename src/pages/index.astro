@@ -1,934 +1,763 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import SegmentCard from "../components/cards/SegmentCard.astro";
 import ProjectCard from "../components/cards/ProjectCard.astro";
 import { getOrderedSegments } from "../data/segments";
 import { getProjectsBySegment } from "../data/projects";
 
 const segments = getOrderedSegments();
 const streetwearProjects = getProjectsBySegment("streetwear");
+const beadAssets = [
+  "b13.png",
+  "b7.png",
+  "b6.png",
+  "b11.png",
+  "b10.png",
+  "b8.png",
+  "b4.png",
+  "b11.png",
+  "b5.png",
+  "b7.png",
+  "b12.png",
+  "b6.png",
+  "b3.png",
+  "b13.png",
+  "b5.png",
+];
 ---
 
-<BaseLayout title="Girisha Suri — Fashion Design Portfolio">
-  <script slot="head" is:inline src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<BaseLayout title="Girisha Suri -- Fashion Design Portfolio">
+  <script is:inline>
+    document.documentElement.classList.add("ct-intro-active");
+  </script>
 
-  <div id="nl-root">
+  <div id="ct-root">
+    <div class="ct-paper" aria-hidden="true"></div>
+    <div class="ct-vignette" aria-hidden="true"></div>
 
-    <div id="nl-spotlight"></div>
-    <div id="nl-canvas-host"></div>
+    <div class="ct-stage" aria-hidden="true">
+      <svg class="ct-thread-svg" aria-hidden="true">
+        <path class="ct-thread-path" d="" fill="none" />
+      </svg>
 
-    <div id="nl-gate">
-      <div id="nl-gate-inner">
-        <p class="nl-gate-label">Girisha Suri — Fashion Design</p>
-        <form id="nl-form" autocomplete="off" class="nl-form">
-          <span class="nl-prompt-arrow" aria-hidden="true">›</span>
-          <input
-            id="nl-input"
-            type="text"
-            spellcheck="false"
-            placeholder="type a command to begin"
-            aria-label="Enter a command to begin"
-          />
-        </form>
-        <p id="nl-hint" class="nl-hint">
-          try: <span class="nl-hint-phrase">pull the needle out</span>
-        </p>
+      <div class="ct-needle">
+        <svg width="360" height="34" viewBox="0 0 360 34" aria-hidden="true">
+          <defs>
+            <linearGradient id="ct-steel" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fbfbfc" />
+              <stop offset=".28" stop-color="#cfd0d4" />
+              <stop offset=".5" stop-color="#8d8e95" />
+              <stop offset=".62" stop-color="#6c6d74" />
+              <stop offset=".8" stop-color="#a9aab0" />
+              <stop offset="1" stop-color="#e7e8ea" />
+            </linearGradient>
+          </defs>
+          <path d="M2,17 L300,9.5 Q322,9 332,10.5 Q352,13 352,17 Q352,21 332,23.5 Q322,25 300,24.5 Z" fill="url(#ct-steel)" />
+          <ellipse cx="326" cy="17" rx="5.4" ry="8.6" fill="#efeae0" stroke="#5e5f66" stroke-width="1.1" />
+          <path d="M2,17 L300,9.5 L300,24.5 Z" fill="url(#ct-steel)" />
+        </svg>
       </div>
+
+      <img class="ct-button" src="/images/landing/crystal/button.png" alt="" />
     </div>
 
-    <main id="nl-content">
+    <div class="ct-beads" aria-hidden="true">
+      {beadAssets.map((asset) => (
+        <img class="ct-bead" src={`/images/landing/crystal/${asset}`} alt="" />
+      ))}
+    </div>
 
-      <header class="nl-hero-header">
-        <p class="nl-kicker">Commercial discipline · Couture finishing</p>
-        <h1 class="nl-hero-title">Girisha Suri</h1>
-        <p class="nl-hero-tagline">
-          Built across streetwear, evening wear, and the spaces between —
-          where the surface carries the idea and the construction stays honest.
+    <main id="ct-content">
+      <header class="ct-hero">
+        <p class="ct-kicker">Commercial discipline / Couture finishing</p>
+        <h1>Girisha Suri</h1>
+        <p class="ct-tagline">
+          A fashion-design portfolio where the surface carries the idea and the construction stays honest,
+          built across streetwear, ethnic, and the spaces between.
         </p>
-        <p class="nl-scroll-cue">Scroll to explore</p>
+        <p class="ct-scroll-cue">Scroll to explore</p>
       </header>
 
-      <section class="nl-segments-section" aria-label="Work by segment">
-        <p class="nl-section-eyebrow">The work</p>
-        <ul class="nl-segment-list">
+      <section class="ct-segments" aria-label="Work by segment">
+        <p class="ct-section-label">The work -- by segment</p>
+        <ul class="ct-segment-list">
           {segments.map((segment, index) => (
-            <SegmentCard segment={segment} index={index} />
+            <li>
+              <a href={`/work/${segment.slug}`}>
+                <span class="ct-segment-num">{String(index + 1).padStart(2, "0")}</span>
+                <span class="ct-segment-copy">
+                  <span class="ct-segment-name">{segment.name}</span>
+                  <span class="ct-segment-blurb">{segment.blurb}</span>
+                </span>
+                <span class="ct-segment-arrow" aria-hidden="true">-&gt;</span>
+              </a>
+            </li>
           ))}
         </ul>
       </section>
 
-      <section class="nl-projects-section" aria-label="Streetwear projects">
-        <div class="nl-projects-header">
-          <h2 class="nl-projects-title">Streetwear</h2>
-          <span class="nl-projects-count">02 — Selected</span>
+      <section class="ct-projects" aria-label="Streetwear projects">
+        <div class="ct-projects-header">
+          <h2>Streetwear</h2>
+          <span>{String(streetwearProjects.length).padStart(2, "0")} -- Selected</span>
         </div>
-        <ul class="nl-project-grid">
+        <ul class="ct-project-grid">
           {streetwearProjects.map((project) => (
             <ProjectCard project={project} />
           ))}
         </ul>
       </section>
 
-      <footer class="nl-page-footer">
-        <p class="nl-footer-quote">"Let the surface carry the idea."</p>
-        <p class="nl-footer-byline">Girisha Suri · Portfolio</p>
+      <footer class="ct-page-footer">
+        <p>"Let the surface carry the idea."</p>
+        <span>Girisha Suri / Portfolio</span>
       </footer>
-
     </main>
   </div>
 </BaseLayout>
 
 <script>
-  import { ScrollTrigger } from "gsap/ScrollTrigger";
+  (() => {
+    const root = document.getElementById("ct-root");
+    if (!root) return;
 
-  // ─── helpers ───────────────────────────────────────────────────────────────
+    const html = document.documentElement;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const stage = root.querySelector(".ct-stage") as HTMLElement | null;
+    const beadLayer = root.querySelector(".ct-beads") as HTMLElement | null;
+    const button = root.querySelector(".ct-button") as HTMLImageElement | null;
+    const needle = root.querySelector(".ct-needle") as HTMLElement | null;
+    const thread = root.querySelector(".ct-thread-path") as SVGPathElement | null;
+    const content = root.querySelector("#ct-content") as HTMLElement | null;
+    const beadEls = Array.from(root.querySelectorAll(".ct-bead")) as HTMLImageElement[];
 
-  function easeInOut(t: number) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
-  function easeOut(t: number) { return 1 - Math.pow(1 - t, 3); }
+    if (reduceMotion || !stage || !beadLayer || !button || !needle || !thread || !content || !beadEls.length) {
+      html.classList.remove("ct-intro-active");
+      html.classList.add("ct-revealed");
+      if (stage) stage.hidden = true;
+      if (beadLayer) beadLayer.hidden = true;
+      return;
+    }
 
-  function waitForThree(cb: () => void) {
-    let tries = 0;
-    const tick = () => {
-      if ((window as any).THREE) return cb();
-      if (tries++ > 200) { console.error("[needle] THREE.js failed to load from CDN"); return; }
-      setTimeout(tick, 25);
-    };
-    tick();
-  }
+    const stageEl = stage;
+    const buttonEl = button;
+    const needleEl = needle;
+    const threadEl = thread;
+    const contentEl = content;
 
-  // ─── state ─────────────────────────────────────────────────────────────────
-
-  let renderer: any = null;
-  let scene: any = null;
-  let camera: any = null;
-  let heroGroup: any = null;
-  let needle: any = null;
-  let button: any = null;
-  let eyeLocal: any = null;
-  let shadowFloor: any = null;
-  let threadMesh: any = null;
-  let threadMat: any = null;
-  let nodes: Array<{ pos: any; prev: any }> = [];
-  let beads: any[] = [];
-  let phase = "idle";
-  let pullT = 0;
-  let released = false;
-  let clock: any = null;
-  let rafId = 0;
-  let bounds = { halfH: 0, halfW: 0, floorY: 0 };
-  let scrollVel = 0;
-  let lastScroll = 0;
-  const threadN = 26;
-  const segLen = 0.062;
-
-  // ─── env texture ───────────────────────────────────────────────────────────
-
-  function makeEnvTexture(THREE: any) {
-    const c = document.createElement("canvas"); c.width = 512; c.height = 256;
-    const g = c.getContext("2d")!;
-    const grad = g.createLinearGradient(0, 0, 0, 256);
-    grad.addColorStop(0, "#fffdf7");
-    grad.addColorStop(0.3, "#efe3cf");
-    grad.addColorStop(0.55, "#c9bda8");
-    grad.addColorStop(0.8, "#6f6655");
-    grad.addColorStop(1, "#34302a");
-    g.fillStyle = grad; g.fillRect(0, 0, 512, 256);
-    const blobs: [string, number, number, number][] = [
-      ["#ffe7c2", 120, 70, 90],
-      ["#d8c2e6", 360, 90, 110],
-      ["#c2e6d8", 250, 150, 120],
-      ["#ffd6e0", 430, 180, 80],
+    const cfg = [
+      { w: 22, ax: 135, ay: -46, rot: 0, strand: true },
+      { w: 46, ax: 150, ay: -16, rot: 38, strand: true },
+      { w: 31, ax: 162, ay: 16, rot: 0, strand: true },
+      { w: 21, ax: 170, ay: 44, rot: 0, strand: true },
+      { w: 44, ax: 176, ay: 74, rot: 18, strand: true },
+      { w: 27, ax: 181, ay: 102, rot: 0, strand: true },
+      { w: 40, ax: 184, ay: 132, rot: 82, strand: true },
+      { w: 19, ax: 186, ay: 158, rot: 0, strand: true },
+      { w: 33, ax: 187, ay: 186, rot: 0, strand: true },
+      { w: 31, ax: 188, ay: 212, rot: 68, strand: true },
+      { w: 36, ax: 189, ay: 244, rot: 0, strand: true },
+      { w: 27, ax: 118, ay: 58, rot: 0, strand: false },
+      { w: 48, ax: 92, ay: 30, rot: 12, strand: false },
+      { w: 20, ax: 150, ay: 116, rot: 0, strand: false },
+      { w: 29, ax: 206, ay: 150, rot: 30, strand: false },
     ];
-    blobs.forEach(([col, x, y, r]) => {
-      const rg = g.createRadialGradient(x, y, 0, x, y, r);
-      rg.addColorStop(0, col); rg.addColorStop(1, "rgba(255,255,255,0)");
-      g.globalAlpha = 0.55; g.fillStyle = rg; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
-    });
-    g.globalAlpha = 1;
-    const kg = g.createRadialGradient(150, 30, 0, 150, 30, 140);
-    kg.addColorStop(0, "rgba(255,255,255,0.95)"); kg.addColorStop(1, "rgba(255,255,255,0)");
-    g.fillStyle = kg; g.beginPath(); g.arc(150, 30, 140, 0, 7); g.fill();
-    const tex = new THREE.CanvasTexture(c);
-    tex.mapping = THREE.EquirectangularReflectionMapping;
-    tex.encoding = THREE.sRGBEncoding;
-    return tex;
-  }
 
-  // ─── pearl texture ─────────────────────────────────────────────────────────
-
-  function makePearlTexture(THREE: any) {
-    const c = document.createElement("canvas"); c.width = 512; c.height = 512;
-    const g = c.getContext("2d")!;
-    g.fillStyle = "#c2b291"; g.fillRect(0, 0, 512, 512);
-    const dark = ["#7a6c50", "#5f5640", "#6d5d52", "#534a3c"];
-    const light = ["#fff6e6", "#f3e8d2", "#e9eef6", "#efe0ee", "#d8ecdd", "#fbeccf"];
-    for (let i = 0; i < 22; i++) {
-      const x = Math.random() * 512, y = Math.random() * 512, r = 70 + Math.random() * 160;
-      const rg = g.createRadialGradient(x, y, 0, x, y, r);
-      rg.addColorStop(0, dark[i % dark.length]); rg.addColorStop(1, "rgba(0,0,0,0)");
-      g.globalAlpha = 0.5; g.fillStyle = rg; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
-    }
-    for (let i = 0; i < 30; i++) {
-      const x = Math.random() * 512, y = Math.random() * 512, r = 50 + Math.random() * 150;
-      const rg = g.createRadialGradient(x, y, 0, x, y, r);
-      rg.addColorStop(0, light[i % light.length]); rg.addColorStop(1, "rgba(255,255,255,0)");
-      g.globalAlpha = 0.55; g.fillStyle = rg; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
-    }
-    g.globalAlpha = 1;
-    const tex = new THREE.CanvasTexture(c);
-    tex.encoding = THREE.sRGBEncoding;
-    return tex;
-  }
-
-  // ─── geometry helpers ──────────────────────────────────────────────────────
-
-  function biconeGeo(THREE: any, r: number, h: number) {
-    return new THREE.ConeGeometry(r, h, 14, 1, false);
-  }
-
-  function teardropGeo(THREE: any, s: number) {
-    const prof: any[] = [];
-    const steps = 16;
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const y = (0.5 - t) * 2.2 * s;
-      let r: number;
-      if (t < 0.4) {
-        r = Math.pow(t / 0.4, 1.5) * 0.85 * s;
-      } else {
-        const u = (t - 0.4) / 0.6;
-        r = Math.sqrt(Math.max(0, 1 - (u - 1) * (u - 1))) * 0.9 * s;
-      }
-      prof.push(new THREE.Vector2(Math.max(0.002, r), y));
-    }
-    return new THREE.LatheGeometry(prof, 20);
-  }
-
-  function approxRadius(nodeIdx: number): number {
-    const map: Record<number, number> = { 8: 0.085, 10: 0.05, 12: 0.075, 13: 0.06, 15: 0.04, 16: 0.075, 18: 0.055, 19: 0.034, 21: 0.058, 23: 0.06, 25: 0.1 };
-    return map[nodeIdx] ?? 0.06;
-  }
-
-  // ─── build button ──────────────────────────────────────────────────────────
-
-  function buildButton(THREE: any, group: any) {
-    const R = 0.92, TH = 0.17;
-    const geo = new THREE.CylinderGeometry(R, R, TH, 200, 6, false);
-    const pos = geo.attributes.position;
-    const v = new THREE.Vector3();
-    for (let i = 0; i < pos.count; i++) {
-      v.fromBufferAttribute(pos, i);
-      const ang = Math.atan2(v.z, v.x);
-      const rad = Math.hypot(v.x, v.z);
-      const wave = 0.032 * Math.sin(3 * ang + 0.6) + 0.022 * Math.sin(5 * ang + 1.7) + 0.013 * Math.sin(8 * ang);
-      const radial = 0.018 * Math.cos(rad * 6.2 + ang * 2.0);
-      const k = Math.min(1, rad / (R * 0.4));
-      if (Math.abs(v.y) > TH * 0.35) {
-        v.y += (wave + radial) * (v.y > 0 ? 1 : 0.7) * k;
-      }
-      if (rad > R * 0.6) {
-        const rr = 1 + 0.022 * Math.sin(4 * ang + 0.4) + 0.012 * Math.sin(7 * ang);
-        v.x *= rr; v.z *= rr;
-      }
-      pos.setXYZ(i, v.x, v.y, v.z);
-    }
-    geo.computeVertexNormals();
-
-    const colorTex = makePearlTexture(THREE);
-    const mat = new THREE.MeshPhysicalMaterial({
-      map: colorTex,
-      color: 0xc4b291,
-      metalness: 0.35, roughness: 0.48,
-      clearcoat: 0.85, clearcoatRoughness: 0.26,
-      envMapIntensity: 0.5, reflectivity: 0.7,
-    });
-    const btn = new THREE.Mesh(geo, mat);
-    btn.rotation.x = Math.PI / 2;
-    btn.castShadow = true; btn.receiveShadow = true;
-    const wrap = new THREE.Group();
-    wrap.add(btn);
-
-    const holeMat = new THREE.MeshStandardMaterial({ color: 0x46402f, metalness: 0.2, roughness: 0.6 });
-    [[0.06, 0.12], [0.06, -0.06]].forEach(([x, y]) => {
-      const hole = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.09, 24), holeMat);
-      hole.rotation.x = Math.PI / 2;
-      hole.position.set(x, y, 0.05);
-      wrap.add(hole);
-    });
-    group.add(wrap);
-    button = wrap;
-  }
-
-  // ─── build needle ──────────────────────────────────────────────────────────
-
-  function buildNeedle(THREE: any, group: any) {
-    const ndl = new THREE.Group();
-    const metal = new THREE.MeshStandardMaterial({ color: 0xcac4b4, metalness: 1.0, roughness: 0.32, envMapIntensity: 0.9 });
-    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.026, 1.5, 20), metal);
-    shaft.position.y = 0.05; shaft.castShadow = true; ndl.add(shaft);
-    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.026, 0.18, 20), metal);
-    tip.position.y = -0.79; tip.castShadow = true; ndl.add(tip);
-    const eye = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.016, 12, 28), metal);
-    eye.position.y = 0.84; eye.scale.set(0.7, 1, 1); eye.castShadow = true; ndl.add(eye);
-    const eyeCap = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 12), metal);
-    eyeCap.position.y = 0.92; ndl.add(eyeCap);
-
-    ndl.position.set(0.6, 0.32, 0.12);
-    ndl.rotation.z = -0.55;
-    group.add(ndl);
-    needle = ndl;
-    eyeLocal = new THREE.Vector3(0.05 * 0.7, 0.84, 0);
-  }
-
-  function eyeWorld(THREE: any) {
-    return needle.localToWorld(eyeLocal.clone());
-  }
-
-  // ─── build thread + beads ──────────────────────────────────────────────────
-
-  function buildThreadAndBeads(THREE: any) {
-    const anchor = eyeWorld(THREE);
-    nodes = [];
-    for (let i = 0; i < threadN; i++) {
-      const p = new THREE.Vector3(anchor.x, anchor.y - segLen * i, anchor.z);
-      nodes.push({ pos: p.clone(), prev: p.clone() });
-    }
-
-    threadMat = new THREE.MeshStandardMaterial({ color: 0x6e1620, roughness: 0.65, metalness: 0.0, transparent: true, opacity: 1 });
-    rebuildThread(THREE);
-
-    const crystalMat = () => new THREE.MeshPhysicalMaterial({
-      color: 0x720811, emissive: 0x44040a, emissiveIntensity: 0.14,
-      metalness: 0.0, roughness: 0.22, clearcoat: 0.35, clearcoatRoughness: 0.16,
-      envMapIntensity: 0.15, reflectivity: 0.6, transparent: true, opacity: 0.97,
-    });
-    const mk = (geo: any, s: number) => {
-      const m = new THREE.Mesh(geo, crystalMat()); m.castShadow = true; m.scale.setScalar(s * 1.6); return m;
+    const state = {
+      vw: window.innerWidth,
+      vh: window.innerHeight,
+      scale: 1,
+      origin: { x: 0, y: 0 },
+      eye: { x: 0, y: 0 },
+      start: performance.now(),
+      last: performance.now(),
+      phase: "idle",
+      pullAt: 1500,
+      revealAt: 0,
+      revealing: false,
+      done: false,
+      scrollVel: 0,
+      lastScroll: window.scrollY || window.pageYOffset || 0,
+      targets: {} as Record<number, number>,
     };
-    const specs = [
-      { node: 8,  geo: () => new THREE.IcosahedronGeometry(0.07, 0) },
-      { node: 10, geo: () => new THREE.SphereGeometry(0.045, 20, 16) },
-      { node: 12, geo: () => new THREE.CylinderGeometry(0.028, 0.028, 0.13, 14) },
-      { node: 13, geo: () => new THREE.OctahedronGeometry(0.055, 0) },
-      { node: 15, geo: () => new THREE.SphereGeometry(0.035, 18, 14) },
-      { node: 16, geo: () => biconeGeo(THREE, 0.06, 0.12) },
-      { node: 18, geo: () => new THREE.IcosahedronGeometry(0.05, 0) },
-      { node: 19, geo: () => new THREE.SphereGeometry(0.03, 16, 12) },
-      { node: 21, geo: () => new THREE.DodecahedronGeometry(0.05, 0) },
-      { node: 23, geo: () => new THREE.CylinderGeometry(0.022, 0.022, 0.1, 12) },
-      { node: 25, geo: () => teardropGeo(THREE, 0.085) },
-    ];
-    beads = [];
-    specs.forEach((sp) => {
-      const mesh = mk(sp.geo(), 1);
-      mesh.userData = {
-        node: sp.node,
-        radius: approxRadius(sp.node) * 1.6,
-        free: false,
-        vel: new THREE.Vector3(),
-        spin: new THREE.Vector3(
-          (Math.random() - 0.5) * 3,
-          (Math.random() - 0.5) * 3,
-          (Math.random() - 0.5) * 3,
-        ),
+
+    const beads = beadEls.map((el, index) => {
+      const beadCfg = cfg[index] || cfg[0];
+      return {
+        el,
+        cfg: beadCfg,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        rot: beadCfg.rot,
+        vrot: 0,
+        released: false,
         settled: false,
         delay: 0,
+        w: 0,
+        h: 0,
+        natW: el.naturalWidth || 40,
+        natH: el.naturalHeight || 40,
       };
-      scene.add(mesh);
-      beads.push(mesh);
     });
-  }
 
-  function rebuildThread(THREE: any) {
-    if (threadMesh) { scene.remove(threadMesh); threadMesh.geometry.dispose(); }
-    const curve = new THREE.CatmullRomCurve3(nodes.map((n: any) => n.pos));
-    const geo = new THREE.TubeGeometry(curve, threadN * 2, 0.014, 6, false);
-    const mesh = new THREE.Mesh(geo, threadMat);
-    mesh.castShadow = true;
-    scene.add(mesh);
-    threadMesh = mesh;
-  }
-
-  // ─── physics: thread (pinned) ──────────────────────────────────────────────
-
-  function stepThread(THREE: any, dt: number, time: number) {
-    const g = -9.8;
-    const wind = Math.sin(time * 0.7) * 0.4 + Math.sin(time * 1.3) * 0.18;
-    const anchor = eyeWorld(THREE);
-    nodes[0].pos.copy(anchor); nodes[0].prev.copy(anchor);
-    for (let i = 1; i < nodes.length; i++) {
-      const n = nodes[i];
-      const vx = (n.pos.x - n.prev.x) * 0.98;
-      const vy = (n.pos.y - n.prev.y) * 0.98;
-      const vz = (n.pos.z - n.prev.z) * 0.98;
-      n.prev.copy(n.pos);
-      n.pos.x += vx + wind * 0.00012 * i;
-      n.pos.y += vy + g * dt * dt;
-      n.pos.z += vz + Math.sin(time * 1.3 + i * 0.3) * 0.0002;
-    }
-    for (let k = 0; k < 18; k++) {
-      for (let i = 0; i < nodes.length - 1; i++) {
-        const a = nodes[i].pos, b = nodes[i + 1].pos;
-        const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
-        const d = Math.hypot(dx, dy, dz) || 0.0001;
-        const diff = (d - segLen) / d;
-        const mxa = i === 0 ? 0 : 0.5, mxb = 0.5 + (i === 0 ? 0.5 : 0);
-        a.x += dx * diff * mxa; a.y += dy * diff * mxa; a.z += dz * diff * mxa;
-        b.x -= dx * diff * mxb; b.y -= dy * diff * mxb; b.z -= dz * diff * mxb;
+    beads.forEach((bead) => {
+      if (!bead.el.complete) {
+        bead.el.addEventListener("load", () => {
+          bead.natW = bead.el.naturalWidth || bead.natW;
+          bead.natH = bead.el.naturalHeight || bead.natH;
+          measure();
+        }, { once: true });
       }
-      nodes[0].pos.copy(anchor);
-    }
-    rebuildThread(THREE);
-  }
-
-  // ─── physics: thread (free, after release) ─────────────────────────────────
-
-  function stepFreeThread(THREE: any, dt: number) {
-    const g = -2.6;
-    const fy = bounds.floorY + 0.02;
-    for (let i = 0; i < nodes.length; i++) {
-      const n = nodes[i];
-      const vx = (n.pos.x - n.prev.x) * 0.97;
-      const vy = (n.pos.y - n.prev.y) * 0.97;
-      n.prev.copy(n.pos);
-      n.pos.x += vx; n.pos.y += vy + g * dt * dt;
-      if (n.pos.y < fy) { n.pos.y = fy; n.prev.y = fy; }
-    }
-    for (let k = 0; k < 10; k++) {
-      for (let i = 0; i < nodes.length - 1; i++) {
-        const a = nodes[i].pos, b = nodes[i + 1].pos;
-        const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
-        const d = Math.hypot(dx, dy, dz) || 0.0001;
-        const diff = (d - segLen) / d;
-        a.x += dx * diff * 0.5; a.y += dy * diff * 0.5; a.z += dz * diff * 0.5;
-        b.x -= dx * diff * 0.5; b.y -= dy * diff * 0.5; b.z -= dz * diff * 0.5;
-      }
-    }
-    rebuildThread(THREE);
-    if (threadMat.opacity > 0.32) threadMat.opacity -= dt * 0.35;
-  }
-
-  // ─── beads: place on thread (idle) ────────────────────────────────────────
-
-  function placeBeadsOnThread() {
-    beads.forEach((m) => {
-      if (m.userData.free) return;
-      const n = nodes[m.userData.node];
-      m.position.copy(n.pos);
-      m.rotation.x += 0.004; m.rotation.y += 0.006;
     });
-  }
 
-  // ─── beads: release (scatter) ─────────────────────────────────────────────
+    function measure() {
+      state.vw = window.innerWidth;
+      state.vh = window.innerHeight;
+      state.scale = Math.min(1.18, Math.max(0.58, state.vw / 1080));
+      state.origin = { x: state.vw * 0.47, y: state.vh * 0.43 };
+      state.eye = {
+        x: state.origin.x + 150 * state.scale,
+        y: state.origin.y - 58 * state.scale,
+      };
 
-  function releaseBeads(THREE: any) {
-    const halfW = bounds.halfW;
-    const n = beads.length;
-    const order = beads.map((_: any, i: number) => i).sort(() => Math.random() - 0.5);
-    beads.forEach((m, i) => {
-      const u = m.userData;
-      u.free = true;
-      const frac = (order[i] + 0.5) / n;
-      const targetX = (frac * 2 - 1) * halfW * 0.82 + (Math.random() - 0.5) * 0.6;
-      u.vel.set(
-        (targetX - m.position.x) * (0.6 + Math.random() * 0.5),
-        -0.2 - Math.random() * 0.7,
-        (Math.random() - 0.5) * 0.4,
-      );
-      u.delay = Math.random() * 0.5;
-    });
-  }
-
-  // ─── beads: physics step ──────────────────────────────────────────────────
-
-  function stepBeads(THREE: any, dt: number) {
-    if (!beads.length) return;
-    const b = bounds;
-    const g = -7.5;
-    const floorY = b.floorY;
-    let push = 0;
-    if (scrollVel) { push = -scrollVel * 0.0009; scrollVel *= 0.8; if (Math.abs(scrollVel) < 0.5) scrollVel = 0; }
-
-    for (const m of beads) {
-      const u = m.userData;
-      if (!u.free) continue;
-      if (u.delay > 0) { u.delay -= dt; continue; }
-      u.vel.y += g * dt;
-      if (m.position.y < floorY + 0.4 && push) u.vel.x += push;
-      if (u.settled) u.vel.x += Math.sin((clock.elapsedTime + u.node) * 0.7) * 0.0006;
-      m.position.x += u.vel.x * dt;
-      m.position.y += u.vel.y * dt;
-      m.position.z += u.vel.z * dt;
-      const rad = u.radius;
-      if (m.position.y - rad < floorY) {
-        m.position.y = floorY + rad;
-        if (u.vel.y < 0) u.vel.y = -u.vel.y * 0.32;
-        u.vel.x *= 0.86; u.vel.z *= 0.86;
-        if (Math.abs(u.vel.y) < 0.25) { u.vel.y = 0; u.settled = true; }
-        m.rotation.z -= u.vel.x / Math.max(rad, 0.03) * dt;
-      } else { u.settled = false; }
-      if (m.position.x - rad < -b.halfW) { m.position.x = -b.halfW + rad; u.vel.x = Math.abs(u.vel.x) * 0.4; }
-      if (m.position.x + rad > b.halfW)  { m.position.x = b.halfW - rad;  u.vel.x = -Math.abs(u.vel.x) * 0.4; }
-      if (m.position.z > 0.3)  { m.position.z = 0.3;  u.vel.z *= -0.4; }
-      if (m.position.z < -0.3) { m.position.z = -0.3; u.vel.z *= -0.4; }
-      if (!u.settled) { m.rotation.x += u.spin.x * dt; m.rotation.y += u.spin.y * dt; }
-    }
-
-    // bead–bead separation
-    for (let i = 0; i < beads.length; i++) {
-      const a = beads[i]; if (!a.userData.free || a.userData.delay > 0) continue;
-      for (let j = i + 1; j < beads.length; j++) {
-        const c = beads[j]; if (!c.userData.free || c.userData.delay > 0) continue;
-        const dx = c.position.x - a.position.x, dy = c.position.y - a.position.y;
-        const d = Math.hypot(dx, dy) || 0.0001;
-        const min = a.userData.radius + c.userData.radius;
-        if (d < min) {
-          const overlap = (min - d) / 2;
-          const nx = dx / d, ny = dy / d;
-          a.position.x -= nx * overlap; a.position.y -= ny * overlap;
-          c.position.x += nx * overlap; c.position.y += ny * overlap;
-          const dvx = (c.userData.vel.x - a.userData.vel.x) * 0.5;
-          a.userData.vel.x += dvx * 0.5; c.userData.vel.x -= dvx * 0.5;
-        }
-      }
-    }
-  }
-
-  // ─── bounds ────────────────────────────────────────────────────────────────
-
-  function updateBounds() {
-    const dist = camera.position.z;
-    const vH = 2 * Math.tan((camera.fov * Math.PI / 180) / 2) * dist;
-    const vW = vH * camera.aspect;
-    bounds = { halfH: vH / 2, halfW: vW / 2, floorY: -vH / 2 + 0.06 };
-    if (shadowFloor) shadowFloor.position.y = bounds.floorY - 0.02;
-  }
-
-  // ─── reveal ────────────────────────────────────────────────────────────────
-
-  function revealSite() {
-    document.documentElement.classList.add("nl-revealed");
-    document.documentElement.style.scrollBehavior = "smooth";
-    setTimeout(() => {
-      const lenis = (window as any).__lenis;
-      if (lenis) {
-        lenis.scrollTo(0, { immediate: true });
-        lenis.resize?.();
-      }
-      ScrollTrigger.refresh();
-    }, 200);
-  }
-
-  // ─── trigger pull ─────────────────────────────────────────────────────────
-
-  function triggerPull() {
-    if (phase !== "idle") return;
-    phase = "pulling";
-    pullT = 0;
-    released = false;
-    const gate = document.getElementById("nl-gate-inner");
-    if (gate) { gate.style.opacity = "0"; gate.style.transform = "translateY(16px)"; }
-    setTimeout(() => { const g = document.getElementById("nl-gate"); if (g) g.style.display = "none"; }, 950);
-  }
-
-  // ─── frame loop ───────────────────────────────────────────────────────────
-
-  function frame() {
-    const THREE = (window as any).THREE;
-    if (!THREE || !renderer) { rafId = requestAnimationFrame(frame); return; }
-    const dt = Math.min(clock.getDelta(), 0.033);
-    const time = clock.elapsedTime;
-
-    if (phase === "idle") {
-      stepThread(THREE, dt, time);
-      placeBeadsOnThread();
-      heroGroup.position.y = Math.sin(time * 0.6) * 0.012;
-    } else if (phase === "pulling") {
-      pullT += dt;
-      const T = pullT;
-
-      const ne = easeInOut(Math.min(T / 1.5, 1));
-      needle.position.y = 0.03 + ne * 2.6;
-      needle.position.x = 0.06 + ne * 0.5;
-      if (T > 1.4) {
-        needle.children.forEach((c: any) => {
-          if (c.material) { c.material.transparent = true; c.material.opacity = Math.max(0, 1 - (T - 1.4) / 0.6); }
-        });
-      }
-
-      const be = easeInOut(Math.min(T / 2.2, 1));
-      const targetX = -bounds.halfW + 0.55, targetY = bounds.halfH - 0.55;
-      button.rotation.z = be * 2.7;
-      button.position.x = be * targetX;
-      button.position.y = be * targetY;
-      button.scale.setScalar(1 - be * 0.72);
-
-      if (T > 0.55 && !released) {
-        released = true;
-        releaseBeads((window as any).THREE);
-      }
-      if (released) stepFreeThread(THREE, dt);
-      stepBeads(THREE, dt);
-
-      if (T > 2.3) {
-        phase = "released";
-        revealSite();
-      }
-    } else {
-      button.rotation.z += dt * 0.08;
-      stepFreeThread(THREE, dt);
-      stepBeads(THREE, dt);
-    }
-
-    renderer.render(scene, camera);
-    rafId = requestAnimationFrame(frame);
-  }
-
-  // ─── init Three.js ────────────────────────────────────────────────────────
-
-  function init() {
-    const THREE = (window as any).THREE;
-    const host = document.getElementById("nl-canvas-host")!;
-    const W = window.innerWidth, H = window.innerHeight;
-
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.setSize(W, H);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.LinearToneMapping;
-    renderer.toneMappingExposure = 1.0;
-    host.appendChild(renderer.domElement);
-
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
-    camera.position.set(0, 0, 5.4);
-
-    const envTex = makeEnvTexture(THREE);
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    const envRT = pmrem.fromEquirectangular(envTex);
-    scene.environment = envRT.texture;
-    envTex.dispose(); pmrem.dispose();
-
-    scene.add(new THREE.HemisphereLight(0xfffaf0, 0xb9b09c, 0.25));
-    const key = new THREE.DirectionalLight(0xfff4e2, 2.2);
-    key.position.set(-3.2, 5.5, 4.2);
-    key.castShadow = true;
-    key.shadow.mapSize.set(2048, 2048);
-    key.shadow.camera.near = 0.5; key.shadow.camera.far = 20;
-    key.shadow.camera.left = -5; key.shadow.camera.right = 5;
-    key.shadow.camera.top = 5; key.shadow.camera.bottom = -5;
-    key.shadow.bias = -0.0004; key.shadow.radius = 6;
-    scene.add(key);
-    const fill = new THREE.DirectionalLight(0xeae6f0, 0.5);
-    fill.position.set(4, 2, 3); scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xffffff, 0.7);
-    rim.position.set(2, -1, -4); scene.add(rim);
-
-    const shadowMat = new THREE.ShadowMaterial({ opacity: 0.1 });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), shadowMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -2.8;
-    floor.receiveShadow = true;
-    scene.add(floor);
-    shadowFloor = floor;
-
-    heroGroup = new THREE.Group(); scene.add(heroGroup);
-    heroGroup.rotation.x = -0.14; heroGroup.rotation.y = 0.05;
-
-    buildButton(THREE, heroGroup);
-    buildNeedle(THREE, heroGroup);
-    scene.updateMatrixWorld(true);
-    buildThreadAndBeads(THREE);
-
-    clock = new THREE.Clock();
-    updateBounds();
-
-    const onResize = () => {
-      const w = window.innerWidth, h = window.innerHeight;
-      renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
-      updateBounds();
-    };
-    window.addEventListener("resize", onResize);
-
-    frame();
-  }
-
-  // ─── DOM wiring ───────────────────────────────────────────────────────────
-
-  function wireDom() {
-    const form = document.getElementById("nl-form");
-    const input = document.getElementById("nl-input") as HTMLInputElement | null;
-    const hint = document.getElementById("nl-hint");
-
-    if (form && input) {
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const v = (input.value || "").toLowerCase();
-        if (/(pull|needle|out|thread|open|begin|enter|start)/.test(v)) {
-          triggerPull();
-        } else {
-          const inner = document.getElementById("nl-gate-inner");
-          if (inner) {
-            inner.style.animation = "nl-shake .5s ease";
-            setTimeout(() => { inner.style.animation = ""; }, 520);
-          }
-          if (hint) {
-            (hint as HTMLElement).style.color = "var(--color-thread)";
-            hint.textContent = "almost — try: pull the needle out";
-          }
-        }
+      buttonEl.style.width = `${250 * state.scale}px`;
+      beads.forEach((bead) => {
+        bead.w = bead.cfg.w * state.scale * 1.06;
+        bead.h = bead.w * (bead.natH / bead.natW);
+        bead.el.style.width = `${bead.w}px`;
       });
     }
 
-    lastScroll = window.scrollY;
+    function beadAnchor(bead: typeof beads[number], sway: number) {
+      const ox = state.origin.x + bead.cfg.ax * state.scale - state.eye.x;
+      const oy = state.origin.y + bead.cfg.ay * state.scale - state.eye.y;
+      const c = Math.cos(sway);
+      const s = Math.sin(sway);
+      return {
+        x: state.eye.x + ox * c - oy * s,
+        y: state.eye.y + ox * s + oy * c,
+      };
+    }
+
+    function easeInOut(t: number) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function startPull(elapsed: number) {
+      state.phase = "pulling";
+      const strand = beads.filter((bead) => bead.cfg.strand);
+      const loose = beads.filter((bead) => !bead.cfg.strand);
+      strand.forEach((bead, index) => {
+        bead.delay = 380 + (strand.length - 1 - index) * 95;
+      });
+      loose.forEach((bead, index) => {
+        bead.delay = 520 + index * 120;
+      });
+
+      const order = beads.map((_, index) => index).sort(() => Math.random() - 0.5);
+      order.forEach((id, rank) => {
+        state.targets[id] = state.vw * (0.1 + 0.8 * (rank / Math.max(1, beads.length - 1)));
+      });
+      state.revealAt = elapsed + 1650;
+    }
+
+    function release(bead: typeof beads[number]) {
+      bead.released = true;
+      const index = beads.indexOf(bead);
+      const targetX = state.targets[index] ?? state.vw * Math.random();
+      bead.vx = (targetX - bead.x) * (0.7 + Math.random() * 0.6) + (Math.random() - 0.5) * 60;
+      bead.vy = -30 - Math.random() * 80;
+      bead.vrot = (Math.random() - 0.5) * 320;
+    }
+
+    function integrate(bead: typeof beads[number], dt: number, time: number) {
+      const gravity = 1850;
+      bead.vy += gravity * dt;
+      bead.x += bead.vx * dt;
+      bead.y += bead.vy * dt;
+      bead.rot += bead.vrot * dt;
+
+      const floor = state.vh - 14 * state.scale - bead.h * 0.42;
+      if (bead.y > floor) {
+        bead.y = floor;
+        if (bead.vy > 0) bead.vy = -bead.vy * 0.26;
+        bead.vx *= 0.72;
+        bead.vrot *= 0.4;
+        if (Math.abs(bead.vy) < 80) {
+          bead.vy = 0;
+          bead.settled = true;
+        }
+        bead.rot -= (bead.vx / Math.max(bead.w, 16)) * dt * 40;
+      } else {
+        bead.settled = false;
+      }
+
+      const margin = bead.w * 0.42;
+      if (bead.x < margin) {
+        bead.x = margin;
+        bead.vx = Math.abs(bead.vx) * 0.4;
+      }
+      if (bead.x > state.vw - margin) {
+        bead.x = state.vw - margin;
+        bead.vx = -Math.abs(bead.vx) * 0.4;
+      }
+      if (bead.settled) {
+        bead.vx *= 0.9;
+        bead.vx += Math.sin(time * 0.8 + bead.x * 0.01) * 1.4 * dt * 60 * 0.02;
+        bead.x += bead.vx * dt;
+        if (bead.x < margin) bead.x = margin;
+        if (bead.x > state.vw - margin) bead.x = state.vw - margin;
+      }
+    }
+
+    function separate() {
+      for (let i = 0; i < beads.length; i++) {
+        const a = beads[i];
+        if (!a.released) continue;
+        for (let j = i + 1; j < beads.length; j++) {
+          const b = beads[j];
+          if (!b.released) continue;
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const distance = Math.hypot(dx, dy) || 0.001;
+          const min = (a.w + b.w) * 0.42;
+          if (distance < min) {
+            const overlap = (min - distance) / 2;
+            const nx = dx / distance;
+            const ny = dy / distance;
+            a.x -= nx * overlap;
+            a.y -= ny * overlap;
+            b.x += nx * overlap;
+            b.y += ny * overlap;
+          }
+        }
+      }
+    }
+
+    function beginReveal(elapsed: number) {
+      if (!state.revealing) {
+        state.revealing = true;
+        html.classList.remove("ct-intro-active");
+        html.classList.add("ct-revealing");
+        contentEl.style.opacity = "0";
+        contentEl.style.pointerEvents = "none";
+        stageEl.style.opacity = "1";
+      }
+
+      const progress = Math.min(1, (elapsed - state.revealAt) / 1200);
+      contentEl.style.opacity = String(progress);
+      stageEl.style.opacity = String(1 - progress);
+
+      if (progress >= 1 && !state.done) {
+        state.done = true;
+        html.classList.remove("ct-revealing");
+        html.classList.add("ct-revealed");
+        stageEl.hidden = true;
+        contentEl.style.opacity = "";
+        contentEl.style.pointerEvents = "";
+        const lenis = (window as any).__lenis;
+        lenis?.resize?.();
+        window.dispatchEvent(new Event("resize"));
+      }
+    }
+
+    function frame(now: number) {
+      const elapsed = now - state.start;
+      const dt = Math.min(0.034, (now - state.last) / 1000);
+      state.last = now;
+      const time = elapsed / 1000;
+
+      if (state.phase === "idle" && elapsed > state.pullAt) startPull(elapsed);
+
+      const sway = Math.sin(time * 0.55) * 0.05 + Math.sin(time * 0.93) * 0.018;
+      const bx = state.origin.x;
+      const by = state.origin.y + Math.sin(time * 0.6) * 3 * state.scale;
+      let buttonRot = Math.sin(time * 0.4) * 1.3;
+      if (state.phase !== "idle") {
+        buttonRot += easeInOut(Math.min(1, (elapsed - state.pullAt) / 2400)) * 26;
+      }
+      buttonEl.style.transform = `translate(${bx}px,${by}px) translate(-50%,-50%) rotate(${buttonRot}deg)`;
+
+      let needlePull = 0;
+      let needleFade = 1;
+      if (state.phase !== "idle") {
+        const pullEase = easeInOut(Math.min(1, (elapsed - state.pullAt) / 1700));
+        needlePull = pullEase * 540 * state.scale;
+        if (elapsed - state.pullAt > 1300) {
+          needleFade = Math.max(0, 1 - (elapsed - state.pullAt - 1300) / 600);
+        }
+      }
+      const angle = -18 * Math.PI / 180;
+      const dx = Math.cos(angle) * needlePull;
+      const dy = Math.sin(angle) * needlePull;
+      const needleScale = state.scale * 0.74;
+      needleEl.style.opacity = String(needleFade);
+      needleEl.style.transform = `translate(${state.eye.x + dx}px,${state.eye.y + dy}px) rotate(-18deg) translate(${-326 * needleScale}px, ${-17 * needleScale}px) scale(${needleScale})`;
+
+      const strandPoints: Array<[number, number]> = [];
+      const releasing = state.phase !== "idle";
+      for (const bead of beads) {
+        if (!bead.released) {
+          const anchor = beadAnchor(bead, sway);
+          bead.x = anchor.x;
+          bead.y = anchor.y;
+          if (bead.cfg.strand) strandPoints.push([anchor.x, anchor.y]);
+          if (releasing && elapsed - state.pullAt > bead.delay) release(bead);
+        } else {
+          integrate(bead, dt, time);
+        }
+        bead.el.style.transform = `translate(${bead.x}px,${bead.y}px) translate(-50%,-50%) rotate(${bead.rot}deg)`;
+      }
+
+      if (releasing) separate();
+
+      if (state.phase === "idle" || (releasing && elapsed - state.pullAt < 500)) {
+        let d = `M ${state.eye.x} ${state.eye.y}`;
+        strandPoints.forEach((point) => {
+          d += ` L ${point[0]} ${point[1]}`;
+        });
+        threadEl.setAttribute("d", d);
+        if (releasing) {
+          threadEl.setAttribute("opacity", String(Math.max(0, 0.82 * (1 - (elapsed - state.pullAt) / 500))));
+        }
+      } else if (releasing) {
+        threadEl.setAttribute("opacity", "0");
+      }
+
+      if (state.revealAt && elapsed > state.revealAt) beginReveal(elapsed);
+
+      if (Math.abs(state.scrollVel) > 0.1) {
+        const push = -state.scrollVel * 0.06;
+        beads.forEach((bead) => {
+          if (bead.settled) bead.vx += push * (0.6 + Math.random() * 0.5);
+        });
+        state.scrollVel *= 0.82;
+        if (Math.abs(state.scrollVel) < 0.4) state.scrollVel = 0;
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    window.addEventListener("resize", measure);
     window.addEventListener("scroll", () => {
-      scrollVel += window.scrollY - lastScroll;
-      lastScroll = window.scrollY;
+      const current = window.scrollY || window.pageYOffset || 0;
+      state.scrollVel += current - state.lastScroll;
+      state.lastScroll = current;
     }, { passive: true });
-  }
 
-  // ─── boot ─────────────────────────────────────────────────────────────────
-
-  wireDom();
-  waitForThree(() => {
-    try { init(); } catch (e) { console.error("[needle] init failed", e); }
-  });
+    measure();
+    requestAnimationFrame(frame);
+  })();
 </script>
 
 <style is:global>
-  /* Gate phase: lock scroll so users can't bypass the intro */
-  html:not(.nl-revealed) {
-    overflow: hidden;
-  }
-  html:not(.nl-revealed) body {
+  html.ct-intro-active,
+  html.ct-intro-active body {
     overflow: hidden;
   }
 
-  /* Site header + site footer: invisible during gate, fade in after reveal */
-  html:not(.nl-revealed) .site-header,
-  html:not(.nl-revealed) .site-footer {
+  html.ct-intro-active .site-header,
+  html.ct-intro-active .site-footer {
     opacity: 0;
     pointer-events: none;
   }
-  html.nl-revealed .site-header,
-  html.nl-revealed .site-footer {
+
+  html.ct-revealed .site-header,
+  html.ct-revealed .site-footer {
     opacity: 1;
     pointer-events: auto;
-    transition: opacity 0.8s ease 0.4s;
+    transition: opacity 0.8s ease 0.3s;
   }
 
-  /* Reveal transitions */
-  html.nl-revealed #nl-content {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-  }
-  html.nl-revealed #nl-spotlight {
-    opacity: 0.4 !important;
+  html.ct-intro-active #ct-content {
+    opacity: 0;
+    pointer-events: none;
   }
 
-  /* Needle landing animations */
-  @keyframes nl-cuepulse {
-    0%, 100% { opacity: 0.35; transform: translateY(0); }
-    50% { opacity: 0.9; transform: translateY(4px); }
+  @keyframes ct-cue {
+    0%,
+    100% {
+      opacity: 0.32;
+      transform: translateY(0);
+    }
+    50% {
+      opacity: 0.85;
+      transform: translateY(5px);
+    }
   }
-  @keyframes nl-shake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-7px); }
-    40% { transform: translateX(6px); }
-    60% { transform: translateX(-4px); }
-    80% { transform: translateX(3px); }
-  }
-</style>
 
-<style>
-  /* ── root ──────────────────────────────────────────────────────────── */
-  #nl-root {
+  #ct-root {
     position: relative;
     min-height: 100vh;
-    background: var(--color-canvas);
     overflow-x: hidden;
+    background: #f0ece2;
+    color: #221f1a;
   }
 
-  /* ── spotlight ─────────────────────────────────────────────────────── */
-  #nl-spotlight {
+  .ct-paper,
+  .ct-vignette {
     position: fixed;
     inset: 0;
     z-index: 0;
     pointer-events: none;
+  }
+
+  .ct-paper {
+    background: radial-gradient(120% 100% at 50% 18%, #f7f4ec 0%, #efeae0 46%, #e6e0d3 100%);
+  }
+
+  .ct-vignette {
+    opacity: 0.5;
     background:
-      radial-gradient(90% 70% at 50% 40%, rgba(255,252,244,0.5) 0%, rgba(236,232,220,0) 50%),
-      radial-gradient(130% 120% at 50% 58%, rgba(0,0,0,0) 48%, rgba(60,52,40,0.22) 100%);
-    transition: opacity 1.2s ease;
+      radial-gradient(70% 55% at 50% 42%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 60%),
+      radial-gradient(130% 120% at 50% 60%, rgba(0, 0, 0, 0) 52%, rgba(74, 64, 48, 0.13) 100%);
   }
 
-  /* ── canvas host ───────────────────────────────────────────────────── */
-  #nl-canvas-host {
+  .ct-stage {
     position: fixed;
     inset: 0;
-    z-index: 40;
+    z-index: 30;
     pointer-events: none;
-  }
-
-  /* ── gate UI ───────────────────────────────────────────────────────── */
-  #nl-gate {
-    position: fixed;
-    inset: 0;
-    z-index: 60;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    padding-bottom: 8vh;
-    pointer-events: none;
-  }
-
-  #nl-gate-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-    pointer-events: auto;
-    transition: opacity 0.9s ease, transform 0.9s ease;
-  }
-
-  .nl-gate-label {
-    margin: 0;
-    font-size: var(--fs-label);
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: var(--color-stone);
-  }
-
-  .nl-form {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    border-bottom: 1px solid rgba(140,42,53,0.45);
-    padding: 6px 2px;
-  }
-
-  .nl-prompt-arrow {
-    color: var(--color-thread);
-    font-family: var(--font-display);
-    font-size: 18px;
-    margin-right: 10px;
-    user-select: none;
-  }
-
-  #nl-input {
-    width: min(72vw, 340px);
-    background: transparent;
-    border: none;
-    outline: none;
-    font-family: var(--font-body);
-    font-size: 16px;
-    color: var(--color-ink);
-    letter-spacing: 0.01em;
-  }
-
-  #nl-input::placeholder {
-    color: var(--color-stone);
-  }
-
-  .nl-hint {
-    margin: 0;
-    font-size: 12px;
-    color: #b3ada0;
-    font-style: italic;
-    transition: color 0.3s ease;
-  }
-
-  .nl-hint-phrase {
-    color: var(--color-thread);
-  }
-
-  /* ── revealed content ──────────────────────────────────────────────── */
-  #nl-content {
-    position: relative;
-    z-index: 10;
     opacity: 0;
-    pointer-events: none;
-    transition: opacity 1.1s ease;
+    visibility: hidden;
+    transition: opacity 1.2s var(--ease-thread), visibility 0s linear 1.2s;
   }
 
-  /* ── hero header ───────────────────────────────────────────────────── */
-  .nl-hero-header {
+  html.ct-intro-active .ct-stage,
+  html.ct-revealing .ct-stage {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  .ct-thread-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .ct-thread-path {
+    stroke: #7c1f28;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.82;
+  }
+
+  .ct-needle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: center;
+    will-change: transform;
+    filter: drop-shadow(0 5px 7px rgba(60, 50, 35, 0.28));
+  }
+
+  .ct-button {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 250px;
+    height: auto;
+    max-width: none;
+    transform-origin: center;
+    will-change: transform;
+    filter:
+      drop-shadow(0 18px 26px rgba(70, 58, 40, 0.34))
+      drop-shadow(0 4px 8px rgba(70, 58, 40, 0.2));
+  }
+
+  .ct-beads {
+    position: fixed;
+    inset: 0;
+    z-index: 36;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  html.ct-intro-active .ct-beads,
+  html.ct-revealing .ct-beads,
+  html.ct-revealed .ct-beads {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ct-beads[hidden],
+  .ct-stage[hidden] {
+    display: none;
+  }
+
+  .ct-bead {
+    position: absolute;
+    left: 0;
+    top: 0;
+    max-width: none;
+    height: auto;
+    will-change: transform;
+    filter: drop-shadow(0 4px 5px rgba(80, 20, 28, 0.32));
+  }
+
+  #ct-content {
+    position: relative;
+    z-index: 20;
+    opacity: 1;
+    transition: opacity 1.1s var(--ease-thread);
+  }
+
+  .ct-hero {
+    min-height: 92svh;
     max-width: var(--max-width-content);
     margin: 0 auto;
-    padding: 120px var(--page-gutter) 0;
+    padding: 12vh var(--page-gutter) 8vh;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
-    gap: 20px;
   }
 
-  .nl-kicker {
-    margin: 0;
-    font-size: var(--fs-label);
-    letter-spacing: 0.34em;
+  .ct-kicker,
+  .ct-section-label,
+  .ct-page-footer span {
+    font-size: 12px;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: var(--color-stone);
+    color: #9a9286;
   }
 
-  .nl-hero-title {
+  .ct-kicker {
+    margin-bottom: 22px;
+  }
+
+  .ct-hero h1 {
     margin: 0;
     font-family: var(--font-display);
     font-variation-settings: var(--fv-hero);
-    font-size: var(--fs-hero);
-    line-height: var(--lh-display);
-    letter-spacing: var(--tracking-display);
-    color: var(--color-ink);
+    font-size: clamp(3.2rem, 10vw, 8rem);
+    line-height: 0.98;
+    color: #221f1a;
   }
 
-  .nl-hero-tagline {
-    margin: 0;
-    max-width: 34rem;
-    font-size: var(--fs-body-lg);
-    line-height: 1.6;
-    color: #6f6a60;
+  .ct-tagline {
+    margin-top: 26px;
+    max-width: 31rem;
+    font-size: 1.08rem;
+    line-height: 1.65;
+    color: #6c655a;
   }
 
-  .nl-scroll-cue {
-    margin-top: 46px;
-    font-size: var(--fs-label);
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    color: #b3ada0;
-    animation: nl-cuepulse 2.6s ease-in-out infinite;
-  }
-
-  /* ── segments section ──────────────────────────────────────────────── */
-  .nl-segments-section {
-    max-width: var(--max-width-content);
-    margin: 0 auto;
-    padding: 140px var(--page-gutter) 40px;
-  }
-
-  .nl-section-eyebrow {
-    margin: 0 0 8px;
-    font-size: var(--fs-label);
+  .ct-scroll-cue {
+    margin-top: 52px;
+    font-size: 11px;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: var(--color-stone);
+    color: #b3aa9c;
+    animation: ct-cue 2.8s ease-in-out infinite;
   }
 
-  .nl-segment-list {
-    border-bottom: 1px solid var(--color-border);
-    padding: 0;
-    list-style: none;
-  }
-
-  /* ── streetwear projects ───────────────────────────────────────────── */
-  .nl-projects-section {
-    max-width: var(--max-width-content);
+  .ct-segments,
+  .ct-projects,
+  .ct-page-footer {
+    max-width: 70rem;
     margin: 0 auto;
-    padding: 80px var(--page-gutter) 60px;
+    padding-inline: var(--page-gutter);
   }
 
-  .nl-projects-header {
+  .ct-segments {
+    padding-top: 6vh;
+    padding-bottom: 12vh;
+  }
+
+  .ct-section-label {
+    margin-bottom: 36px;
+  }
+
+  .ct-segment-list {
+    border-top: 1px solid rgba(124, 31, 40, 0.18);
+  }
+
+  .ct-segment-list li {
+    border-bottom: 1px solid rgba(124, 31, 40, 0.18);
+  }
+
+  .ct-segment-list a {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 16px 20px;
+    padding: 30px 6px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .ct-segment-num {
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    color: #b1a899;
+  }
+
+  .ct-segment-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .ct-segment-name {
+    width: fit-content;
+    font-family: var(--font-display);
+    font-variation-settings: var(--fv-h2);
+    font-size: clamp(1.55rem, 3.6vw, 2.55rem);
+    line-height: 1.08;
+    color: #221f1a;
+    position: relative;
+  }
+
+  .ct-segment-name::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 100%;
+    bottom: -0.14em;
+    height: 2px;
+    background-image: repeating-linear-gradient(to right, #7c1f28 0 6px, transparent 6px 11px);
+    transition: right var(--duration-base) var(--ease-thread);
+  }
+
+  .ct-segment-blurb {
+    max-width: 34rem;
+    font-size: var(--fs-small);
+    line-height: 1.55;
+    color: #756e63;
+  }
+
+  .ct-segment-arrow {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: #7c1f28;
+    transition: transform var(--duration-base) var(--ease-thread);
+  }
+
+  .ct-segment-list a:hover .ct-segment-name::after,
+  .ct-segment-list a:focus-visible .ct-segment-name::after {
+    right: 0;
+  }
+
+  .ct-segment-list a:hover .ct-segment-arrow,
+  .ct-segment-list a:focus-visible .ct-segment-arrow {
+    transform: translateX(6px);
+  }
+
+  .ct-projects {
+    padding-top: 3vh;
+    padding-bottom: 10vh;
+  }
+
+  .ct-projects-header {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -936,56 +765,80 @@ const streetwearProjects = getProjectsBySegment("streetwear");
     margin-bottom: 40px;
   }
 
-  .nl-projects-title {
+  .ct-projects h2 {
     margin: 0;
     font-family: var(--font-display);
     font-variation-settings: var(--fv-h2);
     font-size: var(--fs-h2);
     line-height: var(--lh-display);
-    color: var(--color-ink);
+    color: #221f1a;
   }
 
-  .nl-projects-count {
-    font-size: var(--fs-label);
+  .ct-projects-header span {
+    font-size: 11px;
     letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: var(--color-stone);
+    color: #9a9286;
+    white-space: nowrap;
   }
 
-  .nl-project-grid {
+  .ct-project-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 34px;
-    padding: 0;
-    list-style: none;
   }
 
-  /* ── footer ────────────────────────────────────────────────────────── */
-  .nl-page-footer {
-    max-width: var(--max-width-content);
-    margin: 0 auto;
-    padding: 120px var(--page-gutter) 26vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
+  .ct-page-footer {
+    padding-top: 8vh;
+    padding-bottom: 30vh;
     text-align: center;
   }
 
-  .nl-footer-quote {
+  .ct-page-footer p {
     margin: 0;
     font-family: var(--font-display);
     font-variation-settings: var(--fv-h2);
     font-style: italic;
-    font-size: clamp(1.2rem, 2.6vw, 1.8rem);
-    color: var(--color-ink);
+    font-weight: 300;
+    font-size: clamp(1.3rem, 3vw, 2rem);
+    color: #221f1a;
   }
 
-  .nl-footer-byline {
-    margin: 0;
-    font-size: var(--fs-label);
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    color: var(--color-stone);
+  .ct-page-footer span {
+    display: block;
+    margin-top: 18px;
+  }
+
+  @media (max-width: 720px) {
+    .ct-hero {
+      min-height: 90svh;
+      padding-top: 11vh;
+    }
+
+    .ct-segment-list a {
+      grid-template-columns: 2.5rem minmax(0, 1fr);
+      padding-block: 26px;
+    }
+
+    .ct-segment-arrow {
+      grid-column: 2;
+      font-size: 1rem;
+    }
+
+    .ct-projects-header {
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ct-stage,
+    .ct-beads {
+      display: none !important;
+    }
+
+    .ct-scroll-cue {
+      animation: none;
+    }
   }
 </style>
