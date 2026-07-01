@@ -16,7 +16,7 @@ const segments = getOrderedSegments();
     <div id="nl-grab" aria-hidden="true"></div>
 
     <main id="nl-content">
-      <div aria-hidden="true" style="height: 100vh; pointer-events: none;"></div>
+      <div id="nl-spacer" aria-hidden="true" style="height: 100vh; pointer-events: none;"></div>
 
       <header class="nl-hero">
         <p id="nl-kicker" class="nl-kicker">Commercial discipline &middot; Couture finishing</p>
@@ -68,7 +68,7 @@ const segments = getOrderedSegments();
       html.classList.add("nl-revealed");
       if (grab) grab.hidden = true;
       if (canvasHost) canvasHost.hidden = true;
-      const spacer = contentEl?.querySelector<HTMLElement>(":scope > [aria-hidden='true']");
+      const spacer = document.getElementById("nl-spacer");
       if (spacer) spacer.style.display = "none";
     }
 
@@ -429,7 +429,7 @@ const segments = getOrderedSegments();
     function applyPull(p: number) {
       S.needle.position.copy(S.needleBase).addScaledVector(S.pullVec, p);
       S.button.rotation.z = p * 0.55;
-      if (p > 0.75) {
+      if (S.phase === "completing" && p > 0.75) {
         S.needle.children.forEach((c: any) => {
           if (c.material) {
             c.material.transparent = true;
@@ -668,6 +668,15 @@ const segments = getOrderedSegments();
         r.settleT += dt;
         if (r.settleT > 0.25) {
           scrollDocumentTo(r.target);
+          const spacer = document.getElementById("nl-spacer");
+          if (spacer) {
+            spacer.style.display = "none";
+            const heading = document.getElementById("nl-kicker") || document.getElementById("nl-heading");
+            const settledY = heading
+              ? Math.max(0, heading.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.06)
+              : 0;
+            scrollDocumentTo(settledY);
+          }
           r.active = false;
           const lenis = (window as any).__lenis;
           lenis?.resize?.();
