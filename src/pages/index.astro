@@ -7,7 +7,7 @@ const segments = getOrderedSegments();
 
 <BaseLayout title="Girisha Suri -- Fashion Design Portfolio">
   <Fragment slot="head">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   </Fragment>
 
   <div id="nl-root">
@@ -16,11 +16,11 @@ const segments = getOrderedSegments();
     <div id="nl-grab" aria-hidden="true"></div>
 
     <main id="nl-content">
-      <div id="nl-spacer" aria-hidden="true" style="height: 100vh; pointer-events: none;"></div>
+      <div id="nl-spacer" aria-hidden="true" style="height: 100vh; height: 100dvh; pointer-events: none;"></div>
 
       <header class="nl-hero">
         <p id="nl-kicker" class="nl-kicker">Commercial discipline &middot; Couture finishing</p>
-        <h1 id="nl-heading">Girisha Suri</h1>
+        <h1 id="nl-heading" data-catch="bead">Girisha Suri</h1>
         <p class="nl-tagline">
           Built across streetwear, evening wear, and the spaces between &mdash; where the surface carries the idea and
           the construction stays honest.
@@ -28,13 +28,13 @@ const segments = getOrderedSegments();
       </header>
 
       <section class="nl-segments" aria-label="Work by segment">
-        <p class="nl-section-label">The work</p>
+        <p class="nl-section-label" data-catch="bead">The work</p>
         <ul class="nl-segment-list">
           {segments.map((segment, index) => (
             <li>
               <a href={`/work/${segment.slug}`}>
                 <span class="nl-segment-num">{String(index + 1).padStart(2, "0")}</span>
-                <span class="nl-segment-name">{segment.name}</span>
+                <span class="nl-segment-name" data-catch="bead">{segment.name}</span>
                 <span class="nl-segment-tag">{segment.slug === "vendor-collaboration" ? "B2B" : "View →"}</span>
                 <span class="nl-segment-blurb">{segment.blurb}</span>
               </a>
@@ -44,7 +44,7 @@ const segments = getOrderedSegments();
       </section>
 
       <footer class="nl-page-footer">
-        <p>"Let the surface carry the idea."</p>
+        <p data-catch="bead">"Let the surface carry the idea."</p>
         <span>Girisha Suri &middot; Portfolio</span>
       </footer>
     </main>
@@ -53,6 +53,12 @@ const segments = getOrderedSegments();
 
 <script>
   (() => {
+    // ---- tweakable knobs (defaults tuned to the requested refinements) ----
+    const NT = 1.9; // needle thickness
+    const TT = 0.0038; // thin, delicate thread like the sketch
+    const BREEZE = 1.15; // pendulum sway amount (1.15 ≈ ±20°)
+    const SHADOW = 0.34; // front/top sun shadow strength
+
     const rootEl = document.getElementById("nl-root");
     if (!rootEl) return;
 
@@ -77,24 +83,31 @@ const segments = getOrderedSegments();
       return;
     }
 
+    let revealed = false;
+    function reveal() {
+      if (revealed) return;
+      revealed = true;
+      html.classList.add("nl-revealed");
+      contentEl!.style.pointerEvents = "auto";
+      grab!.style.display = "none";
+    }
+
     const S: any = {
       phase: "idle",
       p: 0,
+      dragging: false,
       dragStart: null as null | { x: number; y: number; p: number },
-      scrollVel: 0,
-      lastScroll: window.scrollY || 0,
       released: false,
       relT: 0,
       btnVy: 0,
-      roll: null as null | { pos: number; vel: number; target: number; active: boolean; settleT: number },
       beadColorHex: 0x5e121b,
       threadColorHex: 0x561019,
-      swayK: 1,
     };
 
     // ---------------- drag ----------------
     function wireDrag() {
-      const dir = { x: 0.46, y: -0.89 };
+      // Drag up-and-out along the needle's axis to draw it from the button.
+      const dir = { x: 0.28, y: -0.96 };
       const PULL_PX = 300;
 
       const down = (e: PointerEvent) => {
@@ -103,6 +116,11 @@ const segments = getOrderedSegments();
         S.dragStart = { x: e.clientX, y: e.clientY, p: S.p };
         S.phase = "dragging";
         grab!.style.cursor = "grabbing";
+        // Keep receiving move/up even if the pointer leaves the surface —
+        // reliable dragging on touch as well as mouse/trackpad.
+        try {
+          grab!.setPointerCapture(e.pointerId);
+        } catch {}
         e.preventDefault();
       };
       const move = (e: PointerEvent) => {
@@ -121,17 +139,6 @@ const segments = getOrderedSegments();
       grab!.addEventListener("pointerdown", down);
       window.addEventListener("pointermove", move, { passive: false });
       window.addEventListener("pointerup", up);
-
-      S.lastScroll = window.scrollY;
-      window.addEventListener(
-        "scroll",
-        () => {
-          const y = window.scrollY;
-          S.scrollVel += y - S.lastScroll;
-          S.lastScroll = y;
-        },
-        { passive: true }
-      );
     }
 
     function waitForThree(cb: () => void) {
@@ -140,7 +147,7 @@ const segments = getOrderedSegments();
         if ((window as any).THREE) return cb();
         if (tries++ > 200) {
           console.error("[needle] THREE failed to load");
-          revealImmediately();
+          reveal();
           return;
         }
         setTimeout(tick, 25);
@@ -155,7 +162,6 @@ const segments = getOrderedSegments();
       const vH = 2 * Math.tan(((cam.fov * Math.PI) / 180) / 2) * dist;
       const vW = vH * cam.aspect;
       S.bounds = { halfH: vH / 2, halfW: vW / 2, floorY: -vH / 2 + 0.06 };
-      if (S.shadowFloor) S.shadowFloor.position.y = S.bounds.floorY - 0.02;
     }
 
     function makeEnvTexture(THREE: any) {
@@ -202,45 +208,73 @@ const segments = getOrderedSegments();
     }
 
     function buildButton(THREE: any, group: any) {
-      const R = 0.95,
-        TH = 0.8;
-      const geo = new THREE.CylinderGeometry(R, R, TH, 220, 8, false);
+      const R = 0.95;
+      // Disc outline with two real holes punched through — the page
+      // background shows straight through them (canvas is transparent).
+      const shape = new THREE.Shape();
+      shape.absarc(0, 0, R, 0, Math.PI * 2, false);
+      // The button.png photo ALREADY has two holes near the centre. Punch our
+      // geometry holes on that same central pair (and we also paint clean
+      // marble over the photo's holes below, so there is never a duplicate set
+      // — exactly two holes, with the needle showing through them).
+      const holeR = 0.085;
+      const h1 = new THREE.Path();
+      h1.absarc(0.037, 0.127, holeR, 0, Math.PI * 2, true);
+      const h2 = new THREE.Path();
+      h2.absarc(-0.037, -0.127, holeR, 0, Math.PI * 2, true);
+      shape.holes.push(h1, h2);
+
+      const geo = new THREE.ExtrudeGeometry(shape, {
+        depth: 0.08,
+        curveSegments: 100,
+        bevelEnabled: true,
+        bevelThickness: 0.02,
+        bevelSize: 0.03,
+        bevelSegments: 5,
+      });
+      geo.center();
+
+      // Gentle shell dome + marble waviness on the front/back caps only.
       const pos = geo.attributes.position;
+      const nor = geo.attributes.normal;
       const v = new THREE.Vector3();
       for (let i = 0; i < pos.count; i++) {
         v.fromBufferAttribute(pos, i);
-        const ang = Math.atan2(v.z, v.x);
-        const rad = Math.hypot(v.x, v.z);
-        const wave = 0.026 * Math.sin(3 * ang + 0.6) + 0.016 * Math.sin(5 * ang + 1.7);
-        const k = Math.min(1, rad / (R * 0.45));
-        if (Math.abs(v.y) > TH * 0.35) v.y += wave * (v.y > 0 ? 1 : 0.6) * k;
-        if (rad > R * 0.6) {
-          const rr = 1 + 0.02 * Math.sin(4 * ang + 0.4) + 0.01 * Math.sin(7 * ang);
-          v.x *= rr;
-          v.z *= rr;
+        const nz = nor.getZ(i);
+        if (Math.abs(nz) > 0.5) {
+          const rad = Math.hypot(v.x, v.y);
+          const ang = Math.atan2(v.y, v.x);
+          const dome = 0.02 * Math.cos((Math.min(1, rad / R) * Math.PI) / 2);
+          const wave = 0.02 * Math.sin(3 * ang + 0.6) + 0.012 * Math.sin(5 * ang + 1.7);
+          pos.setZ(i, v.z + (dome + wave) * (nz > 0 ? 1 : -1));
         }
-        pos.setXYZ(i, v.x, v.y, v.z);
       }
       geo.computeVertexNormals();
 
+      // Normalize the cap UVs to 0..1 across the disc for the marble map.
+      const uv = geo.attributes.uv;
+      for (let i = 0; i < pos.count; i++) {
+        uv.setXY(i, (pos.getX(i) + R) / (2 * R), (pos.getY(i) + R) / (2 * R));
+      }
+      uv.needsUpdate = true;
+
       const mat = new THREE.MeshPhysicalMaterial({
-        color: 0x6a6155,
+        color: 0xbcb3a4,
         metalness: 0.0,
-        roughness: 0.62,
-        clearcoat: 0.6,
-        clearcoatRoughness: 0.3,
-        envMapIntensity: 0.35,
-        reflectivity: 0.4,
+        roughness: 0.72,
+        clearcoat: 0.24,
+        clearcoatRoughness: 0.5,
+        envMapIntensity: 0.14,
+        reflectivity: 0.18,
       });
-      const sideMat = new THREE.MeshStandardMaterial({
-        color: 0x9d8e72,
-        metalness: 0.3,
-        roughness: 0.55,
-        envMapIntensity: 0.5,
+      // Quiet taupe edge that blends into the marble — no bright white ring.
+      const rimMat = new THREE.MeshStandardMaterial({
+        color: 0x8c8171,
+        metalness: 0.06,
+        roughness: 0.82,
+        envMapIntensity: 0.12,
       });
-      const btn = new THREE.Mesh(geo, [sideMat, mat, mat]);
-      btn.rotation.x = Math.PI / 2;
-      btn.rotation.y = 0;
+      const btn = new THREE.Mesh(geo, [mat, rimMat]);
       btn.castShadow = true;
       btn.receiveShadow = true;
       const wrap = new THREE.Group();
@@ -249,18 +283,40 @@ const segments = getOrderedSegments();
       S.button = wrap;
       S.buttonFace = btn;
 
-      new THREE.TextureLoader().load("/images/landing/crystal/button.png", (tex: any) => {
+      const marbleImg = new Image();
+      marbleImg.onload = () => {
+        const cv = document.createElement("canvas");
+        cv.width = marbleImg.width;
+        cv.height = marbleImg.height;
+        const cg = cv.getContext("2d");
+        if (!cg) return;
+        cg.drawImage(marbleImg, 0, 0);
+        // The photo has its OWN two holes near the centre. Clone clean marble
+        // (from just above) down over them, so the only holes on the button
+        // are the two we punch in geometry — never a duplicate set of four.
+        const W = cv.width;
+        const H = cv.height;
+        const pw = W * 0.34;
+        const ph = H * 0.34;
+        const px = (W - pw) / 2;
+        const py = (H - ph) / 2;
+        cg.drawImage(cv, px, py - ph * 0.8, pw, ph, px, py, pw, ph);
+        const tex: any = new THREE.CanvasTexture(cv);
         tex.encoding = THREE.sRGBEncoding;
         tex.anisotropy = Math.min(8, S.renderer.capabilities.getMaxAnisotropy());
         tex.center.set(0.5, 0.5);
         tex.rotation = 0.28;
+        // Zoom past the photo's light background so only the button interior
+        // is sampled — no white ring leaking at the rim.
+        tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+        tex.repeat.set(0.72, 0.72);
         mat.map = tex;
         mat.color.set(0xffffff);
-        mat.emissiveMap = tex;
-        mat.emissive = new THREE.Color(0xffffff);
-        mat.emissiveIntensity = 0.45;
+        mat.emissive = new THREE.Color(0x000000);
+        mat.emissiveIntensity = 0;
         mat.needsUpdate = true;
-      });
+      };
+      marbleImg.src = "/images/landing/crystal/button.png";
     }
 
     function buildNeedle(THREE: any, group: any) {
@@ -271,30 +327,37 @@ const segments = getOrderedSegments();
         roughness: 0.2,
         envMapIntensity: 1.2,
       });
-      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.011, 2.3, 20), metal);
+      // radii scaled up slightly (NT) — needle a touch thicker
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.007 * NT, 0.011 * NT, 2.3, 24), metal);
       shaft.position.y = 0.1;
       shaft.castShadow = true;
       needle.add(shaft);
-      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.011, 0.2, 20), metal);
+      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.011 * NT, 0.2, 24), metal);
       tip.position.y = -1.15;
       tip.castShadow = true;
       needle.add(tip);
-      const eye = new THREE.Mesh(new THREE.TorusGeometry(0.034, 0.0085, 14, 28), metal);
+      const eye = new THREE.Mesh(new THREE.TorusGeometry(0.034 * NT, 0.0085 * NT, 14, 28), metal);
       eye.position.y = 1.31;
       eye.scale.set(0.6, 1, 1);
       eye.castShadow = true;
       needle.add(eye);
-      const eyeCap = new THREE.Mesh(new THREE.SphereGeometry(0.016, 14, 10), metal);
+      const eyeCap = new THREE.Mesh(new THREE.SphereGeometry(0.016 * NT, 14, 10), metal);
       eyeCap.position.y = 1.38;
       needle.add(eyeCap);
 
-      const dir = new THREE.Vector3(0.42, 0.4, 0.82).normalize();
+      // Threads the two central holes: the shaft runs through both hole
+      // centres at z ≈ 0 (visible through the holes, hidden behind the disc
+      // between them). Centred on the button so the composition stays balanced
+      // — tip out lower-left, eye + thread out upper-right, like the reference.
+      const dir = new THREE.Vector3(0.275, 0.944, 0.186).normalize();
       needle.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-      needle.position.set(-0.03, 0.0, -0.04);
-      needle.scale.set(1, 1.7, 1);
+      needle.position.set(0.0, 0.0, -0.01);
+      needle.scale.set(1, 1.4, 1);
       group.add(needle);
       S.needle = needle;
-      S.eyeLocal = new THREE.Vector3(0.034 * 0.6, 1.31, 0);
+      S.eyeLocal = new THREE.Vector3(0.034 * 0.6 * NT, 1.31, 0);
+      // Pull draws the needle up and out along its own axis, pulling the
+      // beaded thread through the holes.
       S.pullVec = dir.clone().multiplyScalar(4.8);
     }
 
@@ -328,17 +391,28 @@ const segments = getOrderedSegments();
       return geo;
     }
 
+    // A single clean thread strand. Beads sit directly on it.
     function rebuildThread(THREE: any) {
       if (S.threadMesh) {
         S.scene.remove(S.threadMesh);
         S.threadMesh.geometry.dispose();
       }
       const curve = new THREE.CatmullRomCurve3(S.nodes.map((n: any) => n.pos));
-      const geo = new THREE.TubeGeometry(curve, S.threadN * 3, 0.0075, 8, false);
+      const geo = new THREE.TubeGeometry(curve, S.threadN * 3, TT, 8, false);
       const mesh = new THREE.Mesh(geo, S.threadMat);
       mesh.castShadow = true;
       S.scene.add(mesh);
       S.threadMesh = mesh;
+    }
+
+    // Rest shape of the thread traced from the reference sketch: a gentle
+    // S-curve leaning to the right as it drops, rather than a straight line.
+    function sketchOffset(t: number) {
+      // t in [0,1] from eye (0) to tail (1). Mostly vertical drape with a
+      // couple of gentle waves, like the reference image's hanging thread.
+      const x = 0.055 * Math.sin(t * Math.PI * 2.1) + 0.03 * t;
+      const z = 0.03 * Math.sin(t * Math.PI * 1.5);
+      return { x, z };
     }
 
     function buildThreadAndBeads(THREE: any) {
@@ -349,7 +423,8 @@ const segments = getOrderedSegments();
       S.nodes = [];
       for (let i = 0; i < N; i++) {
         const t = i / (N - 1);
-        const p = new THREE.Vector3(anchor.x + Math.sin(t * Math.PI) * 0.18, anchor.y - S.segLen * i, anchor.z);
+        const off = sketchOffset(t);
+        const p = new THREE.Vector3(anchor.x + off.x, anchor.y - S.segLen * i, anchor.z + off.z + 0.24);
         S.nodes.push({ pos: p.clone(), prev: p.clone() });
       }
       S.threadMat = new THREE.MeshStandardMaterial({
@@ -388,42 +463,37 @@ const segments = getOrderedSegments();
       const bugle = (r: number, h: number) => new THREE.CylinderGeometry(r, r, h, 16).rotateX((Math.PI / 2) * Math.random());
       const rondelle = (r: number) => new THREE.CylinderGeometry(r, r, r * 0.5, 18).rotateX(Math.PI / 2);
       const bicone = (r: number) => biconeGeo(THREE, r, r * 1.9);
-      const specs = [
-        { node: 16, geo: () => round(0.026), r: 0.026 },
+      const specs: Array<{ node: number; geo: () => any; r?: number }> = [
+        { node: 16, geo: () => round(0.026) },
         { node: 18, geo: () => bicone(0.024), r: 0.03 },
-        { node: 19, geo: () => round(0.03), r: 0.03 },
-        { node: 20, geo: () => rondelle(0.03), r: 0.03 },
-        { node: 21, geo: () => round(0.024), r: 0.024 },
+        { node: 19, geo: () => round(0.03) },
+        { node: 20, geo: () => rondelle(0.03) },
+        { node: 21, geo: () => round(0.024) },
         { node: 22, geo: () => bugle(0.018, 0.07), r: 0.045 },
-        { node: 23, geo: () => round(0.032), r: 0.032 },
+        { node: 23, geo: () => round(0.032) },
         { node: 24, geo: () => bicone(0.026), r: 0.032 },
-        { node: 25, geo: () => round(0.028), r: 0.028 },
-        { node: 26, geo: () => round(0.034), r: 0.034 },
-        { node: 27, geo: () => round(0.026), r: 0.026 },
+        { node: 25, geo: () => round(0.028) },
+        { node: 26, geo: () => round(0.034) },
+        { node: 27, geo: () => round(0.026) },
         { node: 29, geo: () => teardropGeo(THREE, 0.05), r: 0.058 },
       ];
+      const radii = [0.026, 0.03, 0.03, 0.03, 0.024, 0.045, 0.032, 0.032, 0.028, 0.034, 0.026, 0.058];
       S.beads = [];
-      const BS = 1.0;
-      specs.forEach((sp) => {
+      specs.forEach((sp, idx) => {
         const mesh = mk(sp.geo());
-        mesh.scale.setScalar(BS);
         mesh.rotation.set(Math.random() * 6, Math.random() * 6, Math.random() * 6);
         mesh.userData = {
           node: sp.node,
-          radius: sp.r * 1.1 * BS,
+          radius: (sp.r ?? radii[idx]) * 1.1,
           free: false,
           vel: new THREE.Vector3(),
-          spin: new THREE.Vector3((Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3),
           settled: false,
           delay: 0,
+          spin: new THREE.Vector3((Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3),
         };
         S.scene.add(mesh);
         S.beads.push(mesh);
       });
-    }
-
-    function easeOut(t: number) {
-      return 1 - Math.pow(1 - t, 3);
     }
 
     function applyPull(p: number) {
@@ -443,81 +513,28 @@ const segments = getOrderedSegments();
       }
     }
 
-    function stepThread(THREE: any, dt: number, time: number) {
-      const g = -9.8;
-      const wind = (Math.sin(time * 0.8) * 0.5 + Math.sin(time * 1.5) * 0.25) * S.swayK;
+    // Idle thread: the whole drape swings like a pendulum about the needle
+    // eye. BREEZE 1.15 ≈ ±20° swing (0.3035 rad per unit).
+    function shapeThread(THREE: any, time: number) {
       const anchor = eyeWorld();
       const nodes = S.nodes;
-      nodes[0].pos.copy(anchor);
-      nodes[0].prev.copy(anchor);
-      for (let i = 1; i < nodes.length; i++) {
-        const n = nodes[i];
-        const vx = (n.pos.x - n.prev.x) * 0.985,
-          vy = (n.pos.y - n.prev.y) * 0.985,
-          vz = (n.pos.z - n.prev.z) * 0.985;
-        n.prev.copy(n.pos);
-        n.pos.x += vx + wind * 0.000055 * i;
-        n.pos.y += vy + g * dt * dt;
-        n.pos.z += vz + Math.sin(time * 1.3 + i * 0.3) * 0.00009 * S.swayK;
-      }
-      for (let k = 0; k < 20; k++) {
-        for (let i = 0; i < nodes.length - 1; i++) {
-          const a = nodes[i].pos,
-            b = nodes[i + 1].pos;
-          const dx = b.x - a.x,
-            dy = b.y - a.y,
-            dz = b.z - a.z;
-          const d = Math.hypot(dx, dy, dz) || 0.0001;
-          const diff = (d - S.segLen) / d;
-          const mxa = i === 0 ? 0 : 0.5,
-            mxb = 0.5 + (i === 0 ? 0.5 : 0);
-          a.x += dx * diff * mxa;
-          a.y += dy * diff * mxa;
-          a.z += dz * diff * mxa;
-          b.x -= dx * diff * mxb;
-          b.y -= dy * diff * mxb;
-          b.z -= dz * diff * mxb;
-        }
-        nodes[0].pos.copy(anchor);
-      }
-      rebuildThread(THREE);
-    }
-
-    function stepFreeThread(THREE: any, dt: number) {
-      const g = -2.6;
-      const nodes = S.nodes;
-      const fy = S.bounds.floorY + 0.02;
+      const maxRad = BREEZE * 0.3035;
+      const sway = maxRad * (0.85 * Math.sin(time * 0.62) + 0.15 * Math.sin(time * 1.4 + 0.5));
+      const cs = Math.cos(sway),
+        sn = Math.sin(sway);
       for (let i = 0; i < nodes.length; i++) {
-        const n = nodes[i];
-        const vx = (n.pos.x - n.prev.x) * 0.97,
-          vy = (n.pos.y - n.prev.y) * 0.97;
-        n.prev.copy(n.pos);
-        n.pos.x += vx;
-        n.pos.y += vy + g * dt * dt;
-        if (n.pos.y < fy) {
-          n.pos.y = fy;
-          n.prev.y = fy;
-        }
-      }
-      for (let k = 0; k < 10; k++) {
-        for (let i = 0; i < nodes.length - 1; i++) {
-          const a = nodes[i].pos,
-            b = nodes[i + 1].pos;
-          const dx = b.x - a.x,
-            dy = b.y - a.y,
-            dz = b.z - a.z;
-          const d = Math.hypot(dx, dy, dz) || 0.0001;
-          const diff = (d - S.segLen) / d;
-          a.x += dx * diff * 0.5;
-          a.y += dy * diff * 0.5;
-          a.z += dz * diff * 0.5;
-          b.x -= dx * diff * 0.5;
-          b.y -= dy * diff * 0.5;
-          b.z -= dz * diff * 0.5;
-        }
+        const t = i / (nodes.length - 1);
+        const off = sketchOffset(t);
+        const dx = off.x,
+          dy = -S.segLen * i;
+        // rotate the offset-from-eye about Z (screen plane) — anchor stays put,
+        // the tail swings the most.
+        const rx = dx * cs - dy * sn;
+        const ry = dx * sn + dy * cs;
+        nodes[i].pos.set(anchor.x + rx, anchor.y + ry, anchor.z + off.z + 0.24);
+        nodes[i].prev.copy(nodes[i].pos);
       }
       rebuildThread(THREE);
-      if (S.threadMat.opacity > 0) S.threadMat.opacity = Math.max(0, S.threadMat.opacity - dt * 0.5);
     }
 
     function placeBeadsOnThread() {
@@ -530,160 +547,231 @@ const segments = getOrderedSegments();
       });
     }
 
-    function releaseBeads() {
-      const halfW = S.bounds.halfW;
-      const n = S.beads.length;
-      const order = S.beads.map((_: any, i: number) => i).sort(() => Math.random() - 0.5);
-      S.beads.forEach((m: any, i: number) => {
+    function screenToWorld(sx: number, sy: number, zWorld: number) {
+      const THREE = (window as any).THREE;
+      const W = window.innerWidth,
+        H = window.innerHeight;
+      const v = new THREE.Vector3((sx / W) * 2 - 1, -(sy / H) * 2 + 1, 0.5);
+      v.unproject(S.camera);
+      const dir = v.sub(S.camera.position).normalize();
+      const dist = (zWorld - S.camera.position.z) / dir.z;
+      return S.camera.position.clone().add(dir.multiplyScalar(dist));
+    }
+
+    function worldToScreen(pos: any) {
+      const W = window.innerWidth,
+        H = window.innerHeight;
+      const v = pos.clone().project(S.camera);
+      return { x: (v.x * 0.5 + 0.5) * W, y: (-v.y * 0.5 + 0.5) * H };
+    }
+
+    // The thread "breaks": beads fall down the page and snap onto text; the
+    // button drops all the way to the footer name. Positions are tracked in
+    // document space (px) so a stuck object rides with its text as the page
+    // scrolls — each frame we project doc-space back into the 3D scene.
+    function startFall() {
+      const sc = window.scrollY;
+      const beadEls = Array.from(document.querySelectorAll('[data-catch="bead"]')) as HTMLElement[];
+      S.beads.forEach((m: any) => {
         const u = m.userData;
         u.free = true;
-        const frac = (order[i] + 0.5) / n;
-        const targetX = (frac * 2 - 1) * halfW * 0.86 + (Math.random() - 0.5) * 0.6;
-        u.vel.set(
-          (targetX - m.position.x) * (0.7 + Math.random() * 0.6),
-          -0.2 - Math.random() * 0.8,
-          (Math.random() - 0.5) * 0.4
-        );
-        u.delay = Math.random() * 0.4;
+        u.stuck = false;
+        const s = worldToScreen(m.position);
+        u.docX = s.x;
+        u.docY = s.y + sc;
+        u.beadZ = m.position.z;
+        u.vy = 10 + Math.random() * 70;
+        u.bounces = 3 + Math.floor(Math.random() * 3); // several bounces
+        u.age = 0;
+        u.minLive = 1.2 + Math.random() * 0.6; // stay lively ~1.2–1.8s before it can settle
+        u.frac = 0.1 + Math.random() * 0.8; // random landing spot along its target word
+        u.targetEl = beadEls.length ? beadEls[Math.floor(Math.random() * beadEls.length)] : null;
       });
+
+      // The button drops all the way down to the dark site footer and settles
+      // in the negative space just above the "Girisha Suri" wordmark, turning
+      // slowly.
+      S.scene.attach(S.button); // reparent to scene, keep world transform
+      S.btnScaleRest = S.button.scale.clone().multiplyScalar(0.62); // shrink to a medallion when it lands
+      const bs = worldToScreen(S.button.getWorldPosition(new (window as any).THREE.Vector3()));
+      const nameEl = document.querySelector(".site-footer .name") as HTMLElement | null;
+      S.btnFall = {
+        el: nameEl,
+        stuck: false,
+        docX: bs.x,
+        docY: bs.y + sc,
+        vy: 30,
+        vx: 0,
+        bounces: 3, // bounce a few times before resting on the name
+      };
+
+      // Roll the page down to the hero, like turning to the next page. We
+      // drive the scroll ourselves with plain window.scrollTo — supported on
+      // every browser and device — so it stays one smooth, unbroken roll.
+      // Lenis is paused for the duration so it can't fight us, then handed
+      // back in finishBreak once the drag stage has been removed.
+      (window as any).__lenis?.stop();
+      // Land with the kicker a short, comfortable distance below the fixed
+      // header — a little breathing room, not a screenful of empty space.
+      // (finishBreak's spacer removal is pixel-seamless, so wherever the roll
+      // ends is exactly where we stay.)
+      const headerEl = document.querySelector(".site-header") as HTMLElement | null;
+      const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
+      const kickerEl = document.getElementById("nl-kicker");
+      const spacerEl = document.getElementById("nl-spacer");
+      const spacerH = spacerEl ? spacerEl.offsetHeight : window.innerHeight;
+      const landGap = headerH + 26; // small negative space above the kicker
+      const kickerDoc = kickerEl ? kickerEl.getBoundingClientRect().top + window.scrollY : spacerH;
+      const target = Math.max(spacerH * 0.5, kickerDoc - landGap);
+      S.roll = { from: window.scrollY, to: target, t: 0, dur: 1.6, done: false };
     }
 
-    function stepBeads(dt: number) {
-      if (!S.beads) return;
-      const b = S.bounds,
-        g = -8.0,
-        floorY = b.floorY;
-      const arr = S.beads;
-      let push = 0;
-      if (S.scrollVel) {
-        push = -S.scrollVel * 0.006;
-        S.scrollVel *= 0.85;
-        if (Math.abs(S.scrollVel) < 0.3) S.scrollVel = 0;
-      }
-      for (const m of arr) {
+    // Remove the 100vh drag stage so the hero header becomes the top of the
+    // page — the blank first screen can never be scrolled back into view.
+    function finishBreak() {
+      const spacer = document.getElementById("nl-spacer");
+      if (!spacer || (spacer as any).dataset.removed) return;
+      const h = spacer.offsetHeight;
+      const cur = window.scrollY;
+      spacer.style.display = "none";
+      (spacer as any).dataset.removed = "1";
+      // Shift anything still in flight up by the removed height so it keeps
+      // falling toward the same on-screen spot.
+      S.beads.forEach((m: any) => {
         const u = m.userData;
-        if (!u.free) continue;
-        if (u.delay > 0) {
-          u.delay -= dt;
-          continue;
+        if (u.free && !u.stuck) u.docY -= h;
+      });
+      if (S.btnFall && !S.btnFall.stuck) S.btnFall.docY -= h;
+      // Re-anchor to the hero top. Removing the spacer + shifting scroll by
+      // the same amount keeps every pixel in place (beads included), so this
+      // is invisible — but it must NOT read as an upward scroll. Route it
+      // through Lenis with `immediate` so it snaps in one paint and Lenis's
+      // own position stays synced (no drift back toward a stale target).
+      const newTop = Math.max(0, cur - h);
+      const lenis = (window as any).__lenis;
+      lenis?.resize?.();
+      lenis?.start?.(); // hand scrolling back to the user
+      if (lenis?.scrollTo) {
+        lenis.scrollTo(newTop, { immediate: true, force: true });
+      } else {
+        window.scrollTo(0, newTop);
+      }
+      window.dispatchEvent(new Event("resize"));
+    }
+
+    function updateFall(dt: number) {
+      // Smooth roll to the next page — self-driven, no dependency on Lenis.
+      if (S.roll && !S.roll.done) {
+        S.roll.t += dt;
+        const k = Math.min(1, S.roll.t / S.roll.dur);
+        const e = 1 - Math.pow(1 - k, 3);
+        window.scrollTo(0, S.roll.from + (S.roll.to - S.roll.from) * e);
+        if (k >= 1) {
+          S.roll.done = true;
+          finishBreak();
         }
-        u.vel.y += g * dt;
-        m.position.x += u.vel.x * dt;
-        m.position.y += u.vel.y * dt;
-        m.position.z += u.vel.z * dt;
-        const rad = u.radius;
-        const rfloor = floorY;
-        if (m.position.y - rad < rfloor) {
-          m.position.y = rfloor + rad;
-          if (u.vel.y < 0) u.vel.y = -u.vel.y * 0.34;
-          u.vel.x *= 0.85;
-          u.vel.z *= 0.85;
-          if (push) u.vel.x += push;
-          if (Math.abs(u.vel.y) < 0.25) {
-            u.vel.y = 0;
-            u.settled = true;
+      }
+      const sc = window.scrollY;
+      const G = 1000;
+      const maxDoc = document.body.scrollHeight - 24;
+
+      // the thread breaks and fades away
+      if (S.threadMat.opacity > 0) S.threadMat.opacity = Math.max(0, S.threadMat.opacity - dt * 1.4);
+      if (S.threadMesh) S.threadMesh.visible = S.threadMat.opacity > 0.02;
+
+      S.beads.forEach((m: any) => {
+        const u = m.userData;
+        if (!u.free) return;
+        if (!u.stuck) {
+          u.age += dt;
+          u.vy += G * dt;
+          u.docY += u.vy * dt;
+          let tY: number | null = null;
+          let tX: number | null = null;
+          if (u.targetEl) {
+            const r = u.targetEl.getBoundingClientRect();
+            tY = r.top + sc + r.height * 0.5;
+            tX = r.left + r.width * u.frac;
+          } else if (u.docY >= maxDoc) {
+            tY = maxDoc;
           }
-          m.rotation.z -= (u.vel.x / Math.max(rad, 0.03)) * dt;
-        } else u.settled = false;
-        if (m.position.x - rad < -b.halfW) {
-          m.position.x = -b.halfW + rad;
-          u.vel.x = Math.abs(u.vel.x) * 0.4;
-        }
-        if (m.position.x + rad > b.halfW) {
-          m.position.x = b.halfW - rad;
-          u.vel.x = -Math.abs(u.vel.x) * 0.4;
-        }
-        if (m.position.z > 0.3) {
-          m.position.z = 0.3;
-          u.vel.z *= -0.4;
-        }
-        if (m.position.z < -0.3) {
-          m.position.z = -0.3;
-          u.vel.z *= -0.4;
-        }
-        if (!u.settled) {
+          // Drift horizontally onto the target word as it falls, so it lands
+          // on the text naturally instead of piling up where the thread hung.
+          if (tX != null) u.docX += (tX - u.docX) * Math.min(1, dt * 2.5);
+          if (tY != null && u.docY >= tY) {
+            u.docY = tY;
+            // Stay lively for ~1.5s: keep bouncing (with a floor on the bounce
+            // while it's still young) until it has both aged out and run out of
+            // bounces. Then settle on the word — never teleport.
+            const canSettle = u.age >= u.minLive && u.bounces <= 0;
+            if (!canSettle) {
+              let bv = Math.abs(u.vy) * 0.5;
+              if (u.age < u.minLive) bv = Math.max(bv, 150 + Math.random() * 130);
+              u.vy = -bv;
+              if (u.bounces > 0) u.bounces--;
+            } else {
+              u.stuck = true;
+              u.vy = 0;
+            }
+          }
           m.rotation.x += u.spin.x * dt;
           m.rotation.y += u.spin.y * dt;
+        } else if (u.targetEl) {
+          // Locked onto its word — ride it as the page scrolls, and keep a
+          // slow idle turn so the facets keep catching light (shine).
+          const r = u.targetEl.getBoundingClientRect();
+          u.docY = r.top + sc + r.height * 0.5;
+          const tX = r.left + r.width * u.frac;
+          u.docX += (tX - u.docX) * Math.min(1, dt * 5);
+          m.rotation.x += 0.25 * dt;
+          m.rotation.y += 0.32 * dt;
         }
-      }
-      for (let i = 0; i < arr.length; i++) {
-        const a = arr[i];
-        if (!a.userData.free || a.userData.delay > 0) continue;
-        for (let j = i + 1; j < arr.length; j++) {
-          const c = arr[j];
-          if (!c.userData.free || c.userData.delay > 0) continue;
-          const dx = c.position.x - a.position.x,
-            dy = c.position.y - a.position.y;
-          const d = Math.hypot(dx, dy) || 0.0001;
-          const min = a.userData.radius + c.userData.radius;
-          if (d < min) {
-            const overlap = (min - d) / 2,
-              nx = dx / d,
-              ny = dy / d;
-            a.position.x -= nx * overlap;
-            a.position.y -= ny * overlap;
-            c.position.x += nx * overlap;
-            c.position.y += ny * overlap;
-            const dvx = (c.userData.vel.x - a.userData.vel.x) * 0.5;
-            a.userData.vel.x += dvx * 0.5;
-            c.userData.vel.x -= dvx * 0.5;
+        m.position.copy(screenToWorld(u.docX, u.docY - sc, u.beadZ));
+      });
+
+      const b = S.btnFall;
+      if (b) {
+        // Rest point: horizontally over the wordmark, vertically centred in
+        // the empty space between the footer's top edge and the wordmark.
+        let restY: number | null = null;
+        let restX = b.docX;
+        if (b.el) {
+          const nr = b.el.getBoundingClientRect();
+          const foot = (b.el as HTMLElement).closest(".site-footer");
+          const fr = foot ? foot.getBoundingClientRect() : nr;
+          restY = (fr.top + nr.top) / 2 + sc;
+          restX = nr.left + nr.width * 0.5;
+        }
+        if (!b.stuck) {
+          b.vy += G * 0.9 * dt;
+          b.docY += b.vy * dt;
+          // Roll gradually toward the resting column as it drops, so it
+          // arrives there naturally rather than snapping at the end.
+          if (restX != null) b.docX += (restX - b.docX) * Math.min(1, dt * 2.0);
+          S.button.rotation.z += dt * 1.6; // tumble/roll on the way down
+          const tY = restY != null ? restY : b.docY >= maxDoc ? maxDoc : null;
+          if (tY != null && b.docY >= tY) {
+            b.docY = tY;
+            if (Math.abs(b.vy) > 60 && b.bounces > 0) {
+              b.vy = -Math.abs(b.vy) * 0.5; // bounce before it settles
+              b.bounces--;
+            } else {
+              b.stuck = true;
+              b.vy = 0;
+            }
           }
-        }
-      }
-    }
-
-    function beginTransition() {
-      html.classList.add("nl-revealed");
-      contentEl!.style.pointerEvents = "auto";
-      (window as any).__lenis?.stop();
-      const heading = document.getElementById("nl-kicker") || document.getElementById("nl-heading");
-      const startY = window.scrollY;
-      const targetY = heading
-        ? Math.max(0, heading.getBoundingClientRect().top + startY - window.innerHeight * 0.06)
-        : window.innerHeight;
-      S.roll = { pos: startY, vel: 0, target: targetY, active: true, settleT: 0 };
-    }
-
-    function scrollDocumentTo(pos: number) {
-      window.scrollTo(0, pos);
-    }
-
-    function stepRoll(dt: number) {
-      const r = S.roll;
-      if (!r || !r.active) return;
-      const dist = r.target - r.pos;
-      let falling = 0;
-      if (S.beads) for (const m of S.beads) if (m.userData.free && !m.userData.settled) falling++;
-      const weight = 0.35 + 0.65 * (falling / Math.max(1, S.beads.length));
-      r.vel += dist * 2.4 * weight * dt;
-      r.vel += dist * 0.9 * dt;
-      r.vel *= 1 - 3.2 * dt;
-      r.pos += r.vel * dt;
-      if (r.pos < 0) {
-        r.pos = 0;
-        r.vel = 0;
-      }
-      scrollDocumentTo(r.pos);
-      if (Math.abs(dist) < 0.6 && Math.abs(r.vel) < 0.6) {
-        r.settleT += dt;
-        if (r.settleT > 0.25) {
-          scrollDocumentTo(r.target);
-          const spacer = document.getElementById("nl-spacer");
-          if (spacer) {
-            spacer.style.display = "none";
-            const heading = document.getElementById("nl-kicker") || document.getElementById("nl-heading");
-            const settledY = heading
-              ? Math.max(0, heading.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.06)
-              : 0;
-            scrollDocumentTo(settledY);
+        } else {
+          // Settled above the footer wordmark — ease into place (never
+          // teleport), shrink to a medallion that clears the name, turn slowly.
+          if (restY != null) {
+            b.docY += (restY - b.docY) * Math.min(1, dt * 4);
+            b.docX += (restX - b.docX) * Math.min(1, dt * 4);
           }
-          r.active = false;
-          const lenis = (window as any).__lenis;
-          lenis?.resize?.();
-          lenis?.start?.();
-          window.dispatchEvent(new Event("resize"));
+          if (S.btnScaleRest) S.button.scale.lerp(S.btnScaleRest, Math.min(1, dt * 3));
+          S.button.rotation.z += dt * 0.25;
         }
-      } else r.settleT = 0;
+        S.button.position.copy(screenToWorld(b.docX, b.docY - sc, 0));
+      }
     }
 
     function frame() {
@@ -693,17 +781,17 @@ const segments = getOrderedSegments();
       const time = S.clock.elapsedTime;
 
       if (S.phase === "idle") {
-        stepThread(THREE, dt, time);
+        shapeThread(THREE, time);
         placeBeadsOnThread();
-        S.heroGroup.position.y = Math.sin(time * 0.6) * 0.01;
+        S.heroGroup.position.y = Math.sin(time * 0.6) * 0.008;
       } else if (S.phase === "dragging") {
         applyPull(S.p);
-        stepThread(THREE, dt, time);
+        shapeThread(THREE, time);
         placeBeadsOnThread();
       } else if (S.phase === "returning") {
         S.p += (0 - S.p) * Math.min(1, dt * 8);
         applyPull(S.p);
-        stepThread(THREE, dt, time);
+        shapeThread(THREE, time);
         placeBeadsOnThread();
         if (S.p < 0.005) {
           S.p = 0;
@@ -712,35 +800,20 @@ const segments = getOrderedSegments();
       } else if (S.phase === "completing") {
         S.p = Math.min(1, S.p + dt * 1.7);
         applyPull(S.p);
-        S.button.rotation.z = easeOut(S.p) * Math.PI * 1.15;
         if (S.p > 0.45 && !S.released) {
           S.released = true;
-          releaseBeads();
-          beginTransition();
+          startFall();
+          reveal();
         }
-        if (S.released) {
-          stepFreeThread(THREE, dt);
-          stepBeads(dt);
-          stepRoll(dt);
-        } else {
-          stepThread(THREE, dt, time);
+        if (S.released) updateFall(dt);
+        else {
+          shapeThread(THREE, time);
           placeBeadsOnThread();
         }
         if (S.p >= 1) S.phase = "released";
       } else {
-        S.relT = (S.relT || 0) + dt;
-        S.button.rotation.z += dt * 1.4;
-        if (S.relT < 0.28) {
-          S.button.position.x -= dt * 2.2;
-        } else {
-          S.btnVy = (S.btnVy || -1.5) - 16 * dt;
-          S.button.position.y += S.btnVy * dt;
-          S.button.position.x -= dt * 1.2;
-        }
-        if (S.needle) S.needle.scale.multiplyScalar(1 - dt * 3.0);
-        stepFreeThread(THREE, dt);
-        stepBeads(dt);
-        stepRoll(dt);
+        updateFall(dt);
+        if (S.needle) S.needle.scale.multiplyScalar(1 - dt * 2.5);
       }
 
       S.renderer.render(S.scene, S.camera);
@@ -776,40 +849,46 @@ const segments = getOrderedSegments();
       envTex.dispose();
       pmrem.dispose();
 
-      scene.add(new THREE.HemisphereLight(0xfffaf0, 0xb9b09c, 0.35));
-      const key = new THREE.DirectionalLight(0xfff4e2, 1.45);
-      key.position.set(-3.2, 4.6, 5.0);
+      scene.add(new THREE.HemisphereLight(0xfffaf0, 0xb9b09c, 0.5));
+      // Light from the front, a touch upper-left of camera — each object
+      // throws a soft shadow straight back onto the plane behind it (offset
+      // just slightly down-right), exactly as in the sketch.
+      const key = new THREE.DirectionalLight(0xfff4e2, 1.3);
+      key.position.set(-1.8, 2.4, 7.0);
       key.castShadow = true;
-      key.shadow.mapSize.set(2048, 2048);
+      // High-res shadow map over a tight frustum around the hero objects —
+      // crisp, soft shadows instead of the blocky low-res ones.
+      key.shadow.mapSize.set(4096, 4096);
       key.shadow.camera.near = 0.5;
-      key.shadow.camera.far = 22;
-      key.shadow.camera.left = -6;
-      key.shadow.camera.right = 6;
-      key.shadow.camera.top = 6;
-      key.shadow.camera.bottom = -6;
-      key.shadow.bias = -0.0004;
-      key.shadow.radius = 7;
+      key.shadow.camera.far = 26;
+      key.shadow.camera.left = -3.5;
+      key.shadow.camera.right = 3.5;
+      key.shadow.camera.top = 3.5;
+      key.shadow.camera.bottom = -3.5;
+      key.shadow.bias = -0.0003;
+      key.shadow.radius = 4;
       scene.add(key);
-      const fill = new THREE.DirectionalLight(0xeae6f0, 0.45);
-      fill.position.set(4, 2, 3);
+      const fill = new THREE.DirectionalLight(0xeae6f0, 0.4);
+      fill.position.set(3, 1.5, 4);
       scene.add(fill);
-      const rim = new THREE.DirectionalLight(0xffffff, 0.65);
+      const rim = new THREE.DirectionalLight(0xffffff, 0.2);
       rim.position.set(2.5, -1, -4);
       scene.add(rim);
 
-      const shadowMat = new THREE.ShadowMaterial({ opacity: 0.06 });
-      const floor = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), shadowMat);
-      floor.rotation.x = -Math.PI / 2;
-      floor.position.y = -2.9;
-      floor.receiveShadow = true;
-      scene.add(floor);
-      S.shadowFloor = floor;
+      // Invisible catcher plane directly BEHIND the objects — the cast
+      // shadow lands right behind the button and thread, not on a floor.
+      const shadowMat = new THREE.ShadowMaterial({ opacity: SHADOW });
+      const backPlane = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), shadowMat);
+      backPlane.position.set(0, 0, -0.42);
+      backPlane.receiveShadow = true;
+      scene.add(backPlane);
+      S.shadowFloor = backPlane;
 
       const heroGroup = new THREE.Group();
       scene.add(heroGroup);
       S.heroGroup = heroGroup;
-      heroGroup.rotation.x = -0.12;
-      heroGroup.rotation.y = 0.04;
+      heroGroup.rotation.x = -0.02;
+      heroGroup.rotation.y = 0.0;
       heroGroup.scale.setScalar(0.5);
 
       buildButton(THREE, heroGroup);
@@ -845,7 +924,7 @@ const segments = getOrderedSegments();
         init();
       } catch (e) {
         console.error("[needle] init failed", e);
-        revealImmediately();
+        reveal();
       }
     });
   })();
@@ -868,6 +947,7 @@ const segments = getOrderedSegments();
   html.nl-revealed #nl-content {
     opacity: 1 !important;
     pointer-events: auto !important;
+    transition: opacity 0.8s ease;
   }
 
   html.nl-revealed #nl-spotlight {
@@ -926,7 +1006,10 @@ const segments = getOrderedSegments();
     inset: 0;
     z-index: 55;
     cursor: grab;
-    touch-action: none;
+    touch-action: none; /* we own the gesture on touch — no browser panning */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   #nl-content {
