@@ -392,20 +392,14 @@ const segments = getOrderedSegments();
 
     function buildNeedle(THREE: any, group: any) {
       const needle = new THREE.Group();
-      // Polished steel, like a real sewing needle. The old deep-red needle
-      // (#6B2222) matched the thread but vanished against the near-black footer
-      // where it comes to rest — you'd only see the red thread and think the
-      // needle was gone. Bright metal reads clearly on BOTH the pale hero and
-      // the dark footer. The faint emissive is a floor so it can never sink
-      // fully into a dark background even if the environment reflection is weak
-      // on a given GPU — the needle always shows.
+      // Deep red, the same family as the thread (#6B2222) — a clean solid
+      // material (high segment counts below keep the thin geometry crisp, not
+      // pixelated). Slight sheen so it still reads as a needle, not flat paper.
       const metal = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(0xd7d8de).convertSRGBToLinear(),
-        metalness: 0.85,
-        roughness: 0.28,
-        envMapIntensity: 1.15,
-        emissive: new THREE.Color(0x3a3b42).convertSRGBToLinear(),
-        emissiveIntensity: 1.0,
+        color: new THREE.Color(0x6b2222).convertSRGBToLinear(),
+        metalness: 0.25,
+        roughness: 0.42,
+        envMapIntensity: 0.6,
       });
       // Shaft tapers slightly toward the tip; radii scaled by NT (thickness).
       // The needle is LONG on the tip side (below the hole crossing at local
@@ -414,9 +408,15 @@ const segments = getOrderedSegments();
       // needle. Because the pull slides it along its own axis, the whole shaft
       // retracts back through the hole seamlessly, no clipping. Eye keeps its
       // length up top.
+      // The needle does NOT cast a shadow. The shadow catcher sits well behind
+      // the objects, and the needle rests far in front of it, so its cast
+      // shadow projected as a long, offset diagonal line — a stray "second
+      // needle" next to the real one that made the settled thread+needle read
+      // as broken. Without it, the needle and the thread hanging from its eye
+      // stay clean; the button still casts its own grounding shadow.
       const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.0065 * NT, 0.0105 * NT, 2.5, 32), metal);
       shaft.position.y = 0.05; // spans local y −1.2 (bottom) … +1.3 (up to the eye)
-      shaft.castShadow = true;
+      shaft.castShadow = false;
       needle.add(shaft);
       // A genuinely sharp point: base flush with the shaft bottom (−1.2),
       // tapering to a fine apex at −1.8, well past the disc so it reads as
@@ -424,16 +424,16 @@ const segments = getOrderedSegments();
       const tip = new THREE.Mesh(new THREE.ConeGeometry(0.0105 * NT, 0.6, 32), metal);
       tip.rotation.x = Math.PI; // apex points DOWN
       tip.position.y = -1.5;
-      tip.castShadow = true;
+      tip.castShadow = false;
       needle.add(tip);
       const eye = new THREE.Mesh(new THREE.TorusGeometry(0.034 * NT, 0.0085 * NT, 18, 36), metal);
       eye.position.y = 1.31;
       eye.scale.set(0.6, 1, 1);
-      eye.castShadow = true;
+      eye.castShadow = false;
       needle.add(eye);
       const eyeCap = new THREE.Mesh(new THREE.SphereGeometry(0.016 * NT, 20, 14), metal);
       eyeCap.position.y = 1.38;
-      eyeCap.castShadow = true;
+      eyeCap.castShadow = false;
       needle.add(eyeCap);
 
       // Threads the TOP hole only. The shaft crosses the disc plane (z = 0)
@@ -505,9 +505,10 @@ const segments = getOrderedSegments();
       const curve = new THREE.CatmullRomCurve3(S.nodes.map((n: any) => n.pos));
       const geo = new THREE.TubeGeometry(curve, S.threadN * 3, TT, 8, false);
       const mesh = new THREE.Mesh(geo, S.threadMat);
-      // Cast/receive a shadow at all times — idle, falling, and landed — so the
-      // needle + thread keep a grounded shadow the whole way down and at rest.
-      mesh.castShadow = true;
+      // The thread does not cast a shadow either — the same far-offset catcher
+      // turned the thin strand into stray dark lines beside it. It still
+      // receives shadow so it sits in the scene's light.
+      mesh.castShadow = false;
       mesh.receiveShadow = true;
       S.scene.add(mesh);
       S.threadMesh = mesh;
@@ -1583,10 +1584,16 @@ const segments = getOrderedSegments();
       scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
       let imgAspect = 1080 / 1620;
       const resize = () => {
-        const w = window.innerWidth, h = window.innerHeight;
+        // Match the fixed inset:0 host (the true laid-out viewport), NOT
+        // window.innerHeight. On mobile the browser UI makes innerHeight smaller
+        // than the viewport the fixed host actually fills, so sizing to
+        // innerHeight left the canvas short and a strip of the flat page
+        // background (#ece8dc) showed through at the bottom — the grey band you
+        // saw when scrolling the landing page. The <canvas> is kept at
+        // 100%×100% by CSS; here we only size the drawing buffer to match it.
+        const w = host.clientWidth || window.innerWidth;
+        const h = host.clientHeight || window.innerHeight;
         renderer.setSize(w, h, false);
-        renderer.domElement.style.width = w + "px";
-        renderer.domElement.style.height = h + "px";
         const ca = w / h;
         uniforms.uCover.value.set(ca < imgAspect ? ca / imgAspect : 1, ca > imgAspect ? imgAspect / ca : 1);
       };
