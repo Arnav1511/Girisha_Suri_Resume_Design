@@ -7,6 +7,7 @@ const segments = getOrderedSegments();
 
 <BaseLayout title="Girisha Suri -- Fashion Design Portfolio">
   <Fragment slot="head">
+    <link rel="preload" as="image" href="/images/landing/crystal/button.png" />
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   </Fragment>
 
@@ -58,6 +59,12 @@ const segments = getOrderedSegments();
     const TT = 0.0038; // thin, delicate thread like the sketch
     const BREEZE = 1.15; // pendulum sway amount (1.15 ≈ ±20°)
     const SHADOW = 0.34; // front/top sun shadow strength
+
+    // Always begin at the drag stage so the intro (and its scroll roll) plays
+    // on every load/refresh, instead of the browser restoring the previous
+    // scroll position and skipping straight past it.
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    window.scrollTo(0, 0);
 
     const rootEl = document.getElementById("nl-root");
     if (!rootEl) return;
@@ -836,6 +843,20 @@ const segments = getOrderedSegments();
       renderer.toneMappingExposure = 0.82;
       host.appendChild(renderer.domElement);
       S.renderer = renderer;
+
+      // Release the WebGL context on navigate-away/refresh. Without this,
+      // rapid reloads exhaust the browser's context pool, `init()` then fails
+      // to get a context, and the intro silently falls back to a plain
+      // fade-in with no scroll. Freeing it here keeps every reload fresh.
+      const releaseGL = () => {
+        try {
+          renderer.forceContextLoss();
+          renderer.dispose();
+        } catch (e) {
+          /* nothing to do */
+        }
+      };
+      window.addEventListener("pagehide", releaseGL);
 
       const scene = new THREE.Scene();
       S.scene = scene;
