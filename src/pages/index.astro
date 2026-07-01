@@ -827,15 +827,19 @@ const segments = getOrderedSegments();
       S.scene.attach(S.needle); // keep world transform, detach from the hero group
       const nWorld = S.needle.getWorldPosition(new THREE2.Vector3());
       const nsp = worldToScreen(nWorld);
+      // Deterministic landing: no random velocity/spin/bounce. Wherever the
+      // needle breaks away from, it always drifts to the SAME column and comes
+      // to rest in the SAME place with the SAME orientation — so the final
+      // needle+thread pose is identical on every platform and resolution. The
+      // target column is a fraction of the viewport width, so it scales.
       S.needleFall = {
         docX: nsp.x,
         docY: nsp.y + sc,
         z: nWorld.z,
         vy: 12,
-        vx: (Math.random() - 0.5) * 30,
-        bounces: 2,
+        targetX: vw * 0.5, // fixed landing column (centre), scales with width
         stuck: false,
-        spin: (Math.random() < 0.5 ? -1 : 1) * (1.6 + Math.random()),
+        spin: 2.0, // fixed gentle tumble, eases back to eye-up at rest
       };
       // The needle + thread come to rest a comfortable margin ABOVE the very
       // bottom of the page instead of jammed against the last pixel (where the
@@ -926,6 +930,40 @@ const segments = getOrderedSegments();
       window.dispatchEvent(new Event("resize"));
     }
 
+    // The DETERMINISTIC resting shape of the thread, in document-space pixels,
+    // anchored at the needle eye. Given the eye position and the floor, it
+    // returns where node `t` (0 = eye … 1 = free end) should lie: the strand
+    // hangs from the eye straight down to the floor, then the remaining length
+    // lies in a compact serpentine pool trailing to one side. Because it is a
+    // pure function of the eye + floor (no physics, no randomness), the settled
+    // needle+thread looks pixel-identical on every platform and resolution, and
+    // node 0 is exactly on the eye so it can never read as detached.
+    function threadRestPoint(t: number, eyeX: number, eyeY: number, floorDoc: number) {
+      const N = S.threadN;
+      const totalLen = S.threadSegPx * (N - 1);
+      const H = Math.max(30, floorDoc - eyeY); // drop from the eye to the floor
+      // Fraction of the strand spent hanging down to the floor (a touch more
+      // than H so it isn't bowstring-taut), clamped to sensible bounds.
+      let tDrop = (H * 1.15) / Math.max(1, totalLen);
+      tDrop = Math.min(0.62, Math.max(0.24, tDrop));
+      if (t <= tDrop) {
+        const f = t / tDrop; // 0 at eye … 1 at floor
+        const ease = 1 - (1 - f) * (1 - f); // steeper near the eye, easing onto the floor
+        // Bow out to the side as it descends so the hanging strand separates
+        // cleanly from the needle shaft rather than running parallel to it.
+        return { x: eyeX - 48 * Math.sin(f * Math.PI * 0.5), y: eyeY + H * ease };
+      }
+      const g = (t - tDrop) / (1 - tDrop); // 0 … 1 along the floor pool
+      // Trail the pool to the left, but never past the left edge — cap the reach
+      // to the room actually available, so on a narrow phone it stays fully on
+      // screen just like on a wide monitor.
+      const room = Math.max(30, eyeX - 80);
+      const reach = Math.min(170, totalLen * (1 - tDrop) * 0.55, room);
+      const x = eyeX - 48 - reach * g + Math.sin(g * Math.PI * 3) * 20 * (1 - 0.35 * g);
+      const y = floorDoc - Math.abs(Math.sin(g * Math.PI * 3)) * 6; // hug the floor with soft bumps
+      return { x, y };
+    }
+
     // Rope simulation for the broken thread as it falls with the needle. Node 0
     // is pinned to the needle eye; the rest integrate under gravity (verlet) in
     // document-space pixels, with a few distance-constraint passes to hold the
@@ -941,14 +979,21 @@ const segments = getOrderedSegments();
       const headX = es.x;
       const headY = es.y + sc;
 
-      // Once the needle has landed and the strand has stopped moving, freeze
-      // the shape so the tail can't creep/writhe forever (that endless drift is
-      // what made the settled thread look disconnected). We still re-pin the
-      // head to the eye and re-project every node each frame, so the resting
-      // thread stays attached to the needle and rides page scrolls correctly.
+      // Once the needle has landed, ease the whole strand into the DESIGNED
+      // resting drape (a pure function of the eye + floor) and hold it there,
+      // instead of leaving the physics to settle into a different — and often
+      // detached-looking — shape each time. Node 0 stays exactly on the eye, so
+      // the thread is always connected, and the pose is identical everywhere.
       if (S.threadRest) {
         nodes[0].docX = headX;
         nodes[0].docY = headY;
+        const k = Math.min(1, dt * 6); // smooth glide into the designed shape
+        for (let i = 1; i < nodes.length; i++) {
+          const t = i / (nodes.length - 1);
+          const tgt = threadRestPoint(t, headX, headY, floorDoc);
+          nodes[i].docX += (tgt.x - nodes[i].docX) * k;
+          nodes[i].docY += (tgt.y - nodes[i].docY) * k;
+        }
         for (let i = 0; i < nodes.length; i++) {
           nodes[i].pos.copy(screenToWorld(nodes[i].docX, nodes[i].docY - sc, 0));
         }
@@ -1050,26 +1095,25 @@ const segments = getOrderedSegments();
       const needleFloor = maxDoc - (S.restMargin || 0);
       const nf = S.needleFall;
       if (nf) {
+        // Always steer horizontally to the fixed landing column so the needle
+        // ends up in the same spot every time (no random drift).
+        if (nf.targetX != null) {
+          const ease = nf.stuck ? Math.min(1, dt * 4) : Math.min(1, dt * 2.2);
+          nf.docX += (nf.targetX - nf.docX) * ease;
+        }
         if (!nf.stuck) {
           nf.vy += G * dt;
           nf.docY += nf.vy * dt;
-          nf.docX += nf.vx * dt;
-          S.needle.rotation.z += nf.spin * dt; // tumble on the way down
+          S.needle.rotation.z += nf.spin * dt; // one clean tumble on the way down
           if (nf.docY >= needleFloor) {
-            nf.docY = needleFloor;
-            if (Math.abs(nf.vy) > 60 && nf.bounces > 0) {
-              nf.vy = -Math.abs(nf.vy) * 0.45;
-              nf.bounces--;
-            } else {
-              nf.stuck = true;
-              nf.vy = 0;
-            }
+            nf.docY = needleFloor; // lands once, cleanly — no bounce
+            nf.stuck = true;
+            nf.vy = 0;
           }
         } else {
           // Landed: ease back to the threaded orientation (rotation.z → 0) so
           // the EYE points up and the thread drapes visibly down from it onto
-          // the floor — instead of the random tumble sometimes leaving the eye
-          // pointing off the bottom edge, which read as a detached thread.
+          // the floor. Deterministic end orientation, identical every run.
           S.needle.rotation.z += (0 - S.needle.rotation.z) * Math.min(1, dt * 3);
         }
         S.needle.position.copy(screenToWorld(nf.docX, nf.docY - sc, nf.z));
