@@ -1,115 +1,51 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import ProjectCard from "../components/cards/ProjectCard.astro";
 import { getOrderedSegments } from "../data/segments";
-import { getProjectsBySegment } from "../data/projects";
 
 const segments = getOrderedSegments();
-const streetwearProjects = getProjectsBySegment("streetwear");
-const beadAssets = [
-  "b13.png",
-  "b7.png",
-  "b6.png",
-  "b11.png",
-  "b10.png",
-  "b8.png",
-  "b4.png",
-  "b11.png",
-  "b5.png",
-  "b7.png",
-  "b12.png",
-  "b6.png",
-  "b3.png",
-  "b13.png",
-  "b5.png",
-];
 ---
 
 <BaseLayout title="Girisha Suri -- Fashion Design Portfolio">
-  <script is:inline>
-    document.documentElement.classList.add("ct-intro-active");
-  </script>
+  <Fragment slot="head">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  </Fragment>
 
-  <div id="ct-root">
-    <div class="ct-paper" aria-hidden="true"></div>
-    <div class="ct-vignette" aria-hidden="true"></div>
+  <div id="nl-root">
+    <div id="nl-spotlight" aria-hidden="true"></div>
+    <div id="nl-canvas-host" aria-hidden="true"></div>
+    <div id="nl-grab" aria-hidden="true"></div>
 
-    <div class="ct-stage" aria-hidden="true">
-      <svg class="ct-thread-svg" aria-hidden="true">
-        <path class="ct-thread-path" d="" fill="none" />
-      </svg>
+    <main id="nl-content">
+      <div aria-hidden="true" style="height: 100vh; pointer-events: none;"></div>
 
-      <div class="ct-needle">
-        <svg width="360" height="34" viewBox="0 0 360 34" aria-hidden="true">
-          <defs>
-            <linearGradient id="ct-steel" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#fbfbfc" />
-              <stop offset=".28" stop-color="#cfd0d4" />
-              <stop offset=".5" stop-color="#8d8e95" />
-              <stop offset=".62" stop-color="#6c6d74" />
-              <stop offset=".8" stop-color="#a9aab0" />
-              <stop offset="1" stop-color="#e7e8ea" />
-            </linearGradient>
-          </defs>
-          <path d="M2,17 L300,9.5 Q322,9 332,10.5 Q352,13 352,17 Q352,21 332,23.5 Q322,25 300,24.5 Z" fill="url(#ct-steel)" />
-          <ellipse cx="326" cy="17" rx="5.4" ry="8.6" fill="#efeae0" stroke="#5e5f66" stroke-width="1.1" />
-          <path d="M2,17 L300,9.5 L300,24.5 Z" fill="url(#ct-steel)" />
-        </svg>
-      </div>
-
-      <img class="ct-button" src="/images/landing/crystal/button.png" alt="" />
-    </div>
-
-    <div class="ct-beads" aria-hidden="true">
-      {beadAssets.map((asset) => (
-        <img class="ct-bead" src={`/images/landing/crystal/${asset}`} alt="" />
-      ))}
-    </div>
-
-    <main id="ct-content">
-      <header class="ct-hero">
-        <p class="ct-kicker">Commercial discipline / Couture finishing</p>
-        <h1>Girisha Suri</h1>
-        <p class="ct-tagline">
-          A fashion-design portfolio where the surface carries the idea and the construction stays honest,
-          built across streetwear, ethnic, and the spaces between.
+      <header class="nl-hero">
+        <p id="nl-kicker" class="nl-kicker">Commercial discipline &middot; Couture finishing</p>
+        <h1 id="nl-heading">Girisha Suri</h1>
+        <p class="nl-tagline">
+          Built across streetwear, evening wear, and the spaces between &mdash; where the surface carries the idea and
+          the construction stays honest.
         </p>
-        <p class="ct-scroll-cue">Scroll to explore</p>
       </header>
 
-      <section class="ct-segments" aria-label="Work by segment">
-        <p class="ct-section-label">The work -- by segment</p>
-        <ul class="ct-segment-list">
+      <section class="nl-segments" aria-label="Work by segment">
+        <p class="nl-section-label">The work</p>
+        <ul class="nl-segment-list">
           {segments.map((segment, index) => (
             <li>
               <a href={`/work/${segment.slug}`}>
-                <span class="ct-segment-num">{String(index + 1).padStart(2, "0")}</span>
-                <span class="ct-segment-copy">
-                  <span class="ct-segment-name">{segment.name}</span>
-                  <span class="ct-segment-blurb">{segment.blurb}</span>
-                </span>
-                <span class="ct-segment-arrow" aria-hidden="true">-&gt;</span>
+                <span class="nl-segment-num">{String(index + 1).padStart(2, "0")}</span>
+                <span class="nl-segment-name">{segment.name}</span>
+                <span class="nl-segment-tag">{segment.slug === "vendor-collaboration" ? "B2B" : "View →"}</span>
+                <span class="nl-segment-blurb">{segment.blurb}</span>
               </a>
             </li>
           ))}
         </ul>
       </section>
 
-      <section class="ct-projects" aria-label="Streetwear projects">
-        <div class="ct-projects-header">
-          <h2>Streetwear</h2>
-          <span>{String(streetwearProjects.length).padStart(2, "0")} -- Selected</span>
-        </div>
-        <ul class="ct-project-grid">
-          {streetwearProjects.map((project) => (
-            <ProjectCard project={project} />
-          ))}
-        </ul>
-      </section>
-
-      <footer class="ct-page-footer">
+      <footer class="nl-page-footer">
         <p>"Let the surface carry the idea."</p>
-        <span>Girisha Suri / Portfolio</span>
+        <span>Girisha Suri &middot; Portfolio</span>
       </footer>
     </main>
   </div>
@@ -117,728 +53,1051 @@ const beadAssets = [
 
 <script>
   (() => {
-    const root = document.getElementById("ct-root");
-    if (!root) return;
+    const rootEl = document.getElementById("nl-root");
+    if (!rootEl) return;
 
     const html = document.documentElement;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const stage = root.querySelector(".ct-stage") as HTMLElement | null;
-    const beadLayer = root.querySelector(".ct-beads") as HTMLElement | null;
-    const button = root.querySelector(".ct-button") as HTMLImageElement | null;
-    const needle = root.querySelector(".ct-needle") as HTMLElement | null;
-    const thread = root.querySelector(".ct-thread-path") as SVGPathElement | null;
-    const content = root.querySelector("#ct-content") as HTMLElement | null;
-    const beadEls = Array.from(root.querySelectorAll(".ct-bead")) as HTMLImageElement[];
+    const grab = document.getElementById("nl-grab");
+    const canvasHost = document.getElementById("nl-canvas-host");
+    const contentEl = document.getElementById("nl-content");
 
-    if (reduceMotion || !stage || !beadLayer || !button || !needle || !thread || !content || !beadEls.length) {
-      html.classList.remove("ct-intro-active");
-      html.classList.add("ct-revealed");
-      if (stage) stage.hidden = true;
-      if (beadLayer) beadLayer.hidden = true;
+    const reduceMotion =
+      (window as any).__prefersReducedMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function revealImmediately() {
+      html.classList.add("nl-revealed");
+      if (grab) grab.hidden = true;
+      if (canvasHost) canvasHost.hidden = true;
+      const spacer = contentEl?.querySelector<HTMLElement>(":scope > [aria-hidden='true']");
+      if (spacer) spacer.style.display = "none";
+    }
+
+    if (reduceMotion || !grab || !canvasHost || !contentEl) {
+      revealImmediately();
       return;
     }
 
-    const stageEl = stage;
-    const buttonEl = button;
-    const needleEl = needle;
-    const threadEl = thread;
-    const contentEl = content;
-
-    const cfg = [
-      { w: 22, ax: 135, ay: -46, rot: 0, strand: true },
-      { w: 46, ax: 150, ay: -16, rot: 38, strand: true },
-      { w: 31, ax: 162, ay: 16, rot: 0, strand: true },
-      { w: 21, ax: 170, ay: 44, rot: 0, strand: true },
-      { w: 44, ax: 176, ay: 74, rot: 18, strand: true },
-      { w: 27, ax: 181, ay: 102, rot: 0, strand: true },
-      { w: 40, ax: 184, ay: 132, rot: 82, strand: true },
-      { w: 19, ax: 186, ay: 158, rot: 0, strand: true },
-      { w: 33, ax: 187, ay: 186, rot: 0, strand: true },
-      { w: 31, ax: 188, ay: 212, rot: 68, strand: true },
-      { w: 36, ax: 189, ay: 244, rot: 0, strand: true },
-      { w: 27, ax: 118, ay: 58, rot: 0, strand: false },
-      { w: 48, ax: 92, ay: 30, rot: 12, strand: false },
-      { w: 20, ax: 150, ay: 116, rot: 0, strand: false },
-      { w: 29, ax: 206, ay: 150, rot: 30, strand: false },
-    ];
-
-    const state = {
-      vw: window.innerWidth,
-      vh: window.innerHeight,
-      scale: 1,
-      origin: { x: 0, y: 0 },
-      eye: { x: 0, y: 0 },
-      start: performance.now(),
-      last: performance.now(),
+    const S: any = {
       phase: "idle",
-      pullAt: 1500,
-      revealAt: 0,
-      revealing: false,
-      done: false,
+      p: 0,
+      dragStart: null as null | { x: number; y: number; p: number },
       scrollVel: 0,
-      lastScroll: window.scrollY || window.pageYOffset || 0,
-      targets: {} as Record<number, number>,
+      lastScroll: window.scrollY || 0,
+      released: false,
+      relT: 0,
+      btnVy: 0,
+      roll: null as null | { pos: number; vel: number; target: number; active: boolean; settleT: number },
+      beadColorHex: 0x5e121b,
+      threadColorHex: 0x561019,
+      swayK: 1,
     };
 
-    const beads = beadEls.map((el, index) => {
-      const beadCfg = cfg[index] || cfg[0];
-      return {
-        el,
-        cfg: beadCfg,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        rot: beadCfg.rot,
-        vrot: 0,
-        released: false,
-        settled: false,
-        delay: 0,
-        w: 0,
-        h: 0,
-        natW: el.naturalWidth || 40,
-        natH: el.naturalHeight || 40,
+    // ---------------- drag ----------------
+    function wireDrag() {
+      const dir = { x: 0.46, y: -0.89 };
+      const PULL_PX = 300;
+
+      const down = (e: PointerEvent) => {
+        if (S.phase && S.phase !== "idle") return;
+        S.dragging = true;
+        S.dragStart = { x: e.clientX, y: e.clientY, p: S.p };
+        S.phase = "dragging";
+        grab!.style.cursor = "grabbing";
+        e.preventDefault();
       };
-    });
-
-    beads.forEach((bead) => {
-      if (!bead.el.complete) {
-        bead.el.addEventListener("load", () => {
-          bead.natW = bead.el.naturalWidth || bead.natW;
-          bead.natH = bead.el.naturalHeight || bead.natH;
-          measure();
-        }, { once: true });
-      }
-    });
-
-    function measure() {
-      state.vw = window.innerWidth;
-      state.vh = window.innerHeight;
-      state.scale = Math.min(1.18, Math.max(0.58, state.vw / 1080));
-      state.origin = { x: state.vw * 0.47, y: state.vh * 0.43 };
-      state.eye = {
-        x: state.origin.x + 150 * state.scale,
-        y: state.origin.y - 58 * state.scale,
+      const move = (e: PointerEvent) => {
+        if (!S.dragging || !S.dragStart) return;
+        const dx = e.clientX - S.dragStart.x;
+        const dy = e.clientY - S.dragStart.y;
+        const along = (dx * dir.x + dy * dir.y) / PULL_PX;
+        S.p = Math.max(0, Math.min(1, S.dragStart.p + along));
       };
-
-      buttonEl.style.width = `${250 * state.scale}px`;
-      beads.forEach((bead) => {
-        bead.w = bead.cfg.w * state.scale * 1.06;
-        bead.h = bead.w * (bead.natH / bead.natW);
-        bead.el.style.width = `${bead.w}px`;
-      });
-    }
-
-    function beadAnchor(bead: typeof beads[number], sway: number) {
-      const ox = state.origin.x + bead.cfg.ax * state.scale - state.eye.x;
-      const oy = state.origin.y + bead.cfg.ay * state.scale - state.eye.y;
-      const c = Math.cos(sway);
-      const s = Math.sin(sway);
-      return {
-        x: state.eye.x + ox * c - oy * s,
-        y: state.eye.y + ox * s + oy * c,
+      const up = () => {
+        if (!S.dragging) return;
+        S.dragging = false;
+        grab!.style.cursor = "grab";
+        S.phase = S.p >= 0.5 ? "completing" : "returning";
       };
+      grab!.addEventListener("pointerdown", down);
+      window.addEventListener("pointermove", move, { passive: false });
+      window.addEventListener("pointerup", up);
+
+      S.lastScroll = window.scrollY;
+      window.addEventListener(
+        "scroll",
+        () => {
+          const y = window.scrollY;
+          S.scrollVel += y - S.lastScroll;
+          S.lastScroll = y;
+        },
+        { passive: true }
+      );
     }
 
-    function easeInOut(t: number) {
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
-
-    function startPull(elapsed: number) {
-      state.phase = "pulling";
-      const strand = beads.filter((bead) => bead.cfg.strand);
-      const loose = beads.filter((bead) => !bead.cfg.strand);
-      strand.forEach((bead, index) => {
-        bead.delay = 380 + (strand.length - 1 - index) * 95;
-      });
-      loose.forEach((bead, index) => {
-        bead.delay = 520 + index * 120;
-      });
-
-      const order = beads.map((_, index) => index).sort(() => Math.random() - 0.5);
-      order.forEach((id, rank) => {
-        state.targets[id] = state.vw * (0.1 + 0.8 * (rank / Math.max(1, beads.length - 1)));
-      });
-      state.revealAt = elapsed + 1650;
-    }
-
-    function release(bead: typeof beads[number]) {
-      bead.released = true;
-      const index = beads.indexOf(bead);
-      const targetX = state.targets[index] ?? state.vw * Math.random();
-      bead.vx = (targetX - bead.x) * (0.7 + Math.random() * 0.6) + (Math.random() - 0.5) * 60;
-      bead.vy = -30 - Math.random() * 80;
-      bead.vrot = (Math.random() - 0.5) * 320;
-    }
-
-    function integrate(bead: typeof beads[number], dt: number, time: number) {
-      const gravity = 1850;
-      bead.vy += gravity * dt;
-      bead.x += bead.vx * dt;
-      bead.y += bead.vy * dt;
-      bead.rot += bead.vrot * dt;
-
-      const floor = state.vh - 14 * state.scale - bead.h * 0.42;
-      if (bead.y > floor) {
-        bead.y = floor;
-        if (bead.vy > 0) bead.vy = -bead.vy * 0.26;
-        bead.vx *= 0.72;
-        bead.vrot *= 0.4;
-        if (Math.abs(bead.vy) < 80) {
-          bead.vy = 0;
-          bead.settled = true;
+    function waitForThree(cb: () => void) {
+      let tries = 0;
+      const tick = () => {
+        if ((window as any).THREE) return cb();
+        if (tries++ > 200) {
+          console.error("[needle] THREE failed to load");
+          revealImmediately();
+          return;
         }
-        bead.rot -= (bead.vx / Math.max(bead.w, 16)) * dt * 40;
-      } else {
-        bead.settled = false;
-      }
+        setTimeout(tick, 25);
+      };
+      tick();
+    }
 
-      const margin = bead.w * 0.42;
-      if (bead.x < margin) {
-        bead.x = margin;
-        bead.vx = Math.abs(bead.vx) * 0.4;
+    // ---------------- scene ----------------
+    function updateBounds() {
+      const cam = S.camera;
+      const dist = cam.position.z;
+      const vH = 2 * Math.tan(((cam.fov * Math.PI) / 180) / 2) * dist;
+      const vW = vH * cam.aspect;
+      S.bounds = { halfH: vH / 2, halfW: vW / 2, floorY: -vH / 2 + 0.06 };
+      if (S.shadowFloor) S.shadowFloor.position.y = S.bounds.floorY - 0.02;
+    }
+
+    function makeEnvTexture(THREE: any) {
+      const c = document.createElement("canvas");
+      c.width = 512;
+      c.height = 256;
+      const g = c.getContext("2d")!;
+      const grad = g.createLinearGradient(0, 0, 0, 256);
+      grad.addColorStop(0, "#fffdf7");
+      grad.addColorStop(0.32, "#efe3cf");
+      grad.addColorStop(0.56, "#c9bda8");
+      grad.addColorStop(0.8, "#6f6655");
+      grad.addColorStop(1, "#34302a");
+      g.fillStyle = grad;
+      g.fillRect(0, 0, 512, 256);
+      const blobs: Array<[string, number, number, number]> = [
+        ["#ffe7c2", 120, 70, 90],
+        ["#d8c2e6", 360, 90, 110],
+        ["#c2e6d8", 250, 150, 120],
+        ["#ffd6e0", 430, 180, 80],
+      ];
+      blobs.forEach(([col, x, y, r]) => {
+        const rg = g.createRadialGradient(x, y, 0, x, y, r);
+        rg.addColorStop(0, col);
+        rg.addColorStop(1, "rgba(255,255,255,0)");
+        g.globalAlpha = 0.55;
+        g.fillStyle = rg;
+        g.beginPath();
+        g.arc(x, y, r, 0, 7);
+        g.fill();
+      });
+      g.globalAlpha = 1;
+      const kg = g.createRadialGradient(150, 30, 0, 150, 30, 140);
+      kg.addColorStop(0, "rgba(255,255,255,0.95)");
+      kg.addColorStop(1, "rgba(255,255,255,0)");
+      g.fillStyle = kg;
+      g.beginPath();
+      g.arc(150, 30, 140, 0, 7);
+      g.fill();
+      const tex = new THREE.CanvasTexture(c);
+      tex.mapping = THREE.EquirectangularReflectionMapping;
+      tex.encoding = THREE.sRGBEncoding;
+      return tex;
+    }
+
+    function buildButton(THREE: any, group: any) {
+      const R = 0.95,
+        TH = 0.8;
+      const geo = new THREE.CylinderGeometry(R, R, TH, 220, 8, false);
+      const pos = geo.attributes.position;
+      const v = new THREE.Vector3();
+      for (let i = 0; i < pos.count; i++) {
+        v.fromBufferAttribute(pos, i);
+        const ang = Math.atan2(v.z, v.x);
+        const rad = Math.hypot(v.x, v.z);
+        const wave = 0.026 * Math.sin(3 * ang + 0.6) + 0.016 * Math.sin(5 * ang + 1.7);
+        const k = Math.min(1, rad / (R * 0.45));
+        if (Math.abs(v.y) > TH * 0.35) v.y += wave * (v.y > 0 ? 1 : 0.6) * k;
+        if (rad > R * 0.6) {
+          const rr = 1 + 0.02 * Math.sin(4 * ang + 0.4) + 0.01 * Math.sin(7 * ang);
+          v.x *= rr;
+          v.z *= rr;
+        }
+        pos.setXYZ(i, v.x, v.y, v.z);
       }
-      if (bead.x > state.vw - margin) {
-        bead.x = state.vw - margin;
-        bead.vx = -Math.abs(bead.vx) * 0.4;
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshPhysicalMaterial({
+        color: 0x6a6155,
+        metalness: 0.0,
+        roughness: 0.62,
+        clearcoat: 0.6,
+        clearcoatRoughness: 0.3,
+        envMapIntensity: 0.35,
+        reflectivity: 0.4,
+      });
+      const sideMat = new THREE.MeshStandardMaterial({
+        color: 0x9d8e72,
+        metalness: 0.3,
+        roughness: 0.55,
+        envMapIntensity: 0.5,
+      });
+      const btn = new THREE.Mesh(geo, [sideMat, mat, mat]);
+      btn.rotation.x = Math.PI / 2;
+      btn.rotation.y = 0;
+      btn.castShadow = true;
+      btn.receiveShadow = true;
+      const wrap = new THREE.Group();
+      wrap.add(btn);
+      group.add(wrap);
+      S.button = wrap;
+      S.buttonFace = btn;
+
+      new THREE.TextureLoader().load("/images/landing/crystal/button.png", (tex: any) => {
+        tex.encoding = THREE.sRGBEncoding;
+        tex.anisotropy = Math.min(8, S.renderer.capabilities.getMaxAnisotropy());
+        tex.center.set(0.5, 0.5);
+        tex.rotation = 0.28;
+        mat.map = tex;
+        mat.color.set(0xffffff);
+        mat.emissiveMap = tex;
+        mat.emissive = new THREE.Color(0xffffff);
+        mat.emissiveIntensity = 0.45;
+        mat.needsUpdate = true;
+      });
+    }
+
+    function buildNeedle(THREE: any, group: any) {
+      const needle = new THREE.Group();
+      const metal = new THREE.MeshStandardMaterial({
+        color: 0xb9bdc2,
+        metalness: 1.0,
+        roughness: 0.2,
+        envMapIntensity: 1.2,
+      });
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.011, 2.3, 20), metal);
+      shaft.position.y = 0.1;
+      shaft.castShadow = true;
+      needle.add(shaft);
+      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.011, 0.2, 20), metal);
+      tip.position.y = -1.15;
+      tip.castShadow = true;
+      needle.add(tip);
+      const eye = new THREE.Mesh(new THREE.TorusGeometry(0.034, 0.0085, 14, 28), metal);
+      eye.position.y = 1.31;
+      eye.scale.set(0.6, 1, 1);
+      eye.castShadow = true;
+      needle.add(eye);
+      const eyeCap = new THREE.Mesh(new THREE.SphereGeometry(0.016, 14, 10), metal);
+      eyeCap.position.y = 1.38;
+      needle.add(eyeCap);
+
+      const dir = new THREE.Vector3(0.42, 0.4, 0.82).normalize();
+      needle.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      needle.position.set(-0.03, 0.0, -0.04);
+      needle.scale.set(1, 1.7, 1);
+      group.add(needle);
+      S.needle = needle;
+      S.eyeLocal = new THREE.Vector3(0.034 * 0.6, 1.31, 0);
+      S.pullVec = dir.clone().multiplyScalar(4.8);
+    }
+
+    function eyeWorld() {
+      return S.needle.localToWorld(S.eyeLocal.clone());
+    }
+
+    function biconeGeo(THREE: any, r: number, h: number) {
+      const lathe = new THREE.LatheGeometry(
+        [new THREE.Vector2(0.0001, -h / 2), new THREE.Vector2(r, 0), new THREE.Vector2(0.0001, h / 2)],
+        10
+      );
+      return lathe.toNonIndexed ? lathe.toNonIndexed() : lathe;
+    }
+
+    function teardropGeo(THREE: any, s: number) {
+      const pts: Array<[number, number]> = [
+        [0.0, -1.05],
+        [0.46, -0.86],
+        [0.78, -0.55],
+        [0.94, -0.18],
+        [0.96, 0.1],
+        [0.82, 0.42],
+        [0.55, 0.7],
+        [0.28, 0.9],
+        [0.0, 1.08],
+      ];
+      const prof = pts.map(([r, y]) => new THREE.Vector2(Math.max(0.0015, r * s), y * s * 1.25));
+      const geo = new THREE.LatheGeometry(prof, 24);
+      geo.computeVertexNormals();
+      return geo;
+    }
+
+    function rebuildThread(THREE: any) {
+      if (S.threadMesh) {
+        S.scene.remove(S.threadMesh);
+        S.threadMesh.geometry.dispose();
       }
-      if (bead.settled) {
-        bead.vx *= 0.9;
-        bead.vx += Math.sin(time * 0.8 + bead.x * 0.01) * 1.4 * dt * 60 * 0.02;
-        bead.x += bead.vx * dt;
-        if (bead.x < margin) bead.x = margin;
-        if (bead.x > state.vw - margin) bead.x = state.vw - margin;
+      const curve = new THREE.CatmullRomCurve3(S.nodes.map((n: any) => n.pos));
+      const geo = new THREE.TubeGeometry(curve, S.threadN * 3, 0.0075, 8, false);
+      const mesh = new THREE.Mesh(geo, S.threadMat);
+      mesh.castShadow = true;
+      S.scene.add(mesh);
+      S.threadMesh = mesh;
+    }
+
+    function buildThreadAndBeads(THREE: any) {
+      const N = 30;
+      S.threadN = N;
+      S.segLen = 0.072;
+      const anchor = eyeWorld();
+      S.nodes = [];
+      for (let i = 0; i < N; i++) {
+        const t = i / (N - 1);
+        const p = new THREE.Vector3(anchor.x + Math.sin(t * Math.PI) * 0.18, anchor.y - S.segLen * i, anchor.z);
+        S.nodes.push({ pos: p.clone(), prev: p.clone() });
+      }
+      S.threadMat = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(S.threadColorHex).convertSRGBToLinear(),
+        roughness: 0.95,
+        metalness: 0.0,
+        envMapIntensity: 0.1,
+        transparent: true,
+        opacity: 1,
+      });
+      S.threadMesh = null;
+      rebuildThread(THREE);
+
+      const base = new THREE.Color(S.beadColorHex).convertSRGBToLinear();
+      const beadMat = () => {
+        const c = base
+          .clone()
+          .offsetHSL((Math.random() - 0.5) * 0.01, (Math.random() - 0.5) * 0.04, (Math.random() - 0.5) * 0.025);
+        return new THREE.MeshPhysicalMaterial({
+          color: c,
+          metalness: 0.0,
+          roughness: 0.16 + Math.random() * 0.1,
+          clearcoat: 0.85,
+          clearcoatRoughness: 0.12,
+          envMapIntensity: 0.5,
+          reflectivity: 0.5,
+          flatShading: true,
+        });
+      };
+      const mk = (geo: any) => {
+        const m = new THREE.Mesh(geo, beadMat());
+        m.castShadow = true;
+        return m;
+      };
+      const round = (r: number) => new THREE.IcosahedronGeometry(r, 1);
+      const bugle = (r: number, h: number) => new THREE.CylinderGeometry(r, r, h, 16).rotateX((Math.PI / 2) * Math.random());
+      const rondelle = (r: number) => new THREE.CylinderGeometry(r, r, r * 0.5, 18).rotateX(Math.PI / 2);
+      const bicone = (r: number) => biconeGeo(THREE, r, r * 1.9);
+      const specs = [
+        { node: 16, geo: () => round(0.026), r: 0.026 },
+        { node: 18, geo: () => bicone(0.024), r: 0.03 },
+        { node: 19, geo: () => round(0.03), r: 0.03 },
+        { node: 20, geo: () => rondelle(0.03), r: 0.03 },
+        { node: 21, geo: () => round(0.024), r: 0.024 },
+        { node: 22, geo: () => bugle(0.018, 0.07), r: 0.045 },
+        { node: 23, geo: () => round(0.032), r: 0.032 },
+        { node: 24, geo: () => bicone(0.026), r: 0.032 },
+        { node: 25, geo: () => round(0.028), r: 0.028 },
+        { node: 26, geo: () => round(0.034), r: 0.034 },
+        { node: 27, geo: () => round(0.026), r: 0.026 },
+        { node: 29, geo: () => teardropGeo(THREE, 0.05), r: 0.058 },
+      ];
+      S.beads = [];
+      const BS = 1.0;
+      specs.forEach((sp) => {
+        const mesh = mk(sp.geo());
+        mesh.scale.setScalar(BS);
+        mesh.rotation.set(Math.random() * 6, Math.random() * 6, Math.random() * 6);
+        mesh.userData = {
+          node: sp.node,
+          radius: sp.r * 1.1 * BS,
+          free: false,
+          vel: new THREE.Vector3(),
+          spin: new THREE.Vector3((Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3),
+          settled: false,
+          delay: 0,
+        };
+        S.scene.add(mesh);
+        S.beads.push(mesh);
+      });
+    }
+
+    function easeOut(t: number) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function applyPull(p: number) {
+      S.needle.position.copy(S.needleBase).addScaledVector(S.pullVec, p);
+      S.button.rotation.z = p * 0.55;
+      if (p > 0.75) {
+        S.needle.children.forEach((c: any) => {
+          if (c.material) {
+            c.material.transparent = true;
+            c.material.opacity = Math.max(0, 1 - (p - 0.75) / 0.25);
+          }
+        });
+      } else {
+        S.needle.children.forEach((c: any) => {
+          if (c.material) c.material.opacity = 1;
+        });
       }
     }
 
-    function separate() {
-      for (let i = 0; i < beads.length; i++) {
-        const a = beads[i];
-        if (!a.released) continue;
-        for (let j = i + 1; j < beads.length; j++) {
-          const b = beads[j];
-          if (!b.released) continue;
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
-          const distance = Math.hypot(dx, dy) || 0.001;
-          const min = (a.w + b.w) * 0.42;
-          if (distance < min) {
-            const overlap = (min - distance) / 2;
-            const nx = dx / distance;
-            const ny = dy / distance;
-            a.x -= nx * overlap;
-            a.y -= ny * overlap;
-            b.x += nx * overlap;
-            b.y += ny * overlap;
+    function stepThread(THREE: any, dt: number, time: number) {
+      const g = -9.8;
+      const wind = (Math.sin(time * 0.8) * 0.5 + Math.sin(time * 1.5) * 0.25) * S.swayK;
+      const anchor = eyeWorld();
+      const nodes = S.nodes;
+      nodes[0].pos.copy(anchor);
+      nodes[0].prev.copy(anchor);
+      for (let i = 1; i < nodes.length; i++) {
+        const n = nodes[i];
+        const vx = (n.pos.x - n.prev.x) * 0.985,
+          vy = (n.pos.y - n.prev.y) * 0.985,
+          vz = (n.pos.z - n.prev.z) * 0.985;
+        n.prev.copy(n.pos);
+        n.pos.x += vx + wind * 0.000055 * i;
+        n.pos.y += vy + g * dt * dt;
+        n.pos.z += vz + Math.sin(time * 1.3 + i * 0.3) * 0.00009 * S.swayK;
+      }
+      for (let k = 0; k < 20; k++) {
+        for (let i = 0; i < nodes.length - 1; i++) {
+          const a = nodes[i].pos,
+            b = nodes[i + 1].pos;
+          const dx = b.x - a.x,
+            dy = b.y - a.y,
+            dz = b.z - a.z;
+          const d = Math.hypot(dx, dy, dz) || 0.0001;
+          const diff = (d - S.segLen) / d;
+          const mxa = i === 0 ? 0 : 0.5,
+            mxb = 0.5 + (i === 0 ? 0.5 : 0);
+          a.x += dx * diff * mxa;
+          a.y += dy * diff * mxa;
+          a.z += dz * diff * mxa;
+          b.x -= dx * diff * mxb;
+          b.y -= dy * diff * mxb;
+          b.z -= dz * diff * mxb;
+        }
+        nodes[0].pos.copy(anchor);
+      }
+      rebuildThread(THREE);
+    }
+
+    function stepFreeThread(THREE: any, dt: number) {
+      const g = -2.6;
+      const nodes = S.nodes;
+      const fy = S.bounds.floorY + 0.02;
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        const vx = (n.pos.x - n.prev.x) * 0.97,
+          vy = (n.pos.y - n.prev.y) * 0.97;
+        n.prev.copy(n.pos);
+        n.pos.x += vx;
+        n.pos.y += vy + g * dt * dt;
+        if (n.pos.y < fy) {
+          n.pos.y = fy;
+          n.prev.y = fy;
+        }
+      }
+      for (let k = 0; k < 10; k++) {
+        for (let i = 0; i < nodes.length - 1; i++) {
+          const a = nodes[i].pos,
+            b = nodes[i + 1].pos;
+          const dx = b.x - a.x,
+            dy = b.y - a.y,
+            dz = b.z - a.z;
+          const d = Math.hypot(dx, dy, dz) || 0.0001;
+          const diff = (d - S.segLen) / d;
+          a.x += dx * diff * 0.5;
+          a.y += dy * diff * 0.5;
+          a.z += dz * diff * 0.5;
+          b.x -= dx * diff * 0.5;
+          b.y -= dy * diff * 0.5;
+          b.z -= dz * diff * 0.5;
+        }
+      }
+      rebuildThread(THREE);
+      if (S.threadMat.opacity > 0) S.threadMat.opacity = Math.max(0, S.threadMat.opacity - dt * 0.5);
+    }
+
+    function placeBeadsOnThread() {
+      S.beads.forEach((m: any) => {
+        if (m.userData.free) return;
+        const n = S.nodes[m.userData.node];
+        m.position.copy(n.pos);
+        m.rotation.x += 0.003;
+        m.rotation.y += 0.005;
+      });
+    }
+
+    function releaseBeads() {
+      const halfW = S.bounds.halfW;
+      const n = S.beads.length;
+      const order = S.beads.map((_: any, i: number) => i).sort(() => Math.random() - 0.5);
+      S.beads.forEach((m: any, i: number) => {
+        const u = m.userData;
+        u.free = true;
+        const frac = (order[i] + 0.5) / n;
+        const targetX = (frac * 2 - 1) * halfW * 0.86 + (Math.random() - 0.5) * 0.6;
+        u.vel.set(
+          (targetX - m.position.x) * (0.7 + Math.random() * 0.6),
+          -0.2 - Math.random() * 0.8,
+          (Math.random() - 0.5) * 0.4
+        );
+        u.delay = Math.random() * 0.4;
+      });
+    }
+
+    function stepBeads(dt: number) {
+      if (!S.beads) return;
+      const b = S.bounds,
+        g = -8.0,
+        floorY = b.floorY;
+      const arr = S.beads;
+      let push = 0;
+      if (S.scrollVel) {
+        push = -S.scrollVel * 0.006;
+        S.scrollVel *= 0.85;
+        if (Math.abs(S.scrollVel) < 0.3) S.scrollVel = 0;
+      }
+      for (const m of arr) {
+        const u = m.userData;
+        if (!u.free) continue;
+        if (u.delay > 0) {
+          u.delay -= dt;
+          continue;
+        }
+        u.vel.y += g * dt;
+        m.position.x += u.vel.x * dt;
+        m.position.y += u.vel.y * dt;
+        m.position.z += u.vel.z * dt;
+        const rad = u.radius;
+        const rfloor = floorY;
+        if (m.position.y - rad < rfloor) {
+          m.position.y = rfloor + rad;
+          if (u.vel.y < 0) u.vel.y = -u.vel.y * 0.34;
+          u.vel.x *= 0.85;
+          u.vel.z *= 0.85;
+          if (push) u.vel.x += push;
+          if (Math.abs(u.vel.y) < 0.25) {
+            u.vel.y = 0;
+            u.settled = true;
+          }
+          m.rotation.z -= (u.vel.x / Math.max(rad, 0.03)) * dt;
+        } else u.settled = false;
+        if (m.position.x - rad < -b.halfW) {
+          m.position.x = -b.halfW + rad;
+          u.vel.x = Math.abs(u.vel.x) * 0.4;
+        }
+        if (m.position.x + rad > b.halfW) {
+          m.position.x = b.halfW - rad;
+          u.vel.x = -Math.abs(u.vel.x) * 0.4;
+        }
+        if (m.position.z > 0.3) {
+          m.position.z = 0.3;
+          u.vel.z *= -0.4;
+        }
+        if (m.position.z < -0.3) {
+          m.position.z = -0.3;
+          u.vel.z *= -0.4;
+        }
+        if (!u.settled) {
+          m.rotation.x += u.spin.x * dt;
+          m.rotation.y += u.spin.y * dt;
+        }
+      }
+      for (let i = 0; i < arr.length; i++) {
+        const a = arr[i];
+        if (!a.userData.free || a.userData.delay > 0) continue;
+        for (let j = i + 1; j < arr.length; j++) {
+          const c = arr[j];
+          if (!c.userData.free || c.userData.delay > 0) continue;
+          const dx = c.position.x - a.position.x,
+            dy = c.position.y - a.position.y;
+          const d = Math.hypot(dx, dy) || 0.0001;
+          const min = a.userData.radius + c.userData.radius;
+          if (d < min) {
+            const overlap = (min - d) / 2,
+              nx = dx / d,
+              ny = dy / d;
+            a.position.x -= nx * overlap;
+            a.position.y -= ny * overlap;
+            c.position.x += nx * overlap;
+            c.position.y += ny * overlap;
+            const dvx = (c.userData.vel.x - a.userData.vel.x) * 0.5;
+            a.userData.vel.x += dvx * 0.5;
+            c.userData.vel.x -= dvx * 0.5;
           }
         }
       }
     }
 
-    function beginReveal(elapsed: number) {
-      if (!state.revealing) {
-        state.revealing = true;
-        html.classList.remove("ct-intro-active");
-        html.classList.add("ct-revealing");
-        contentEl.style.opacity = "0";
-        contentEl.style.pointerEvents = "none";
-        stageEl.style.opacity = "1";
-      }
-
-      const progress = Math.min(1, (elapsed - state.revealAt) / 1200);
-      contentEl.style.opacity = String(progress);
-      stageEl.style.opacity = String(1 - progress);
-
-      if (progress >= 1 && !state.done) {
-        state.done = true;
-        html.classList.remove("ct-revealing");
-        html.classList.add("ct-revealed");
-        stageEl.hidden = true;
-        contentEl.style.opacity = "";
-        contentEl.style.pointerEvents = "";
-        const lenis = (window as any).__lenis;
-        lenis?.resize?.();
-        window.dispatchEvent(new Event("resize"));
-      }
+    function beginTransition() {
+      html.classList.add("nl-revealed");
+      contentEl!.style.pointerEvents = "auto";
+      (window as any).__lenis?.stop();
+      const heading = document.getElementById("nl-kicker") || document.getElementById("nl-heading");
+      const startY = window.scrollY;
+      const targetY = heading
+        ? Math.max(0, heading.getBoundingClientRect().top + startY - window.innerHeight * 0.06)
+        : window.innerHeight;
+      S.roll = { pos: startY, vel: 0, target: targetY, active: true, settleT: 0 };
     }
 
-    function frame(now: number) {
-      const elapsed = now - state.start;
-      const dt = Math.min(0.034, (now - state.last) / 1000);
-      state.last = now;
-      const time = elapsed / 1000;
+    function scrollDocumentTo(pos: number) {
+      window.scrollTo(0, pos);
+    }
 
-      if (state.phase === "idle" && elapsed > state.pullAt) startPull(elapsed);
-
-      const sway = Math.sin(time * 0.55) * 0.05 + Math.sin(time * 0.93) * 0.018;
-      const bx = state.origin.x;
-      const by = state.origin.y + Math.sin(time * 0.6) * 3 * state.scale;
-      let buttonRot = Math.sin(time * 0.4) * 1.3;
-      if (state.phase !== "idle") {
-        buttonRot += easeInOut(Math.min(1, (elapsed - state.pullAt) / 2400)) * 26;
+    function stepRoll(dt: number) {
+      const r = S.roll;
+      if (!r || !r.active) return;
+      const dist = r.target - r.pos;
+      let falling = 0;
+      if (S.beads) for (const m of S.beads) if (m.userData.free && !m.userData.settled) falling++;
+      const weight = 0.35 + 0.65 * (falling / Math.max(1, S.beads.length));
+      r.vel += dist * 2.4 * weight * dt;
+      r.vel += dist * 0.9 * dt;
+      r.vel *= 1 - 3.2 * dt;
+      r.pos += r.vel * dt;
+      if (r.pos < 0) {
+        r.pos = 0;
+        r.vel = 0;
       }
-      buttonEl.style.transform = `translate(${bx}px,${by}px) translate(-50%,-50%) rotate(${buttonRot}deg)`;
-
-      let needlePull = 0;
-      let needleFade = 1;
-      if (state.phase !== "idle") {
-        const pullEase = easeInOut(Math.min(1, (elapsed - state.pullAt) / 1700));
-        needlePull = pullEase * 540 * state.scale;
-        if (elapsed - state.pullAt > 1300) {
-          needleFade = Math.max(0, 1 - (elapsed - state.pullAt - 1300) / 600);
+      scrollDocumentTo(r.pos);
+      if (Math.abs(dist) < 0.6 && Math.abs(r.vel) < 0.6) {
+        r.settleT += dt;
+        if (r.settleT > 0.25) {
+          scrollDocumentTo(r.target);
+          r.active = false;
+          const lenis = (window as any).__lenis;
+          lenis?.resize?.();
+          lenis?.start?.();
+          window.dispatchEvent(new Event("resize"));
         }
-      }
-      const angle = -18 * Math.PI / 180;
-      const dx = Math.cos(angle) * needlePull;
-      const dy = Math.sin(angle) * needlePull;
-      const needleScale = state.scale * 0.74;
-      needleEl.style.opacity = String(needleFade);
-      needleEl.style.transform = `translate(${state.eye.x + dx}px,${state.eye.y + dy}px) rotate(-18deg) translate(${-326 * needleScale}px, ${-17 * needleScale}px) scale(${needleScale})`;
+      } else r.settleT = 0;
+    }
 
-      const strandPoints: Array<[number, number]> = [];
-      const releasing = state.phase !== "idle";
-      for (const bead of beads) {
-        if (!bead.released) {
-          const anchor = beadAnchor(bead, sway);
-          bead.x = anchor.x;
-          bead.y = anchor.y;
-          if (bead.cfg.strand) strandPoints.push([anchor.x, anchor.y]);
-          if (releasing && elapsed - state.pullAt > bead.delay) release(bead);
+    function frame() {
+      const THREE = (window as any).THREE;
+      if (!THREE || !S.renderer) return;
+      const dt = Math.min(S.clock.getDelta(), 0.033);
+      const time = S.clock.elapsedTime;
+
+      if (S.phase === "idle") {
+        stepThread(THREE, dt, time);
+        placeBeadsOnThread();
+        S.heroGroup.position.y = Math.sin(time * 0.6) * 0.01;
+      } else if (S.phase === "dragging") {
+        applyPull(S.p);
+        stepThread(THREE, dt, time);
+        placeBeadsOnThread();
+      } else if (S.phase === "returning") {
+        S.p += (0 - S.p) * Math.min(1, dt * 8);
+        applyPull(S.p);
+        stepThread(THREE, dt, time);
+        placeBeadsOnThread();
+        if (S.p < 0.005) {
+          S.p = 0;
+          S.phase = "idle";
+        }
+      } else if (S.phase === "completing") {
+        S.p = Math.min(1, S.p + dt * 1.7);
+        applyPull(S.p);
+        S.button.rotation.z = easeOut(S.p) * Math.PI * 1.15;
+        if (S.p > 0.45 && !S.released) {
+          S.released = true;
+          releaseBeads();
+          beginTransition();
+        }
+        if (S.released) {
+          stepFreeThread(THREE, dt);
+          stepBeads(dt);
+          stepRoll(dt);
         } else {
-          integrate(bead, dt, time);
+          stepThread(THREE, dt, time);
+          placeBeadsOnThread();
         }
-        bead.el.style.transform = `translate(${bead.x}px,${bead.y}px) translate(-50%,-50%) rotate(${bead.rot}deg)`;
-      }
-
-      if (releasing) separate();
-
-      if (state.phase === "idle" || (releasing && elapsed - state.pullAt < 500)) {
-        let d = `M ${state.eye.x} ${state.eye.y}`;
-        strandPoints.forEach((point) => {
-          d += ` L ${point[0]} ${point[1]}`;
-        });
-        threadEl.setAttribute("d", d);
-        if (releasing) {
-          threadEl.setAttribute("opacity", String(Math.max(0, 0.82 * (1 - (elapsed - state.pullAt) / 500))));
+        if (S.p >= 1) S.phase = "released";
+      } else {
+        S.relT = (S.relT || 0) + dt;
+        S.button.rotation.z += dt * 1.4;
+        if (S.relT < 0.28) {
+          S.button.position.x -= dt * 2.2;
+        } else {
+          S.btnVy = (S.btnVy || -1.5) - 16 * dt;
+          S.button.position.y += S.btnVy * dt;
+          S.button.position.x -= dt * 1.2;
         }
-      } else if (releasing) {
-        threadEl.setAttribute("opacity", "0");
+        if (S.needle) S.needle.scale.multiplyScalar(1 - dt * 3.0);
+        stepFreeThread(THREE, dt);
+        stepBeads(dt);
+        stepRoll(dt);
       }
 
-      if (state.revealAt && elapsed > state.revealAt) beginReveal(elapsed);
-
-      if (Math.abs(state.scrollVel) > 0.1) {
-        const push = -state.scrollVel * 0.06;
-        beads.forEach((bead) => {
-          if (bead.settled) bead.vx += push * (0.6 + Math.random() * 0.5);
-        });
-        state.scrollVel *= 0.82;
-        if (Math.abs(state.scrollVel) < 0.4) state.scrollVel = 0;
-      }
-
-      requestAnimationFrame(frame);
+      S.renderer.render(S.scene, S.camera);
     }
 
-    window.addEventListener("resize", measure);
-    window.addEventListener("scroll", () => {
-      const current = window.scrollY || window.pageYOffset || 0;
-      state.scrollVel += current - state.lastScroll;
-      state.lastScroll = current;
-    }, { passive: true });
+    function init() {
+      const THREE = (window as any).THREE;
+      const host = canvasHost!;
+      const W = window.innerWidth,
+        H = window.innerHeight;
 
-    measure();
-    requestAnimationFrame(frame);
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.setSize(W, H);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 0.82;
+      host.appendChild(renderer.domElement);
+      S.renderer = renderer;
+
+      const scene = new THREE.Scene();
+      S.scene = scene;
+      const camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 100);
+      camera.position.set(0, 0, 9.6);
+      S.camera = camera;
+
+      const envTex = makeEnvTexture(THREE);
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      const envRT = pmrem.fromEquirectangular(envTex);
+      scene.environment = envRT.texture;
+      envTex.dispose();
+      pmrem.dispose();
+
+      scene.add(new THREE.HemisphereLight(0xfffaf0, 0xb9b09c, 0.35));
+      const key = new THREE.DirectionalLight(0xfff4e2, 1.45);
+      key.position.set(-3.2, 4.6, 5.0);
+      key.castShadow = true;
+      key.shadow.mapSize.set(2048, 2048);
+      key.shadow.camera.near = 0.5;
+      key.shadow.camera.far = 22;
+      key.shadow.camera.left = -6;
+      key.shadow.camera.right = 6;
+      key.shadow.camera.top = 6;
+      key.shadow.camera.bottom = -6;
+      key.shadow.bias = -0.0004;
+      key.shadow.radius = 7;
+      scene.add(key);
+      const fill = new THREE.DirectionalLight(0xeae6f0, 0.45);
+      fill.position.set(4, 2, 3);
+      scene.add(fill);
+      const rim = new THREE.DirectionalLight(0xffffff, 0.65);
+      rim.position.set(2.5, -1, -4);
+      scene.add(rim);
+
+      const shadowMat = new THREE.ShadowMaterial({ opacity: 0.06 });
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), shadowMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = -2.9;
+      floor.receiveShadow = true;
+      scene.add(floor);
+      S.shadowFloor = floor;
+
+      const heroGroup = new THREE.Group();
+      scene.add(heroGroup);
+      S.heroGroup = heroGroup;
+      heroGroup.rotation.x = -0.12;
+      heroGroup.rotation.y = 0.04;
+      heroGroup.scale.setScalar(0.5);
+
+      buildButton(THREE, heroGroup);
+      buildNeedle(THREE, heroGroup);
+      scene.updateMatrixWorld(true);
+      buildThreadAndBeads(THREE);
+
+      S.phase = "idle";
+      S.clock = new THREE.Clock();
+      S.needleBase = S.needle.position.clone();
+      updateBounds();
+
+      const onResize = () => {
+        const w = window.innerWidth,
+          h = window.innerHeight;
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        updateBounds();
+      };
+      window.addEventListener("resize", onResize);
+
+      const animate = () => {
+        requestAnimationFrame(animate);
+        frame();
+      };
+      animate();
+    }
+
+    wireDrag();
+    waitForThree(() => {
+      try {
+        init();
+      } catch (e) {
+        console.error("[needle] init failed", e);
+        revealImmediately();
+      }
+    });
   })();
 </script>
 
 <style is:global>
-  html.ct-intro-active,
-  html.ct-intro-active body {
+  html:not(.nl-revealed) body {
     overflow: hidden;
   }
 
-  html.ct-intro-active .site-header,
-  html.ct-intro-active .site-footer {
+  html.nl-revealed body {
+    overflow-y: auto;
+  }
+
+  html:not(.nl-revealed) #nl-content {
     opacity: 0;
     pointer-events: none;
   }
 
-  html.ct-revealed .site-header,
-  html.ct-revealed .site-footer {
+  html.nl-revealed #nl-content {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  html.nl-revealed #nl-spotlight {
+    opacity: 0.35 !important;
+  }
+
+  html.nl-revealed #nl-grab {
+    display: none !important;
+  }
+
+  html:not(.nl-revealed) .site-header,
+  html:not(.nl-revealed) .site-footer {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  html.nl-revealed .site-header,
+  html.nl-revealed .site-footer {
     opacity: 1;
     pointer-events: auto;
     transition: opacity 0.8s ease 0.3s;
   }
 
-  html.ct-intro-active #ct-content {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  @keyframes ct-cue {
-    0%,
-    100% {
-      opacity: 0.32;
-      transform: translateY(0);
-    }
-    50% {
-      opacity: 0.85;
-      transform: translateY(5px);
-    }
-  }
-
-  #ct-root {
+  #nl-root {
     position: relative;
     min-height: 100vh;
     overflow-x: hidden;
-    background: #f0ece2;
-    color: #221f1a;
+    background: #ece8dc;
+    color: #1e1b17;
   }
 
-  .ct-paper,
-  .ct-vignette {
+  #nl-spotlight {
     position: fixed;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-  }
-
-  .ct-paper {
-    background: radial-gradient(120% 100% at 50% 18%, #f7f4ec 0%, #efeae0 46%, #e6e0d3 100%);
-  }
-
-  .ct-vignette {
-    opacity: 0.5;
     background:
-      radial-gradient(70% 55% at 50% 42%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 60%),
-      radial-gradient(130% 120% at 50% 60%, rgba(0, 0, 0, 0) 52%, rgba(74, 64, 48, 0.13) 100%);
+      radial-gradient(78% 62% at 50% 42%, rgba(255, 252, 244, 0.55) 0%, rgba(236, 232, 220, 0) 55%),
+      radial-gradient(135% 125% at 50% 56%, rgba(0, 0, 0, 0) 46%, rgba(58, 50, 38, 0.26) 100%);
+    transition: opacity 1.4s ease;
   }
 
-  .ct-stage {
+  #nl-canvas-host {
     position: fixed;
     inset: 0;
-    z-index: 30;
+    z-index: 40;
     pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 1.2s var(--ease-thread), visibility 0s linear 1.2s;
   }
 
-  html.ct-intro-active .ct-stage,
-  html.ct-revealing .ct-stage {
-    opacity: 1;
-    visibility: visible;
-    transition-delay: 0s;
+  #nl-canvas-host canvas {
+    display: block;
   }
 
-  .ct-thread-svg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-  }
-
-  .ct-thread-path {
-    stroke: #7c1f28;
-    stroke-width: 1.6;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    opacity: 0.82;
-  }
-
-  .ct-needle {
-    position: absolute;
-    left: 0;
-    top: 0;
-    transform-origin: center;
-    will-change: transform;
-    filter: drop-shadow(0 5px 7px rgba(60, 50, 35, 0.28));
-  }
-
-  .ct-button {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 250px;
-    height: auto;
-    max-width: none;
-    transform-origin: center;
-    will-change: transform;
-    filter:
-      drop-shadow(0 18px 26px rgba(70, 58, 40, 0.34))
-      drop-shadow(0 4px 8px rgba(70, 58, 40, 0.2));
-  }
-
-  .ct-beads {
+  #nl-grab {
     position: fixed;
     inset: 0;
-    z-index: 36;
-    pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
+    z-index: 55;
+    cursor: grab;
+    touch-action: none;
   }
 
-  html.ct-intro-active .ct-beads,
-  html.ct-revealing .ct-beads,
-  html.ct-revealed .ct-beads {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .ct-beads[hidden],
-  .ct-stage[hidden] {
-    display: none;
-  }
-
-  .ct-bead {
-    position: absolute;
-    left: 0;
-    top: 0;
-    max-width: none;
-    height: auto;
-    will-change: transform;
-    filter: drop-shadow(0 4px 5px rgba(80, 20, 28, 0.32));
-  }
-
-  #ct-content {
+  #nl-content {
     position: relative;
-    z-index: 20;
-    opacity: 1;
-    transition: opacity 1.1s var(--ease-thread);
+    z-index: 10;
   }
 
-  .ct-hero {
-    min-height: 92svh;
+  .nl-hero {
     max-width: var(--max-width-content);
     margin: 0 auto;
-    padding: 12vh var(--page-gutter) 8vh;
+    padding: 14vh var(--page-gutter) 5vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     text-align: center;
   }
 
-  .ct-kicker,
-  .ct-section-label,
-  .ct-page-footer span {
-    font-size: 12px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: #9a9286;
-  }
-
-  .ct-kicker {
-    margin-bottom: 22px;
-  }
-
-  .ct-hero h1 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-variation-settings: var(--fv-hero);
-    font-size: clamp(3.2rem, 10vw, 8rem);
-    line-height: 0.98;
-    color: #221f1a;
-  }
-
-  .ct-tagline {
-    margin-top: 26px;
-    max-width: 31rem;
-    font-size: 1.08rem;
-    line-height: 1.65;
-    color: #6c655a;
-  }
-
-  .ct-scroll-cue {
-    margin-top: 52px;
+  .nl-kicker,
+  .nl-section-label,
+  .nl-page-footer span {
     font-size: 11px;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: #b3aa9c;
-    animation: ct-cue 2.8s ease-in-out infinite;
+    color: #9a9690;
   }
 
-  .ct-segments,
-  .ct-projects,
-  .ct-page-footer {
-    max-width: 70rem;
+  .nl-kicker {
+    margin-bottom: 22px;
+  }
+
+  .nl-hero h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-variation-settings: var(--fv-hero);
+    font-size: clamp(3rem, 9vw, 7rem);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+    color: #1e1b17;
+  }
+
+  .nl-tagline {
+    margin-top: 26px;
+    max-width: 34rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #6f6a60;
+  }
+
+  .nl-segments,
+  .nl-page-footer {
+    max-width: var(--max-width-content);
     margin: 0 auto;
     padding-inline: var(--page-gutter);
   }
 
-  .ct-segments {
+  .nl-segments {
     padding-top: 6vh;
     padding-bottom: 12vh;
   }
 
-  .ct-section-label {
-    margin-bottom: 36px;
+  .nl-section-label {
+    margin-bottom: 8px;
   }
 
-  .ct-segment-list {
-    border-top: 1px solid rgba(124, 31, 40, 0.18);
+  .nl-segment-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid rgba(154, 150, 144, 0.4);
   }
 
-  .ct-segment-list li {
-    border-bottom: 1px solid rgba(124, 31, 40, 0.18);
+  .nl-segment-list li {
+    border-top: 1px solid rgba(154, 150, 144, 0.4);
   }
 
-  .ct-segment-list a {
+  .nl-segment-list a {
     display: grid;
-    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    grid-template-columns: 3.2rem minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
     align-items: baseline;
-    gap: 16px 20px;
-    padding: 30px 6px;
+    gap: 6px 24px;
+    padding: 34px 0;
     text-decoration: none;
     color: inherit;
   }
 
-  .ct-segment-num {
+  .nl-segment-num {
+    grid-column: 1;
+    grid-row: 1;
     font-family: var(--font-display);
-    font-size: 0.82rem;
-    color: #b1a899;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    color: #9a9690;
   }
 
-  .ct-segment-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 0;
-  }
-
-  .ct-segment-name {
+  .nl-segment-name {
+    grid-column: 2;
+    grid-row: 1;
     width: fit-content;
     font-family: var(--font-display);
     font-variation-settings: var(--fv-h2);
-    font-size: clamp(1.55rem, 3.6vw, 2.55rem);
-    line-height: 1.08;
-    color: #221f1a;
-    position: relative;
+    font-size: clamp(2rem, 5vw, 3.6rem);
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+    color: #1e1b17;
+    border-bottom: 2px dashed transparent;
+    transition: border-color var(--duration-base) ease;
   }
 
-  .ct-segment-name::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 100%;
-    bottom: -0.14em;
-    height: 2px;
-    background-image: repeating-linear-gradient(to right, #7c1f28 0 6px, transparent 6px 11px);
-    transition: right var(--duration-base) var(--ease-thread);
-  }
-
-  .ct-segment-blurb {
-    max-width: 34rem;
-    font-size: var(--fs-small);
-    line-height: 1.55;
-    color: #756e63;
-  }
-
-  .ct-segment-arrow {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    color: #7c1f28;
-    transition: transform var(--duration-base) var(--ease-thread);
-  }
-
-  .ct-segment-list a:hover .ct-segment-name::after,
-  .ct-segment-list a:focus-visible .ct-segment-name::after {
-    right: 0;
-  }
-
-  .ct-segment-list a:hover .ct-segment-arrow,
-  .ct-segment-list a:focus-visible .ct-segment-arrow {
-    transform: translateX(6px);
-  }
-
-  .ct-projects {
-    padding-top: 3vh;
-    padding-bottom: 10vh;
-  }
-
-  .ct-projects-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 40px;
-  }
-
-  .ct-projects h2 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-variation-settings: var(--fv-h2);
-    font-size: var(--fs-h2);
-    line-height: var(--lh-display);
-    color: #221f1a;
-  }
-
-  .ct-projects-header span {
+  .nl-segment-tag {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
     font-size: 11px;
-    letter-spacing: 0.28em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #9a9286;
+    color: #b3ada0;
     white-space: nowrap;
   }
 
-  .ct-project-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 34px;
+  .nl-segment-blurb {
+    grid-column: 2;
+    grid-row: 2;
+    max-width: 34rem;
+    font-size: var(--fs-small);
+    line-height: 1.55;
+    color: #6f6a60;
   }
 
-  .ct-page-footer {
+  .nl-segment-list a:hover .nl-segment-name,
+  .nl-segment-list a:focus-visible .nl-segment-name {
+    border-color: #8c2a35;
+  }
+
+  .nl-page-footer {
     padding-top: 8vh;
     padding-bottom: 30vh;
     text-align: center;
   }
 
-  .ct-page-footer p {
+  .nl-page-footer p {
     margin: 0;
     font-family: var(--font-display);
     font-variation-settings: var(--fv-h2);
     font-style: italic;
     font-weight: 300;
-    font-size: clamp(1.3rem, 3vw, 2rem);
-    color: #221f1a;
+    font-size: clamp(1.2rem, 2.6vw, 1.8rem);
+    color: #1e1b17;
   }
 
-  .ct-page-footer span {
+  .nl-page-footer span {
     display: block;
     margin-top: 18px;
   }
 
   @media (max-width: 720px) {
-    .ct-hero {
-      min-height: 90svh;
+    .nl-hero {
       padding-top: 11vh;
     }
 
-    .ct-segment-list a {
+    .nl-segment-list a {
       grid-template-columns: 2.5rem minmax(0, 1fr);
-      padding-block: 26px;
     }
 
-    .ct-segment-arrow {
+    .nl-segment-tag {
       grid-column: 2;
-      font-size: 1rem;
+      grid-row: 3;
+      justify-self: start;
     }
 
-    .ct-projects-header {
-      flex-direction: column;
-      gap: 8px;
+    .nl-segment-blurb {
+      grid-column: 2;
+      grid-row: 2;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ct-stage,
-    .ct-beads {
+    #nl-canvas-host,
+    #nl-grab {
       display: none !important;
-    }
-
-    .ct-scroll-cue {
-      animation: none;
     }
   }
 </style>
