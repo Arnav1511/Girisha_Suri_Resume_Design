@@ -392,14 +392,20 @@ const segments = getOrderedSegments();
 
     function buildNeedle(THREE: any, group: any) {
       const needle = new THREE.Group();
-      // Deep red, the same family as the thread (#6B2222) — a clean solid
-      // material (high segment counts below keep the thin geometry crisp, not
-      // pixelated). Slight sheen so it still reads as a needle, not flat paper.
+      // Polished steel, like a real sewing needle. The old deep-red needle
+      // (#6B2222) matched the thread but vanished against the near-black footer
+      // where it comes to rest — you'd only see the red thread and think the
+      // needle was gone. Bright metal reads clearly on BOTH the pale hero and
+      // the dark footer. The faint emissive is a floor so it can never sink
+      // fully into a dark background even if the environment reflection is weak
+      // on a given GPU — the needle always shows.
       const metal = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(0x6b2222).convertSRGBToLinear(),
-        metalness: 0.25,
-        roughness: 0.42,
-        envMapIntensity: 0.6,
+        color: new THREE.Color(0xd7d8de).convertSRGBToLinear(),
+        metalness: 0.85,
+        roughness: 0.28,
+        envMapIntensity: 1.15,
+        emissive: new THREE.Color(0x3a3b42).convertSRGBToLinear(),
+        emissiveIntensity: 1.0,
       });
       // Shaft tapers slightly toward the tip; radii scaled by NT (thickness).
       // The needle is LONG on the tip side (below the hole crossing at local
