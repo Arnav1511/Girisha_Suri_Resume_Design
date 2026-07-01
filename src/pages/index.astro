@@ -183,6 +183,30 @@ const segments = getOrderedSegments();
       S.bounds = { halfH: vH / 2, halfW: vW / 2, floorY: -vH / 2 + 0.06 };
     }
 
+    // Size the key light's shadow frustum to cover the WHOLE visible viewport
+    // in world units, so shadows look identical at every resolution / aspect
+    // ratio. halfH is fixed (it depends only on the camera FOV + distance), but
+    // halfW grows with the viewport's aspect ratio — on a wide monitor the
+    // world is much wider than on a laptop. The frustum used to be a fixed
+    // ±5.6 wide, so on wider screens any object that fell/landed past that
+    // edge dropped out of the shadow map and its shadow clipped — which is why
+    // the shadows looked broken at some resolutions and fine at others. Tying
+    // the frustum to the live bounds (plus padding for the light's offset)
+    // makes every screen cover its own content, so the result is consistent.
+    function fitShadowFrustum() {
+      const key = S.keyLight;
+      if (!key || !S.bounds) return;
+      const pad = 1.3;
+      const hw = S.bounds.halfW + pad;
+      const hh = S.bounds.halfH + pad;
+      const cam = key.shadow.camera;
+      cam.left = -hw;
+      cam.right = hw;
+      cam.top = hh;
+      cam.bottom = -hh;
+      cam.updateProjectionMatrix();
+    }
+
     function makeEnvTexture(THREE: any) {
       const c = document.createElement("canvas");
       c.width = 512;
@@ -813,6 +837,15 @@ const segments = getOrderedSegments();
         stuck: false,
         spin: (Math.random() < 0.5 ? -1 : 1) * (1.6 + Math.random()),
       };
+      // The needle + thread come to rest a comfortable margin ABOVE the very
+      // bottom of the page instead of jammed against the last pixel (where the
+      // tip and half the thread were being clipped off the bottom edge, which
+      // made the whole thing read as broken/detached). This leaves the eye,
+      // shaft and the little pool of thread fully on-screen. Scaled to the
+      // viewport so it looks the same on any screen.
+      S.restMargin = Math.min(190, Math.round(window.innerHeight * 0.17));
+      S.threadRest = false; // becomes true once the thread stops moving
+      S.threadCalm = 0; // seconds the needle has been landed, gating the freeze
       // Seed the thread nodes into document space for a simple rope simulation
       // (verlet + distance constraints) that trails from the falling needle.
       let segSum = 0;
@@ -897,21 +930,48 @@ const segments = getOrderedSegments();
     // is pinned to the needle eye; the rest integrate under gravity (verlet) in
     // document-space pixels, with a few distance-constraint passes to hold the
     // strand together. Nodes are then projected back into the 3D scene.
-    function simThreadFall(THREE: any, dt: number, sc: number, maxDoc: number) {
+    function simThreadFall(THREE: any, dt: number, sc: number, floorDoc: number) {
       const nodes = S.nodes;
+      // Refresh the needle's world matrix FIRST so the eye position we pin the
+      // head to is this frame's, not last frame's (localToWorld reads a cached
+      // matrix, which lags a frame and can open a hairline gap at the eye while
+      // things are still moving). The head is glued to the eye every frame.
+      S.needle.updateMatrixWorld(true);
+      const es = worldToScreen(eyeWorld());
+      const headX = es.x;
+      const headY = es.y + sc;
+
+      // Once the needle has landed and the strand has stopped moving, freeze
+      // the shape so the tail can't creep/writhe forever (that endless drift is
+      // what made the settled thread look disconnected). We still re-pin the
+      // head to the eye and re-project every node each frame, so the resting
+      // thread stays attached to the needle and rides page scrolls correctly.
+      if (S.threadRest) {
+        nodes[0].docX = headX;
+        nodes[0].docY = headY;
+        for (let i = 0; i < nodes.length; i++) {
+          nodes[i].pos.copy(screenToWorld(nodes[i].docX, nodes[i].docY - sc, 0));
+        }
+        rebuildThread(THREE);
+        return;
+      }
+
       const g = 2600; // px/s^2 in document space
       const rest = S.threadSegPx;
       // Pin the head to the needle eye.
-      const es = worldToScreen(eyeWorld());
-      nodes[0].docX = es.x;
-      nodes[0].docY = es.y + sc;
-      nodes[0].docPX = nodes[0].docX;
-      nodes[0].docPY = nodes[0].docY;
-      // Verlet integrate the rest.
+      nodes[0].docX = headX;
+      nodes[0].docY = headY;
+      nodes[0].docPX = headX;
+      nodes[0].docPY = headY;
+      // Verlet integrate the rest, tracking how fast the strand is still moving
+      // so we know when it has come to rest.
+      let maxSpeed = 0;
       for (let i = 1; i < nodes.length; i++) {
         const n = nodes[i];
         const vx = (n.docX - n.docPX) * 0.98;
         const vy = (n.docY - n.docPY) * 0.98;
+        if (Math.abs(vx) > maxSpeed) maxSpeed = Math.abs(vx);
+        if (Math.abs(vy) > maxSpeed) maxSpeed = Math.abs(vy);
         n.docPX = n.docX;
         n.docPY = n.docY;
         n.docX += vx;
@@ -920,9 +980,9 @@ const segments = getOrderedSegments();
       // Iterate distance + floor as balanced constraints. Each pass: (1) hold
       // each segment at its rest length so the strand stays intact and its head
       // stays glued to the pinned eye — NO gap between needle and thread; then
-      // (2) push any node that sank below the page bottom back up onto it. Node
-      // 0 (the eye) is never moved, so the whole thread hangs from the needle
-      // and comes to rest lying on the floor, still attached.
+      // (2) push any node that sank below the floor back up onto it. Node 0
+      // (the eye) is never moved, so the whole thread hangs from the needle and
+      // comes to rest, still attached.
       for (let it = 0; it < 16; it++) {
         for (let i = 1; i < nodes.length; i++) {
           const a = nodes[i - 1];
@@ -944,18 +1004,29 @@ const segments = getOrderedSegments();
         // Floor collision as a constraint (not a hard pre-clamp that fought the
         // distance pass and tore the strand off the eye).
         for (let i = 1; i < nodes.length; i++) {
-          if (nodes[i].docY > maxDoc) nodes[i].docY = maxDoc;
+          if (nodes[i].docY > floorDoc) nodes[i].docY = floorDoc;
         }
       }
       // Keep the eye pinned as the final word (distance passes never move it,
       // but be explicit) so the head is exactly on the needle eye.
-      nodes[0].docX = es.x;
-      nodes[0].docY = es.y + sc;
+      nodes[0].docX = headX;
+      nodes[0].docY = headY;
       // Project back into the scene for the tube geometry.
       for (let i = 0; i < nodes.length; i++) {
         nodes[i].pos.copy(screenToWorld(nodes[i].docX, nodes[i].docY - sc, 0));
       }
       rebuildThread(THREE);
+
+      // Latch to rest once the needle has landed: either as soon as the strand
+      // goes calm, or after a short grace period regardless. The rope solver
+      // leaves a permanent ~1px per-frame jitter as it redistributes the slack
+      // pooled on the floor, so a pure "is it calm" test never fully fires and
+      // the tail creeps forever — the time cap guarantees it always comes to
+      // rest and stays put.
+      if (S.needleFall && S.needleFall.stuck) {
+        S.threadCalm += dt;
+        if (maxSpeed < 1.2 || S.threadCalm > 2.5) S.threadRest = true;
+      }
     }
 
     function updateFall(dt: number) {
@@ -974,7 +1045,9 @@ const segments = getOrderedSegments();
       const G = 1000;
       const maxDoc = document.body.scrollHeight - 24;
 
-      // The needle falls to the bottom of the page, tumbling as it goes.
+      // The needle falls and comes to rest a margin above the very bottom so
+      // it (and the thread hanging from its eye) stay fully visible.
+      const needleFloor = maxDoc - (S.restMargin || 0);
       const nf = S.needleFall;
       if (nf) {
         if (!nf.stuck) {
@@ -982,8 +1055,8 @@ const segments = getOrderedSegments();
           nf.docY += nf.vy * dt;
           nf.docX += nf.vx * dt;
           S.needle.rotation.z += nf.spin * dt; // tumble on the way down
-          if (nf.docY >= maxDoc) {
-            nf.docY = maxDoc;
+          if (nf.docY >= needleFloor) {
+            nf.docY = needleFloor;
             if (Math.abs(nf.vy) > 60 && nf.bounces > 0) {
               nf.vy = -Math.abs(nf.vy) * 0.45;
               nf.bounces--;
@@ -1003,8 +1076,14 @@ const segments = getOrderedSegments();
       }
 
       // The thread trails behind the falling needle like a broken string
-      // (simple rope sim in document space, then projected back into 3D).
-      if (S.threadFalling) simThreadFall((window as any).THREE, dt, sc, maxDoc);
+      // (simple rope sim in document space, then projected back into 3D). Its
+      // floor sits just below where the needle rests, so it pools in a small
+      // visible heap under the eye rather than smearing along the very bottom
+      // edge of the page.
+      if (S.threadFalling) {
+        const threadFloor = maxDoc - Math.max(0, (S.restMargin || 0) - 26);
+        simThreadFall((window as any).THREE, dt, sc, threadFloor);
+      }
 
       S.beads.forEach((m: any) => {
         const u = m.userData;
@@ -1249,13 +1328,13 @@ const segments = getOrderedSegments();
       key.shadow.mapSize.set(4096, 4096);
       key.shadow.camera.near = 0.5;
       key.shadow.camera.far = 26;
-      key.shadow.camera.left = -5.6;
-      key.shadow.camera.right = 5.6;
-      key.shadow.camera.top = 4.2;
-      key.shadow.camera.bottom = -4.2;
+      // The left/right/top/bottom extents are set responsively by
+      // fitShadowFrustum() (called after updateBounds, and again on resize) so
+      // the shadow map always covers the full viewport at any aspect ratio.
       key.shadow.bias = -0.0003;
       key.shadow.radius = 14;
       scene.add(key);
+      S.keyLight = key;
       const fill = new THREE.DirectionalLight(0xeae6f0, 0.4);
       fill.position.set(3, 1.5, 4);
       scene.add(fill);
@@ -1292,6 +1371,7 @@ const segments = getOrderedSegments();
       S.clock = new THREE.Clock();
       S.needleBase = S.needle.position.clone();
       updateBounds();
+      fitShadowFrustum();
 
       // Pull hint: a soft pulsing halo that marks the needle's eye as the grab
       // point. A radial-gradient sprite in the thread's warm red; it rides the
@@ -1328,6 +1408,7 @@ const segments = getOrderedSegments();
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
         updateBounds();
+        fitShadowFrustum();
       };
       window.addEventListener("resize", onResize);
 
