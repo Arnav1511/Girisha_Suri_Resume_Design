@@ -576,6 +576,7 @@ const segments = getOrderedSegments();
         const u = m.userData;
         u.free = true;
         u.stuck = false;
+        m.castShadow = false; // no stray far-cast shadow once it leaves the thread
         const s = worldToScreen(m.position);
         u.docX = s.x;
         u.docY = s.y + sc;
