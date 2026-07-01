@@ -22,12 +22,28 @@ const year = new Date().getFullYear();
 
 <style>
   .site-footer {
+    position: relative;
     padding: var(--space-2xl) var(--page-gutter) var(--space-xl);
     background: var(--color-bg-inverted);
     color: var(--color-text-inverted);
     display: flex;
     flex-direction: column;
     gap: var(--space-xl);
+  }
+
+  /* Soft dusk transition into the footer: a gradient strip sitting just above
+     the footer fades the (light) page background down into the dark footer
+     colour, so as you scroll the footer eases in instead of hard-popping as a
+     dark rectangle. Non-interactive; matches the footer background exactly. */
+  .site-footer::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -120px;
+    height: 120px;
+    background: linear-gradient(to bottom, transparent, var(--color-bg-inverted));
+    pointer-events: none;
   }
 
   .row {
