@@ -58,6 +58,13 @@ const segments = getOrderedSegments();
     const NT = 2.5; // needle thickness (thicker per request)
     const TT = 0.0038; // thin, delicate thread like the sketch
     const BREEZE = 1.15; // pendulum sway amount (1.15 ≈ ±20°)
+    // The two holes of the button, in disc-local coords — measured directly
+    // from the two white holes in the reference photo (button-marble.png): a
+    // near-vertical pair centred on the disc. BOTH are punched clean through
+    // the geometry so they are always see-through (the page background shows
+    // through them). The needle threads the TOP hole only.
+    const HOLE_TOP = { x: 0.025, y: 0.215 };
+    const HOLE_BOT = { x: 0.017, y: -0.206 };
     const SHADOW = 0.24; // front/top sun shadow strength
 
     // Always begin at the drag stage so the intro (and its scroll roll) plays
@@ -221,26 +228,24 @@ const segments = getOrderedSegments();
       // background shows straight through them (canvas is transparent).
       const shape = new THREE.Shape();
       shape.absarc(0, 0, R, 0, Math.PI * 2, false);
-      // The button.png photo ALREADY has two holes near the centre. Punch our
-      // geometry holes on that same central pair (and we also paint clean
-      // marble over the photo's holes below, so there is never a duplicate set
-      // — exactly two holes, with the needle showing through them).
-      const holeR = 0.085;
-      // Two holes on the needle's ~136° diagonal axis (upper-right ↔
-      // lower-left) so the shaft threads through both centres.
+      // Punch BOTH holes clean through the geometry, exactly over the photo's
+      // two painted white holes (radius matched to them). Both are genuinely
+      // see-through, so the page background always shows through them. The
+      // needle threads the TOP hole only.
+      const holeR = 0.075;
       const h1 = new THREE.Path();
-      h1.absarc(0.095, 0.092, holeR, 0, Math.PI * 2, true);
+      h1.absarc(HOLE_TOP.x, HOLE_TOP.y, holeR, 0, Math.PI * 2, true);
       const h2 = new THREE.Path();
-      h2.absarc(-0.095, -0.092, holeR, 0, Math.PI * 2, true);
+      h2.absarc(HOLE_BOT.x, HOLE_BOT.y, holeR, 0, Math.PI * 2, true);
       shape.holes.push(h1, h2);
 
       const geo = new THREE.ExtrudeGeometry(shape, {
-        depth: 0.08,
+        depth: 0.13,
         curveSegments: 100,
         bevelEnabled: true,
-        bevelThickness: 0.02,
-        bevelSize: 0.03,
-        bevelSegments: 5,
+        bevelThickness: 0.03,
+        bevelSize: 0.05,
+        bevelSegments: 8,
       });
       geo.center();
 
@@ -254,8 +259,8 @@ const segments = getOrderedSegments();
         if (Math.abs(nz) > 0.5) {
           const rad = Math.hypot(v.x, v.y);
           const ang = Math.atan2(v.y, v.x);
-          const dome = 0.02 * Math.cos((Math.min(1, rad / R) * Math.PI) / 2);
-          const wave = 0.02 * Math.sin(3 * ang + 0.6) + 0.012 * Math.sin(5 * ang + 1.7);
+          const dome = 0.05 * Math.cos((Math.min(1, rad / R) * Math.PI) / 2);
+          const wave = 0.03 * Math.sin(3 * ang + 0.6) + 0.018 * Math.sin(5 * ang + 1.7);
           pos.setZ(i, v.z + (dome + wave) * (nz > 0 ? 1 : -1));
         }
       }
@@ -271,11 +276,11 @@ const segments = getOrderedSegments();
       const mat = new THREE.MeshPhysicalMaterial({
         color: 0xbcb3a4,
         metalness: 0.0,
-        roughness: 0.72,
-        clearcoat: 0.24,
-        clearcoatRoughness: 0.5,
+        roughness: 0.6,
+        clearcoat: 0.36,
+        clearcoatRoughness: 0.32,
         envMapIntensity: 0.14,
-        reflectivity: 0.18,
+        reflectivity: 0.2,
       });
       // Quiet taupe edge that blends into the marble — no bright white ring.
       const rimMat = new THREE.MeshStandardMaterial({
@@ -301,16 +306,10 @@ const segments = getOrderedSegments();
         const cg = cv.getContext("2d");
         if (!cg) return;
         cg.drawImage(marbleImg, 0, 0);
-        // The photo has its OWN two holes near the centre. Clone clean marble
-        // (from just above) down over them, so the only holes on the button
-        // are the two we punch in geometry — never a duplicate set of four.
-        const W = cv.width;
-        const H = cv.height;
-        const pw = W * 0.34;
-        const ph = H * 0.34;
-        const px = (W - pw) / 2;
-        const py = (H - ph) / 2;
-        cg.drawImage(cv, px, py - ph * 0.8, pw, ph, px, py, pw, ph);
+        // No clone-patch: the face is the photo as-is (that stray square in the
+        // centre is gone). The punched top hole sits over the photo's painted
+        // top hole; the bottom hole stays painted, so it reads exactly like the
+        // PNG.
         const tex: any = new THREE.CanvasTexture(cv);
         tex.encoding = THREE.sRGBEncoding;
         tex.anisotropy = Math.min(8, S.renderer.capabilities.getMaxAnisotropy());
@@ -321,6 +320,12 @@ const segments = getOrderedSegments();
         tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
         tex.repeat.set(0.9, 0.9);
         mat.map = tex;
+        // Drive real surface relief from the photo's own light/dark tones, so
+        // the marble swirls read as raised/recessed 3D — highlights and shadows
+        // shift across the surface as the button turns and pulls out, instead
+        // of looking like a flat printed disc.
+        mat.bumpMap = tex;
+        mat.bumpScale = 0.02;
         mat.color.set(0xffffff);
         mat.emissive = new THREE.Color(0x000000);
         mat.emissiveIntensity = 0;
@@ -341,18 +346,19 @@ const segments = getOrderedSegments();
         envMapIntensity: 0.6,
       });
       // Shaft tapers slightly toward the tip; radii scaled by NT (thickness).
-      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.0065 * NT, 0.0105 * NT, 2.15, 32), metal);
-      shaft.position.y = 0.18;
+      // The tip side (below the hole crossing at local y = 0) is kept SHORT so
+      // the pointed end tucks behind the disc and stays hidden while threaded,
+      // instead of jutting out past the rim like a skewer. It slides back into
+      // view only as the needle is pulled out. The eye side keeps its length.
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.0065 * NT, 0.0105 * NT, 1.6, 32), metal);
+      shaft.position.y = 0.5; // spans local y −0.3 (bottom) … +1.3 (up to the eye)
       shaft.castShadow = true;
       needle.add(shaft);
-      // A long, genuinely sharp point (not a stubby broom end): base matches the
-      // shaft's lower radius, tapering to a fine apex over a long cone.
-      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.0105 * NT, 0.62, 32), metal);
-      // Flip so the apex points DOWN (default cone apex is +Y, which produced
-      // the blunt "broomstick" end). Base flush with the shaft bottom (-0.895),
-      // fine apex at -1.515.
-      tip.rotation.x = Math.PI;
-      tip.position.y = -1.205;
+      // A genuinely sharp point: base flush with the shaft bottom (−0.3),
+      // tapering to a fine apex at −0.8 — short enough to hide behind the disc.
+      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.0105 * NT, 0.5, 32), metal);
+      tip.rotation.x = Math.PI; // apex points DOWN
+      tip.position.y = -0.55;
       tip.castShadow = true;
       needle.add(tip);
       const eye = new THREE.Mesh(new THREE.TorusGeometry(0.034 * NT, 0.0085 * NT, 18, 36), metal);
@@ -365,14 +371,27 @@ const segments = getOrderedSegments();
       eyeCap.castShadow = true;
       needle.add(eyeCap);
 
-      // Threads the two central holes: the shaft runs through both hole
-      // centres at z ≈ 0 (visible through the holes, hidden behind the disc
-      // between them). Inserted at ~136° (≈44° above the horizontal line) —
-      // a diagonal, tip out to the lower-left, eye + thread out to the
-      // upper-right, so the pull still reads left → right.
-      const dir = new THREE.Vector3(0.719, 0.695, 0.17).normalize();
+      // Threads the TOP hole only. The shaft crosses the disc plane (z = 0)
+      // exactly at the top hole's centre — that crossing IS the insertion
+      // point, so the needle enters right at the hole, never before or after
+      // it. Above the crossing (toward the eye) the shaft is in front of the
+      // disc (+z); below it (toward the tip) it dips behind the disc (−z), so
+      // it genuinely reads as pushed INTO that one hole. Insertion angle 67°
+      // in the protractor convention the user gave — 0° at the top, measured
+      // CLOCKWISE — so the shaft points up-and-right, ~23° above horizontal
+      // (eye + thread out to the upper-right, tip out to the lower-left). The
+      // +z tilt lifts the eye toward the viewer so the tip dives behind the
+      // face right at the hole rather than skimming across it.
+      const INSERT_DEG = 73;
+      const insA = (INSERT_DEG * Math.PI) / 180;
+      const dir = new THREE.Vector3(Math.sin(insA), Math.cos(insA), 1.25).normalize();
       needle.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-      needle.position.set(0.0, 0.0, -0.01);
+      // Origin sits AT the hole on the disc mid-plane (z = 0), so the shaft
+      // crosses the face exactly at the hole centre — not shifted off to the
+      // side into solid marble. (A non-zero z here would slide the crossing
+      // along the needle's own diagonal, off the hole, which is what made it
+      // stab through the marble.)
+      needle.position.set(HOLE_TOP.x, HOLE_TOP.y, 0.0);
       needle.scale.set(1, 1.4, 1);
       group.add(needle);
       S.needle = needle;
@@ -434,7 +453,7 @@ const segments = getOrderedSegments();
     // ends meet at the eye (t=0 and t=1); it bellies out to ±LOOP_W and drops
     // to LOOP_L at the bottom (t=0.5), where the beads and teardrop hang.
     const LOOP_W = 0.075; // half-width of the loop
-    const LOOP_L = 1.95; // total drop to the bottom of the loop
+    const LOOP_L = 2.7; // total drop to the bottom of the loop (longer thread)
     function sketchOffset(t: number) {
       const a = t * Math.PI * 2;
       // Base loop.
@@ -451,7 +470,7 @@ const segments = getOrderedSegments();
     }
 
     function buildThreadAndBeads(THREE: any) {
-      const N = 44;
+      const N = 60;
       S.threadN = N;
       S.segLen = LOOP_L / (N / 2);
       const anchor = eyeWorld();
@@ -533,23 +552,32 @@ const segments = getOrderedSegments();
       // lathe + flatShading already gives clean faceted facets.
       const bicone = (r: number) => biconeGeo(THREE, r, r * 1.9);
       // Stones sit on the lower part of the loop, strung down to the big
-      // teardrop drop at the very bottom (node 22 ≈ t 0.5), like the
-      // "multiple beads" sketch. N = 44 → the bottom of the loop is at node 22.
-      const specs: Array<{ node: number; geo: () => any; r?: number }> = [
-        { node: 14, geo: () => stone(0.026), r: 0.026 },
-        { node: 15, geo: () => bicone(0.026), r: 0.03 },
-        { node: 16, geo: () => stone(0.031), r: 0.031 },
-        { node: 17, geo: () => stone(0.028), r: 0.028 },
-        { node: 18, geo: () => stone(0.024), r: 0.024 },
-        { node: 19, geo: () => bicone(0.03), r: 0.038 },
-        { node: 20, geo: () => stone(0.033), r: 0.033 },
-        { node: 21, geo: () => bicone(0.028), r: 0.034 },
-        { node: 22, geo: () => teardropGeo(THREE, 0.055), r: 0.064 },
-        { node: 24, geo: () => stone(0.029), r: 0.029 },
-        { node: 25, geo: () => bicone(0.026), r: 0.03 },
-        { node: 26, geo: () => stone(0.026), r: 0.026 },
+      // teardrop drop at the very bottom (node 30 ≈ t 0.5), like the
+      // "multiple beads" sketch. N = 60 → the bottom of the loop is at node 30.
+      // The longer thread carries a few extra stones (same knapped-ruby look
+      // and physics as the rest — they're all pushed through the same pipeline
+      // below and into S.beads).
+      const specs: Array<{ node: number; geo: () => any; r: number }> = [
+        { node: 18, geo: () => stone(0.026), r: 0.026 },
+        { node: 19, geo: () => bicone(0.026), r: 0.03 },
+        { node: 20, geo: () => stone(0.031), r: 0.031 },
+        { node: 21, geo: () => stone(0.028), r: 0.028 },
+        { node: 22, geo: () => stone(0.024), r: 0.024 },
+        { node: 23, geo: () => bicone(0.03), r: 0.038 },
+        { node: 24, geo: () => stone(0.033), r: 0.033 },
+        { node: 25, geo: () => bicone(0.028), r: 0.034 },
+        { node: 26, geo: () => stone(0.03), r: 0.03 },
+        { node: 27, geo: () => bicone(0.026), r: 0.03 },
+        { node: 28, geo: () => stone(0.029), r: 0.029 },
+        { node: 29, geo: () => bicone(0.03), r: 0.038 },
+        { node: 30, geo: () => teardropGeo(THREE, 0.055), r: 0.064 },
+        { node: 32, geo: () => stone(0.029), r: 0.029 },
+        { node: 33, geo: () => bicone(0.026), r: 0.03 },
+        { node: 34, geo: () => stone(0.026), r: 0.026 },
+        { node: 35, geo: () => stone(0.028), r: 0.028 },
+        { node: 36, geo: () => bicone(0.027), r: 0.032 },
       ];
-      const radii = [0.026, 0.03, 0.031, 0.028, 0.024, 0.038, 0.033, 0.034, 0.064, 0.029, 0.03, 0.026];
+      const radii = specs.map((s) => s.r);
       // Largest stone (the teardrop) gets the deepest red; the rest randomised.
       const maxR = Math.max(...radii);
       S.beads = [];
@@ -573,20 +601,14 @@ const segments = getOrderedSegments();
     }
 
     function applyPull(p: number) {
-      S.needle.position.copy(S.needleBase).addScaledVector(S.pullVec, p);
-      S.button.rotation.z = p * 0.55;
-      if (S.phase === "completing" && p > 0.75) {
-        S.needle.children.forEach((c: any) => {
-          if (c.material) {
-            c.material.transparent = true;
-            c.material.opacity = Math.max(0, 1 - (p - 0.75) / 0.25);
-          }
-        });
-      } else {
-        S.needle.children.forEach((c: any) => {
-          if (c.material) c.material.opacity = 1;
-        });
-      }
+      // Once the needle has broken away (S.needleFall), it falls under its own
+      // physics — don't keep yanking it back along the pull axis.
+      if (!S.needleFall) S.needle.position.copy(S.needleBase).addScaledVector(S.pullVec, p);
+      if (!S.btnFall) S.button.rotation.z = p * 0.55;
+      // Normal depth testing does the right thing on its own: the part of the
+      // needle still behind the disc stays hidden, and only the part that has
+      // emerged in front of the face draws on top of the button as it comes out
+      // of the hole.
     }
 
     // Idle thread: the whole drape swings like a pendulum about the needle
@@ -652,8 +674,25 @@ const segments = getOrderedSegments();
     // button drops all the way to the footer name. Positions are tracked in
     // document space (px) so a stuck object rides with its text as the page
     // scrolls — each frame we project doc-space back into the 3D scene.
+    // Tight bounds of an element's actual TEXT (not its full block box). A
+    // centred <p>/<h1> has a full-width box with empty margins on either side;
+    // a bead aimed at that box could land in the blank margin. Measuring the
+    // text run with a Range keeps beads on the real letters only.
+    function textRect(el: HTMLElement) {
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const r = range.getBoundingClientRect();
+        if (r && r.width > 0 && r.height > 0) return r;
+      } catch (e) {
+        /* fall through */
+      }
+      return el.getBoundingClientRect();
+    }
+
     function startFall() {
       const sc = window.scrollY;
+      // Every catchable letter/word on the page.
       const beadEls = Array.from(document.querySelectorAll('[data-catch="bead"]')) as HTMLElement[];
       S.beads.forEach((m: any) => {
         const u = m.userData;
@@ -668,9 +707,23 @@ const segments = getOrderedSegments();
         u.bounces = 3 + Math.floor(Math.random() * 3); // several bounces
         u.age = 0;
         u.minLive = 1.2 + Math.random() * 0.6; // stay lively ~1.2–1.8s before it can settle
-        u.frac = 0.1 + Math.random() * 0.8; // random landing spot along its target word
-        u.targetEl = beadEls.length ? beadEls[Math.floor(Math.random() * beadEls.length)] : null;
+        u.frac = 0.15 + Math.random() * 0.7; // landing spot along its target word
+        u.atBottom = false; // true once it has come to rest at the page bottom
+        // Land only on a hard object — a letter BELOW where it starts — and
+        // rest on TOP of it. If there is no letter beneath (it would pass
+        // through them all), it drops to the bottom of the last page instead.
+        const below = beadEls.filter((el) => {
+          const r = textRect(el);
+          return r.width > 0 && r.height > 0 && r.top + sc > u.docY + 8;
+        });
+        u.targetEl = below.length ? below[Math.floor(Math.random() * below.length)] : null;
       });
+      // Always let a randomised handful (at least 2) pass through every letter
+      // and rest at the very bottom of the last page — which beads do this is
+      // shuffled each run so it stays varied.
+      const order = S.beads.map((_: any, i: number) => i).sort(() => Math.random() - 0.5);
+      const nBottom = Math.min(S.beads.length, 2 + Math.floor(Math.random() * 3)); // 2–4
+      order.slice(0, nBottom).forEach((i: number) => (S.beads[i].userData.targetEl = null));
 
       // The button drops all the way down to the dark site footer and settles
       // in the negative space just above the "Girisha Suri" wordmark, turning
@@ -688,6 +741,44 @@ const segments = getOrderedSegments();
         vx: 0,
         bounces: 3, // bounce a few times before resting on the name
       };
+
+      // The needle + thread BREAK AWAY from the button and fall together to the
+      // very bottom of the page. The beads have just been released (above), so
+      // the loop is now a bare string trailing from the needle eye — that is
+      // the "thread breaking". Physics for both are tracked in document space
+      // (px) so they fall the full length of the page and ride scrolls.
+      const THREE2 = (window as any).THREE;
+      S.scene.attach(S.needle); // keep world transform, detach from the hero group
+      const nWorld = S.needle.getWorldPosition(new THREE2.Vector3());
+      const nsp = worldToScreen(nWorld);
+      S.needleFall = {
+        docX: nsp.x,
+        docY: nsp.y + sc,
+        z: nWorld.z,
+        vy: 12,
+        vx: (Math.random() - 0.5) * 30,
+        bounces: 2,
+        stuck: false,
+        spin: (Math.random() < 0.5 ? -1 : 1) * (1.6 + Math.random()),
+      };
+      // Seed the thread nodes into document space for a simple rope simulation
+      // (verlet + distance constraints) that trails from the falling needle.
+      let segSum = 0;
+      for (let i = 0; i < S.nodes.length; i++) {
+        const s = worldToScreen(S.nodes[i].pos);
+        const n = S.nodes[i];
+        n.docX = s.x;
+        n.docY = s.y + sc;
+        n.docPX = s.x;
+        n.docPY = s.y + sc;
+        if (i > 0) {
+          const p = worldToScreen(S.nodes[i - 1].pos);
+          segSum += Math.hypot(s.x - p.x, s.y - p.y);
+        }
+      }
+      S.threadSegPx = Math.max(4, segSum / Math.max(1, S.nodes.length - 1));
+      S.threadFalling = true;
+      S.threadMat.opacity = 1; // it no longer fades; it falls instead
 
       // Roll the page down to the hero, like turning to the next page. We
       // drive the scroll ourselves with plain window.scrollTo — supported on
@@ -726,6 +817,13 @@ const segments = getOrderedSegments();
         if (u.free && !u.stuck) u.docY -= h;
       });
       if (S.btnFall && !S.btnFall.stuck) S.btnFall.docY -= h;
+      if (S.needleFall && !S.needleFall.stuck) S.needleFall.docY -= h;
+      if (S.threadFalling) {
+        S.nodes.forEach((n: any) => {
+          n.docY -= h;
+          n.docPY -= h;
+        });
+      }
       // Re-anchor to the hero top. Removing the spacer + shifting scroll by
       // the same amount keeps every pixel in place (beads included), so this
       // is invisible — but it must NOT read as an upward scroll. Route it
@@ -741,6 +839,58 @@ const segments = getOrderedSegments();
         window.scrollTo(0, newTop);
       }
       window.dispatchEvent(new Event("resize"));
+    }
+
+    // Rope simulation for the broken thread as it falls with the needle. Node 0
+    // is pinned to the needle eye; the rest integrate under gravity (verlet) in
+    // document-space pixels, with a few distance-constraint passes to hold the
+    // strand together. Nodes are then projected back into the 3D scene.
+    function simThreadFall(THREE: any, dt: number, sc: number, maxDoc: number) {
+      const nodes = S.nodes;
+      const g = 2600; // px/s^2 in document space
+      const rest = S.threadSegPx;
+      // Pin the head to the needle eye.
+      const es = worldToScreen(eyeWorld());
+      nodes[0].docX = es.x;
+      nodes[0].docY = es.y + sc;
+      nodes[0].docPX = nodes[0].docX;
+      nodes[0].docPY = nodes[0].docY;
+      // Verlet integrate the rest.
+      for (let i = 1; i < nodes.length; i++) {
+        const n = nodes[i];
+        const vx = (n.docX - n.docPX) * 0.98;
+        const vy = (n.docY - n.docPY) * 0.98;
+        n.docPX = n.docX;
+        n.docPY = n.docY;
+        n.docX += vx;
+        n.docY += vy + g * dt * dt;
+        if (n.docY > maxDoc) n.docY = maxDoc; // rest on the page bottom
+      }
+      // Distance constraints (hold the strand length).
+      for (let it = 0; it < 4; it++) {
+        for (let i = 1; i < nodes.length; i++) {
+          const a = nodes[i - 1];
+          const b = nodes[i];
+          const dx = b.docX - a.docX;
+          const dy = b.docY - a.docY;
+          const d = Math.hypot(dx, dy) || 1e-4;
+          const diff = (d - rest) / d;
+          if (i - 1 === 0) {
+            b.docX -= dx * diff;
+            b.docY -= dy * diff;
+          } else {
+            a.docX += dx * 0.5 * diff;
+            a.docY += dy * 0.5 * diff;
+            b.docX -= dx * 0.5 * diff;
+            b.docY -= dy * 0.5 * diff;
+          }
+        }
+      }
+      // Project back into the scene for the tube geometry.
+      for (let i = 0; i < nodes.length; i++) {
+        nodes[i].pos.copy(screenToWorld(nodes[i].docX, nodes[i].docY - sc, 0));
+      }
+      rebuildThread(THREE);
     }
 
     function updateFall(dt: number) {
@@ -759,9 +909,31 @@ const segments = getOrderedSegments();
       const G = 1000;
       const maxDoc = document.body.scrollHeight - 24;
 
-      // the thread breaks and fades away
-      if (S.threadMat.opacity > 0) S.threadMat.opacity = Math.max(0, S.threadMat.opacity - dt * 1.4);
-      if (S.threadMesh) S.threadMesh.visible = S.threadMat.opacity > 0.02;
+      // The needle falls to the bottom of the page, tumbling as it goes.
+      const nf = S.needleFall;
+      if (nf) {
+        if (!nf.stuck) {
+          nf.vy += G * dt;
+          nf.docY += nf.vy * dt;
+          nf.docX += nf.vx * dt;
+          S.needle.rotation.z += nf.spin * dt; // tumble on the way down
+          if (nf.docY >= maxDoc) {
+            nf.docY = maxDoc;
+            if (Math.abs(nf.vy) > 60 && nf.bounces > 0) {
+              nf.vy = -Math.abs(nf.vy) * 0.45;
+              nf.bounces--;
+            } else {
+              nf.stuck = true;
+              nf.vy = 0;
+            }
+          }
+        }
+        S.needle.position.copy(screenToWorld(nf.docX, nf.docY - sc, nf.z));
+      }
+
+      // The thread trails behind the falling needle like a broken string
+      // (simple rope sim in document space, then projected back into 3D).
+      if (S.threadFalling) simThreadFall((window as any).THREE, dt, sc, maxDoc);
 
       S.beads.forEach((m: any) => {
         const u = m.userData;
@@ -773,20 +945,22 @@ const segments = getOrderedSegments();
           let tY: number | null = null;
           let tX: number | null = null;
           if (u.targetEl) {
-            const r = u.targetEl.getBoundingClientRect();
-            tY = r.top + sc + r.height * 0.5;
+            const r = textRect(u.targetEl);
+            tY = r.top + sc; // land ON TOP of the letters, not in their middle
             tX = r.left + r.width * u.frac;
           } else if (u.docY >= maxDoc) {
+            // No letter beneath it — it passed through them all, so it rests at
+            // the bottom of the last page.
             tY = maxDoc;
           }
-          // Drift horizontally onto the target word as it falls, so it lands
-          // on the text naturally instead of piling up where the thread hung.
+          // Drift horizontally onto the target word as it falls, so it lands on
+          // the text naturally instead of piling up where the thread hung.
           if (tX != null) u.docX += (tX - u.docX) * Math.min(1, dt * 2.5);
           if (tY != null && u.docY >= tY) {
             u.docY = tY;
             // Stay lively for ~1.5s: keep bouncing (with a floor on the bounce
             // while it's still young) until it has both aged out and run out of
-            // bounces. Then settle on the word — never teleport.
+            // bounces. Then settle — never teleport.
             const canSettle = u.age >= u.minLive && u.bounces <= 0;
             if (!canSettle) {
               let bv = Math.abs(u.vy) * 0.5;
@@ -796,17 +970,23 @@ const segments = getOrderedSegments();
             } else {
               u.stuck = true;
               u.vy = 0;
+              if (!u.targetEl) u.atBottom = true; // came to rest at the page bottom
             }
           }
           m.rotation.x += u.spin.x * dt;
           m.rotation.y += u.spin.y * dt;
         } else if (u.targetEl) {
-          // Locked onto its word — ride it as the page scrolls, and keep a
-          // slow idle turn so the facets keep catching light (shine).
-          const r = u.targetEl.getBoundingClientRect();
-          u.docY = r.top + sc + r.height * 0.5;
+          // Locked onto its word — ride the TOP of it as the page scrolls, and
+          // keep a slow idle turn so the facets keep catching light (shine).
+          const r = textRect(u.targetEl);
+          u.docY = r.top + sc;
           const tX = r.left + r.width * u.frac;
           u.docX += (tX - u.docX) * Math.min(1, dt * 5);
+          m.rotation.x += 0.25 * dt;
+          m.rotation.y += 0.32 * dt;
+        } else if (u.atBottom) {
+          // Resting at the very bottom of the last page — stay pinned there.
+          u.docY = maxDoc;
           m.rotation.x += 0.25 * dt;
           m.rotation.y += 0.32 * dt;
         }
@@ -897,7 +1077,6 @@ const segments = getOrderedSegments();
         if (S.p >= 1) S.phase = "released";
       } else {
         updateFall(dt);
-        if (S.needle) S.needle.scale.multiplyScalar(1 - dt * 2.5);
       }
 
       S.renderer.render(S.scene, S.camera);
