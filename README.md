@@ -11,7 +11,7 @@ That combination has no server to check a password against at request time —
 see "How the password gate actually works" below for what that means and
 the trade-off it implies.
 
-## Run it
+## Run it please if you want
 
 ```bash
 npm install
