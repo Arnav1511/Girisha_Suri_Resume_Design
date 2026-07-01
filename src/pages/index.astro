@@ -12,6 +12,7 @@ const segments = getOrderedSegments();
   </Fragment>
 
   <div id="nl-root">
+    <div id="nl-watercolor" aria-hidden="true"></div>
     <div id="nl-spotlight" aria-hidden="true"></div>
     <div id="nl-canvas-host" aria-hidden="true"></div>
     <div id="nl-grab" aria-hidden="true"></div>
@@ -116,6 +117,8 @@ const segments = getOrderedSegments();
       btnVy: 0,
       beadColorHex: 0x3a0703,
       threadColorHex: 0x6b2222,
+      interacted: false, // becomes true on first pointer-down; kills the hint
+      idleT: 0, // seconds sat idle without interacting (drives the hint)
     };
 
     // ---------------- drag ----------------
@@ -127,6 +130,7 @@ const segments = getOrderedSegments();
 
       const down = (e: PointerEvent) => {
         if (S.phase && S.phase !== "idle") return;
+        S.interacted = true; // first touch — the pull hint has done its job
         S.dragging = true;
         S.dragStart = { x: e.clientX, y: e.clientY, p: S.p };
         S.phase = "dragging";
@@ -1116,6 +1120,20 @@ const segments = getOrderedSegments();
       const time = S.clock.elapsedTime;
 
       if (S.phase === "idle") {
+        // Pull hint (auto-peek): after a short idle, the needle gently eases out
+        // of the button and settles back on a loop — a live preview of the pull
+        // — until the user first interacts.
+        if (!S.interacted) {
+          S.idleT += dt;
+          const t2 = S.idleT - 2.5;
+          let peek = 0;
+          if (t2 > 0) {
+            const local = t2 % 3.4; // out-and-back, then a short rest, repeat
+            if (local < 1.6) peek = Math.sin((local / 1.6) * Math.PI) * 0.13;
+          }
+          S.p = peek;
+        }
+        applyPull(S.p);
         shapeThread(THREE, time);
         placeBeadsOnThread();
         S.heroGroup.position.y = Math.sin(time * 0.6) * 0.008;
@@ -1148,6 +1166,24 @@ const segments = getOrderedSegments();
         if (S.p >= 1) S.phase = "released";
       } else {
         updateFall(dt);
+      }
+
+      // Pulsing eye halo (pull hint): visible only until the first interaction,
+      // riding the needle's eye and pulsing to draw the eye there.
+      if (S.eyeGlow) {
+        const hint = !S.interacted && S.phase === "idle";
+        const pulse = 0.5 + 0.5 * Math.sin(time * 2.0);
+        const target = hint ? 0.3 + 0.45 * pulse : 0;
+        const m = S.eyeGlow.material;
+        m.opacity += (target - m.opacity) * Math.min(1, dt * 4);
+        if (m.opacity > 0.01) {
+          S.eyeGlow.visible = true;
+          S.eyeGlow.position.copy(S.heroGroup.worldToLocal(eyeWorld()));
+          const s = 0.72 + 0.2 * pulse;
+          S.eyeGlow.scale.set(s, s, 1);
+        } else {
+          S.eyeGlow.visible = false;
+        }
       }
 
       S.renderer.render(S.scene, S.camera);
@@ -1257,6 +1293,34 @@ const segments = getOrderedSegments();
       S.needleBase = S.needle.position.clone();
       updateBounds();
 
+      // Pull hint: a soft pulsing halo that marks the needle's eye as the grab
+      // point. A radial-gradient sprite in the thread's warm red; it rides the
+      // eye and fades away the moment the user first interacts.
+      {
+        const gc = document.createElement("canvas");
+        gc.width = gc.height = 128;
+        const g2 = gc.getContext("2d")!;
+        // A soft red RING (transparent centre) so it frames the eye and reads
+        // clearly on the pale background instead of washing out.
+        const grd = g2.createRadialGradient(64, 64, 0, 64, 64, 64);
+        grd.addColorStop(0.0, "rgba(190,63,58,0.0)");
+        grd.addColorStop(0.5, "rgba(190,63,58,0.06)");
+        grd.addColorStop(0.72, "rgba(178,55,50,0.62)");
+        grd.addColorStop(0.86, "rgba(178,55,50,0.28)");
+        grd.addColorStop(1.0, "rgba(178,55,50,0.0)");
+        g2.fillStyle = grd;
+        g2.fillRect(0, 0, 128, 128);
+        const gtex = new THREE.CanvasTexture(gc);
+        gtex.encoding = THREE.sRGBEncoding;
+        const glow = new THREE.Sprite(
+          new THREE.SpriteMaterial({ map: gtex, transparent: true, opacity: 0, depthTest: false, depthWrite: false })
+        );
+        glow.scale.set(0.85, 0.85, 1);
+        glow.renderOrder = 30;
+        heroGroup.add(glow);
+        S.eyeGlow = glow;
+      }
+
       const onResize = () => {
         const w = window.innerWidth,
           h = window.innerHeight;
@@ -1283,6 +1347,146 @@ const segments = getOrderedSegments();
         reveal();
       }
     });
+  })();
+</script>
+
+<script>
+  // Flowing-watercolor background for the opening landing view. A fullscreen
+  // shader takes the watercolor photo and makes its darker pigment swirl/bloom
+  // like ink in water — perpetually, seamlessly (the noise field evolves with
+  // time, so there is never a reset). White paper stays calm (flow is masked by
+  // darkness); a faint luminance-based light term gives the moving pigment a
+  // subtle 3D shimmer. Sits behind everything, kept soft so the hero leads.
+  (() => {
+    const host = document.getElementById("nl-watercolor");
+    if (!host) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const vertexShader = `
+      varying vec2 vUv;
+      void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }
+    `;
+    const fragmentShader = `
+      precision highp float;
+      varying vec2 vUv;
+      uniform float uTime, uStrength, uSpeed, uIntensity;
+      uniform sampler2D uTex;
+      uniform vec2 uCover;
+      float hash(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p,p+45.32); return fract(p.x*p.y); }
+      float vnoise(vec2 p){
+        vec2 i = floor(p), f = fract(p);
+        vec2 u = f*f*(3.0-2.0*f);
+        float a=hash(i), b=hash(i+vec2(1.0,0.0)), c=hash(i+vec2(0.0,1.0)), d=hash(i+vec2(1.0,1.0));
+        return mix(mix(a,b,u.x), mix(c,d,u.x), u.y);
+      }
+      float fbm(vec2 p){ float s=0.0,a=0.5; for(int i=0;i<4;i++){ s+=a*vnoise(p); p*=2.02; a*=0.5; } return s; }
+      float lum(vec3 c){ return dot(c, vec3(0.299,0.587,0.114)); }
+      vec2 coverUv(vec2 uv){ return (uv-0.5)*uCover + 0.5; }
+      // Sample the texture advected along a molten flow field, at a given phase
+      // of the drift cycle.
+      vec3 sampleFlow(vec2 uv, vec2 dir, float amt){
+        return texture2D(uTex, clamp(coverUv(uv - dir * amt), 0.0, 1.0)).rgb;
+      }
+      void main(){
+        float t = uTime * uSpeed;
+        vec2 p = vUv * 2.4;
+        // A slow, curling flow field: mostly creeping downward-right, warped by
+        // evolving noise so the red channels wander like molten lava.
+        float n1 = fbm(p + vec2(0.0, -t * 0.6));
+        float n2 = fbm(p + vec2(4.3, 1.9) - t * 0.5);
+        vec2 dir = normalize(vec2(0.35, 1.0) + (vec2(n1, n2) - 0.5) * 1.6);
+
+        vec3 base = texture2D(uTex, clamp(coverUv(vUv), 0.0, 1.0)).rgb;
+        float darkMask = smoothstep(0.98, 0.45, lum(base)); // red pigment=1, paper=0
+        float amp = uStrength * darkMask; // only the pigment flows; paper stays
+
+        // Dual-phase advection: two drift cycles a half-period apart, cross-faded
+        // so the flow is continuous and seamless — never a visible reset/jump.
+        float ph1 = fract(t);
+        float ph2 = fract(t + 0.5);
+        float w = abs(1.0 - 2.0 * ph1);
+        vec3 col = mix(sampleFlow(vUv, dir, ph1 * amp), sampleFlow(vUv, dir, ph2 * amp), w);
+
+        // Molten shimmer: light the flowing pigment by its own luminance slope so
+        // ridges catch light and creep like lava, giving a 3D sense.
+        vec2 off = dir * mix(ph1, ph2, w) * amp;
+        float e = 0.0016;
+        float lx = lum(texture2D(uTex, clamp(coverUv(vUv+off+vec2(e,0.0)),0.,1.)).rgb)
+                 - lum(texture2D(uTex, clamp(coverUv(vUv+off-vec2(e,0.0)),0.,1.)).rgb);
+        float ly = lum(texture2D(uTex, clamp(coverUv(vUv+off+vec2(0.0,e)),0.,1.)).rgb)
+                 - lum(texture2D(uTex, clamp(coverUv(vUv+off-vec2(0.0,e)),0.,1.)).rgb);
+        vec3 nrm = normalize(vec3(-lx*7.0, -ly*7.0, 1.0));
+        float light = 0.5 + 0.5*dot(nrm, normalize(vec3(0.3,0.4,0.85)));
+        col *= mix(1.0, 0.72 + 0.5*light, 0.45*darkMask);
+
+        float pigment = smoothstep(0.99, 0.5, lum(col)); // white paper -> transparent
+        gl_FragColor = vec4(col, pigment * uIntensity);
+      }
+    `;
+
+    let tries = 0;
+    const boot = () => {
+      const THREE = (window as any).THREE;
+      if (!THREE) { if (tries++ < 200) setTimeout(boot, 25); return; }
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      host.appendChild(renderer.domElement);
+      const scene = new THREE.Scene();
+      const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      const uniforms: any = {
+        uTime: { value: 0 },
+        uTex: { value: null },
+        uCover: { value: new THREE.Vector2(1, 1) },
+        uStrength: { value: 0.15 }, // molten creep distance — visibly flowing
+        uSpeed: { value: 0.26 }, // flow speed (slow, viscous like lava)
+        uIntensity: { value: 0.72 }, // pigment opacity
+      };
+      const mat = new THREE.ShaderMaterial({
+        uniforms,
+        vertexShader,
+        fragmentShader,
+        transparent: true,
+        depthTest: false,
+        depthWrite: false,
+      });
+      scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
+      let imgAspect = 1080 / 1620;
+      const resize = () => {
+        const w = window.innerWidth, h = window.innerHeight;
+        renderer.setSize(w, h, false);
+        renderer.domElement.style.width = w + "px";
+        renderer.domElement.style.height = h + "px";
+        const ca = w / h;
+        uniforms.uCover.value.set(ca < imgAspect ? ca / imgAspect : 1, ca > imgAspect ? imgAspect / ca : 1);
+      };
+      new THREE.TextureLoader().load("/images/landing/watercolor-bg.png", (tex: any) => {
+        tex.minFilter = THREE.LinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+        tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+        if (tex.image && tex.image.width) imgAspect = tex.image.width / tex.image.height;
+        uniforms.uTex.value = tex;
+        resize();
+        renderer.render(scene, cam);
+      });
+      window.addEventListener("resize", resize);
+      resize();
+      const t0 = performance.now();
+      let running = !reduce;
+      const loop = () => {
+        if (!running) return;
+        // Intro only: stop once the site is revealed (CSS fades it out).
+        if (document.documentElement.classList.contains("nl-revealed")) { running = false; return; }
+        requestAnimationFrame(loop);
+        uniforms.uTime.value = (performance.now() - t0) / 1000;
+        if (uniforms.uTex.value) renderer.render(scene, cam);
+      };
+      if (!reduce) loop();
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) running = false;
+        else if (!reduce) { running = true; loop(); }
+      });
+    };
+    boot();
   })();
 </script>
 
@@ -1335,10 +1539,31 @@ const segments = getOrderedSegments();
     color: #1e1b17;
   }
 
-  #nl-spotlight {
+  #nl-watercolor {
     position: fixed;
     inset: 0;
     z-index: 0;
+    pointer-events: none;
+    opacity: 0.9;
+    transition: opacity 0.9s ease;
+  }
+
+  /* Intro only: once the needle is pulled and the site is revealed, the
+     flowing watercolor fades away and stays gone for the rest of the site. */
+  html.nl-revealed #nl-watercolor {
+    opacity: 0;
+  }
+
+  #nl-watercolor canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  #nl-spotlight {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
     pointer-events: none;
     background:
       radial-gradient(78% 62% at 50% 42%, rgba(255, 252, 244, 0.55) 0%, rgba(236, 232, 220, 0) 55%),
