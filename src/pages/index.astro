@@ -1461,6 +1461,21 @@ const segments = getOrderedSegments();
         frame();
       };
       animate();
+
+      if (location.search.includes("debugfall")) {
+        setTimeout(() => {
+          reveal();
+          S.p = 0.6;
+          S.phase = "completing";
+        }, 500);
+        if (location.search.includes("tobottom")) {
+          setTimeout(() => {
+            const b = document.body.scrollHeight;
+            (window as any).__lenis?.scrollTo?.(b, { immediate: true, force: true });
+            window.scrollTo(0, b);
+          }, 7000);
+        }
+      }
     }
 
     wireDrag();
